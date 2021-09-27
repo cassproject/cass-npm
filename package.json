@@ -94,7 +94,7 @@
 		"babel-plugin-transform-remove-strict-mode": "^0.0.2",
 		"chai": "^4.3.4",
 		"convert-hrtime": "^5.0.0",
-		"cypress": "^7.2.0",
+		"cypress": "^8.4.1",
 		"eslint": "^7.32.0",
 		"mocha": "^8.3.2",
 		"node-polyfill-webpack-plugin": "^1.1.3",
