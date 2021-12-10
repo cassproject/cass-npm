@@ -54,7 +54,7 @@
 		"base64-arraybuffer": "^1.0.1",
 		"forge": "^2.3.0",
 		"form-data": "^4.0.0",
-		"jsonld": "1.8.1",
+		"jsonld": "5.2.0",
 		"node-forge": "^0.10.0",
 		"papaparse": "^5.3.1",
 		"pem-jwk": "^2.0.0",
