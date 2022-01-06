@@ -57,7 +57,7 @@
 		"forge": "^2.3.0",
 		"form-data": "^4.0.0",
 		"jsonld": "^5.2.0",
-		"node-forge": "^0.10.0",
+		"node-forge": "^1.0.0",
 		"papaparse": "^5.3.1",
 		"pem-jwk": "^2.0.0",
 		"promise-worker": "^2.0.1",
