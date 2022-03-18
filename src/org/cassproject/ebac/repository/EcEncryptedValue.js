@@ -125,6 +125,13 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		if (d["name"] != null) {
 			v.name = d["name"];
 		}
+		// directory and parent directory need to stay unencrypted to be searchable
+		if (d["directory"] != null) {
+			v["directory"] = d["directory"];
+		}
+		if (d["parentDirectory" != null]) {
+			v["parentDirectory"] = d["parentDirectory"];
+		}
 		var newIv = EcAes.newIv(16);
 		var newSecret = EcAes.newIv(16);
 		return this.encryptValueActual(
