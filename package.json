@@ -136,7 +136,7 @@
 		"chai": "^4.3.7",
 		"concurrently": "^7.5.0",
 		"convert-hrtime": "^5.0.0",
-		"cypress": "^11.0.1",
+		"cypress": "^12.0.1",
 		"eslint": "^8.27.0",
 		"mocha": "^10.1.0",
 		"node-polyfill-webpack-plugin": "^2.0.1",
