@@ -155,7 +155,7 @@
 		"@cypress/browserify-preprocessor": "^3.0.2",
 		"@cypress/vite-dev-server": "^5.2.1",
 		"@cypress/webpack-preprocessor": "^6.0.2",
-		"chai": "4.5.0",
+		"chai": "5.1.2",
 		"concurrently": "^9.1.0",
 		"convert-hrtime": "^5.0.0",
 		"cypress": "^13.16.0",
