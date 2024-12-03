@@ -162,7 +162,7 @@
 		"cypress-fail-fast": "^7.1.1",
 		"eslint": "^9.15.0",
 		"fake-indexeddb": "^6.0.0",
-		"mocha": "^10.8.2",
+		"mocha": "^11.0.1",
 		"node-polyfill-webpack-plugin": "^4.0.0",
 		"nodemon": "^3.1.7",
 		"nyc": "^17.1.0",
