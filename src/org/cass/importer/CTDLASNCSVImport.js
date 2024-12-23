@@ -64,32 +64,37 @@ module.exports = class CTDLASNCSVImport {
 						}
 						duplicates.sort((a, b) => a.competencyText < b.competencyText ? -1 : 1);
 					}
-				}
-				for (let i = 0; i < tabularData.length; i++) {
-					if (i == 0) continue;
-					let col = tabularData[i];
-					if (
-						col[typeCol] != null &&
-						col[typeCol].trim() == "ceasn:CompetencyFramework"
-					)
-						frameworkCounter++;
-					else if (
+					for (let i = 0; i < tabularData.length; i++) {
+						if (i == 0) continue;
+						let col = tabularData[i];
+						if (
 							col[typeCol] != null &&
-							col[typeCol].trim() == "ceterms:Collection"
+							col[typeCol].trim() == "ceasn:CompetencyFramework"
 						)
-							collectionCounter++;
-					else if (
-						col[typeCol] != null &&
-						col[typeCol].trim() == "ceasn:Competency"
-					)
-						competencyCounter++;
-					else if (col[typeCol] == null || col[typeCol] == "" || col[typeCol].toLowerCase().startsWith('sample') || col[typeCol].toLowerCase().startsWith('instruction'))
-						continue;
-					else {
-						this.error("Found unknown type:" + col[typeCol]);
-						return;
+							frameworkCounter++;
+						else if (
+								col[typeCol] != null &&
+								col[typeCol].trim() == "ceterms:Collection"
+							)
+								collectionCounter++;
+						else if (
+							col[typeCol] != null &&
+							col[typeCol].trim() == "ceasn:Competency"
+						) {
+							competencyCounter++;
+							if (colCompetencyText && !col[colCompetencyText].trim()) {
+								this.error('CTDLASN Parse Error: Competency text is empty on line ' + (i+1));
+								return;
+							}
+						} else if (col[typeCol] == null || col[typeCol] == "" || col[typeCol].toLowerCase().startsWith('sample') || col[typeCol].toLowerCase().startsWith('instruction'))
+							continue;
+						else {
+							this.error("Found unknown type:" + col[typeCol]);
+							return;
+						}
 					}
 				}
+				
 				success(frameworkCounter, competencyCounter, collectionCounter, duplicates);
 			},
 			error: failure
@@ -125,6 +130,16 @@ module.exports = class CTDLASNCSVImport {
 			encoding: "UTF-8",
 			complete: async function(results) {
 				let tabularData = results["data"];
+				try {
+					for (let data of tabularData) {
+						for (let [key, value] of Object.entries(data)) {
+							data[key] = value.trim();
+						}
+					}
+				} catch (e) {
+					console.error('Error trimming data', e);
+				}
+				
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassTerms"))));
 				let frameworks = {};
 				let frameworkArray = [];
@@ -606,6 +621,16 @@ module.exports = class CTDLASNCSVImport {
 			encoding: "UTF-8",
 			complete: async function(results) {
 				let tabularData = results["data"];
+				try {
+					for (let data of tabularData) {
+						for (let [key, value] of Object.entries(data)) {
+							data[key] = value.trim();
+						}
+					}
+				} catch (e) {
+					console.error('Error trimming data', e);
+				}
+
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassTerms"))));
 				let frameworks = {};
 				let frameworkArray = [];

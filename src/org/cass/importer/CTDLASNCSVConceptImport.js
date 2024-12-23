@@ -75,6 +75,15 @@ module.exports = class CTDLASNCSVConceptImport {
 			encoding: "UTF-8",
 			complete: async function(results) {
 				let tabularData = results["data"];
+				try {
+					for (let data of tabularData) {
+						for (let [key, value] of Object.entries(data)) {
+							data[key] = value.trim();
+						}
+					}
+				} catch (e) {
+					console.error('Error trimming data', e);
+				}
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
 				let schemeArray = [];
 				let concepts = [];
@@ -324,6 +333,15 @@ module.exports = class CTDLASNCSVConceptImport {
 			encoding: "UTF-8",
 			complete: async function(results) {
 				let tabularData = results["data"];
+				try {
+					for (let data of tabularData) {
+						for (let [key, value] of Object.entries(data)) {
+							data[key] = value.trim();
+						}
+					}
+				} catch (e) {
+					console.error('Error trimming data', e);
+				}
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
 				let schemeArray = [];
 				let concepts = [];
