@@ -1,5 +1,36 @@
 const EcArray = require("../../../com/eduworks/ec/array/EcArray");
 
+const jsonld = require("jsonld");
+
+let isNode = false;    
+if (typeof process === 'object') {
+  if (typeof process.versions === 'object') {
+    if (typeof process.versions.node !== 'undefined') {
+      isNode = true;
+    }
+  }
+}
+
+const jsonldCache = {}; // Cache JSONLD documents to avoid multiple requests when doing recast
+const docLoader = isNode ? jsonld.documentLoaders.node() : jsonld.documentLoaders.xhr(); // Different document loader for node and browser
+const customDocLoader = async (url, options) => {
+	if(url in jsonldCache) {
+	  return {
+		contextUrl: null, // this is for a context via a link header
+		document: jsonldCache[url], // this is the actual document that was loaded
+		documentUrl: url // this is the actual context URL after redirects
+	  };
+	}
+	// call the default documentLoader
+	let result = docLoader(url);
+	  result.then((x) => {
+		  if (x && x.document) {
+			  jsonldCache[url] = x.document;
+		  }
+	  })
+	  return result;
+};
+
 module.exports = class CTDLASNCSVConceptImport {
 	static analyzeFile(file, success, failure) {
 		if (file == null) {
@@ -120,7 +151,8 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						let e = await translator.recast(
 							"https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConcepts.json",
-							"https://schema.cassproject.org/0.4/skos"
+							"https://schema.cassproject.org/0.4/skos",
+							customDocLoader
 						);
 						if (e["ceterms:AgentSector"] != null) {
 							e["https://purl.org/ctdl/terms/AgentSector"] = e["ceterms:AgentSector"];
@@ -187,7 +219,8 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						let e = await translator.recast(
 							"https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConcepts.json",
-							"https://schema.cassproject.org/0.4/skos"
+							"https://schema.cassproject.org/0.4/skos",
+							customDocLoader
 						);
 						e.type = "Concept";
 						let f = new EcConcept();
@@ -374,7 +407,8 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						let e = await translator.recast(
 							"https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConcepts.json",
-							"https://schema.cassproject.org/0.4/skos"
+							"https://schema.cassproject.org/0.4/skos",
+							customDocLoader
 						);
 						e.type = "ConceptScheme";
 						let f = new EcConceptScheme();
@@ -438,7 +472,8 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						let e = await translator.recast(
 							"https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConcepts.json",
-							"https://schema.cassproject.org/0.4/skos"
+							"https://schema.cassproject.org/0.4/skos",
+							customDocLoader
 						);
 						e.type = "Concept";
 						let f = new EcConcept();

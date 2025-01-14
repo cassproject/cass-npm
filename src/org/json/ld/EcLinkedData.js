@@ -265,15 +265,18 @@ global.jsonld = require("jsonld");
 			}
 		}
 	}
-	async recast(translationContext, targetContext) {
+	async recast(translationContext, targetContext, documentLoader) {
 		let me = this;
 		let json = JSON.parse(this.toJson());
 		if (targetContext == null) targetContext = json["@context"];
 		json["@context"] = translationContext;
 		let finalTargetContext = targetContext;
+		let docLoader;
+		if (documentLoader)
+			docLoader = {documentLoader: documentLoader}
 		let actual;
 		try {
-			actual = await jsonld.expand(json);
+			actual = await jsonld.expand(json, docLoader);
 		} catch(error) {
 			if (error != null) {
 				global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcLinkedDataRecast", error["message"]);
@@ -282,7 +285,7 @@ global.jsonld = require("jsonld");
 		}
 		let o;
 		try {
-			o = await jsonld.compact(actual, finalTargetContext);
+			o = await jsonld.compact(actual, finalTargetContext, docLoader);
 		} catch(s) {
 			if (s != null) {
 				global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcLinkedDataRecast", s);
