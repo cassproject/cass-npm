@@ -49,6 +49,9 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 1.5.72
+* Throws error when importing CTDL/ASN with blank competency text.
+
 ## 1.5.71
 * Fixed issue by trimming spaces in some inputs.
 
