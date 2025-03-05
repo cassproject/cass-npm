@@ -174,6 +174,10 @@ module.exports = class CTDLASNCSVImport {
 							continue;
 						}
 					}
+					if (!pretranslatedE["@id"]) {
+						failure(`Row ${i + 2}: is missing an @id`)
+						return;
+					}
 					if (
 						pretranslatedE["@type"] ==
 						"ceasn:CompetencyFramework"
@@ -373,8 +377,7 @@ module.exports = class CTDLASNCSVImport {
 							}
 							if (!done) {
 								failure(
-									`Row ${i+1}: Could not find framework:` +
-										e["type"]
+									`Row ${i+2}: Could not find framework:${e["type"]} (Possibly missing ceasn:isPartOf or ceasn:isChildOf)`
 								);
 								return;
 							}
@@ -392,14 +395,14 @@ module.exports = class CTDLASNCSVImport {
 									].competency.push(f.shortId());
 								} else {
 									failure(
-										`Row ${i+1}: Object cannot trace to framework:` +
+										`Row ${i+2}: Object cannot trace to framework:` +
 											e["type"]
 									);
 									return;
 								}
 							} else {
 								failure(
-									`Row ${i+1}: Object has no framework:` +
+									`Row ${i+2}: Object has no framework:` +
 										e["type"]
 								);
 								return;
@@ -596,7 +599,7 @@ module.exports = class CTDLASNCSVImport {
 						return;
 					} else {
 						failure(
-							`Row ${i+1}: Found unknown type:` + pretranslatedE["@type"]
+							`Row ${i+2}: Found unknown type:` + pretranslatedE["@type"]
 						);
 						return;
 					}
@@ -954,7 +957,7 @@ module.exports = class CTDLASNCSVImport {
 						return;
 					} else {
 						failure(
-							`Row ${i+1}: Found unknown type:` + pretranslatedE["@type"]
+							`Row ${i+2}: Found unknown type:` + pretranslatedE["@type"]
 						);
 						return;
 					}
