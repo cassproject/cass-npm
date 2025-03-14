@@ -42,7 +42,7 @@ module.exports = class CSVExport extends Exporter {
 						"https://credreg.net/ctdlasn/schema/context/json",
 						g["@type"]
 					);
-					rld.copyFrom(graph[i]);
+					rld.copyFrom(g);
 					objects.push(rld);
 					if (g["@graph"] != null) {
 						CSVExport.findGraphs(g, objects);
