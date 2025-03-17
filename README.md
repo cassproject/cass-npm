@@ -49,6 +49,12 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 1.5.73
+* CSV export fix
+* Updated libraries
+* CTDL ASN export fix
+* Caching for EcLinkedData recast (taxonomy conversion)
+
 ## 1.5.72
 * Throws error when importing CTDL/ASN with blank competency text.
 

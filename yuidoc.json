@@ -1,7 +1,7 @@
 {
     "name": "CaSS Library",
     "description": "CaSS Library API: A library of tools for working with the Competency and Skills System (CaSS).",
-    "version": "1.5.72",
+    "version": "1.5.73",
     "url": "http://devs.cassproject.org/",
     "logo": "http://eduworks.com/img/eduworks-ring-e.png",
     "options": {
