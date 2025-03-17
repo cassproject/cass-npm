@@ -1,7 +1,7 @@
 FROM node:20
 WORKDIR code
 COPY package.json package.json
-RUN npm install undici
+RUN npm install undici@six
 
 COPY ca.crt ca.crt
 COPY client.crt client.crt
