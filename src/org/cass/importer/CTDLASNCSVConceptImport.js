@@ -137,6 +137,14 @@ module.exports = class CTDLASNCSVConceptImport {
 							endpoint,
 							repo
 						);
+						try {
+							let existing = await EcRepository.get(translator.id);
+							if (existing && existing.type !== translator.type) {
+								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
+							}
+						} catch (e) {
+							console.error(e);
+						}
 						if (translator["ceasn:name"] != null) {
 							let name = translator["ceasn:name"];
 							let nameWithLanguage = {};
@@ -393,6 +401,14 @@ module.exports = class CTDLASNCSVConceptImport {
 							endpoint,
 							repo
 						);
+						try {
+							let existing = await EcRepository.get(translator.id);
+							if (existing && existing.type !== translator.type) {
+								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
+							}
+						} catch (e) {
+							console.error(e);
+						}
 						if (translator["ceasn:name"] != null) {
 							let name = translator["ceasn:name"];
 							let nameWithLanguage = {};

@@ -189,6 +189,14 @@ module.exports = class CTDLASNCSVImport {
 							endpoint,
 							repo
 						);
+						try {
+							let existing = await EcRepository.get(translator.id);
+							if (existing && existing.type !== translator.type) {
+								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
+							}
+						} catch (e) {
+							console.error(e);
+						}
 						for (let each in translator) {
 							// Make replacements for skipped duplicates
 							if (skip && Array.isArray(skip) && skip.length > 0) {
@@ -676,6 +684,14 @@ module.exports = class CTDLASNCSVImport {
 							endpoint,
 							repo
 						);
+						try {
+							let existing = await EcRepository.get(translator.id);
+							if (existing && existing.type !== translator.type) {
+								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
+							}
+						} catch (e) {
+							console.error(e);
+						}
 						for (let each in translator) {
 							if (terms[each]) {
 								translator[terms[each]] = translator[each];
