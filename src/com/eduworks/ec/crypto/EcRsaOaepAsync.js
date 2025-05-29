@@ -149,6 +149,7 @@ module.exports = class EcRsaOaepAsync {
 				.then(afterKeyIsImported)
 				.catch((error) => {
 					global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcRsaOaepAsyncDecrypt", error);
+					console.trace(error);
 					EcAesCtrAsync.fipsOff();
 					return null;
 				}))});

@@ -49,6 +49,9 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+* Lost Node 18 FIPS support due to incompatibility.
+* Updated cryptography to operate 4-6x faster.
+
 ## 1.5.73
 * CSV export fix
 * Updated libraries

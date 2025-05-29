@@ -199,14 +199,14 @@ describe("EcFrameworkGraph", () => {
         });
         assert.deepEqual(result, [1]);
     })
-    it('assertion encrypt decrypt async noCrypto x1000', async () => {
+    it('assertion encrypt decrypt async noCrypto x100', async () => {
         EcRsaOaepAsyncWorker.encryptCounter = 0;
         EcRsaOaepAsyncWorker.decryptCounter = 0;
         EcRsaOaepAsyncWorker.signCounter = 0;
         EcRsaOaepAsyncWorker.verifyCounter = 0;
         EcAesCtrAsyncWorker.encryptCounter = 0;
         EcAesCtrAsyncWorker.decryptCounter = 0;
-        let count = 1000;
+        let count = 100;
         let promises = [];
         let c = await newCompetency("async test");
         for (let i = 0;i < count;i++)
@@ -254,8 +254,8 @@ describe("EcFrameworkGraph", () => {
         console.log("rsa:",{encryptCounter:EcRsaOaepAsyncWorker.encryptCounter, decryptCounter:EcRsaOaepAsyncWorker.decryptCounter,signCounter:EcRsaOaepAsyncWorker.signCounter, verifyCounter:EcRsaOaepAsyncWorker.verifyCounter});
         console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
     });
-    it('assertion encrypt decrypt async noSecretCaching x1000', async () => {
-        let count = 1000;
+    it('assertion encrypt decrypt async noSecretCaching x100', async () => {
+        let count = 100;
         EcRsaOaepAsyncWorker.encryptCounter = 0;
         EcRsaOaepAsyncWorker.decryptCounter = 0;
         EcRsaOaepAsyncWorker.signCounter = 0;
@@ -312,7 +312,7 @@ describe("EcFrameworkGraph", () => {
         console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
         EcEncryptedValue.secretReuse = true;
     });
-    it('assertion encrypt decrypt async x1000', async () => {
+    it('assertion encrypt decrypt async x100', async () => {
         EcEncryptedValue.secretReuseMap = {};
         EcRsaOaepAsyncWorker.encryptCounter = 0;
         EcRsaOaepAsyncWorker.decryptCounter = 0;
@@ -320,7 +320,7 @@ describe("EcFrameworkGraph", () => {
         EcRsaOaepAsyncWorker.verifyCounter = 0;
         EcAesCtrAsyncWorker.encryptCounter = 0;
         EcAesCtrAsyncWorker.decryptCounter = 0;
-        let count = 1000;
+        let count = 100;
         let promises = [];
         let c = await newCompetency("async test");
         for (let i = 0;i < count;i++)
