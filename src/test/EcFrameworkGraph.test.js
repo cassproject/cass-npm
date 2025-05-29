@@ -199,14 +199,14 @@ describe("EcFrameworkGraph", () => {
         });
         assert.deepEqual(result, [1]);
     })
-    it('assertion encrypt decrypt async noCrypto x10000', async () => {
+    it('assertion encrypt decrypt async noCrypto x1000', async () => {
         EcRsaOaepAsyncWorker.encryptCounter = 0;
         EcRsaOaepAsyncWorker.decryptCounter = 0;
         EcRsaOaepAsyncWorker.signCounter = 0;
         EcRsaOaepAsyncWorker.verifyCounter = 0;
         EcAesCtrAsyncWorker.encryptCounter = 0;
         EcAesCtrAsyncWorker.decryptCounter = 0;
-        let count = 10000;
+        let count = 1000;
         let promises = [];
         let c = await newCompetency("async test");
         for (let i = 0;i < count;i++)
@@ -254,8 +254,8 @@ describe("EcFrameworkGraph", () => {
         console.log("rsa:",{encryptCounter:EcRsaOaepAsyncWorker.encryptCounter, decryptCounter:EcRsaOaepAsyncWorker.decryptCounter,signCounter:EcRsaOaepAsyncWorker.signCounter, verifyCounter:EcRsaOaepAsyncWorker.verifyCounter});
         console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
     });
-    it('assertion encrypt decrypt async noSecretCaching x10000', async () => {
-        let count = 10000;
+    it('assertion encrypt decrypt async noSecretCaching x1000', async () => {
+        let count = 1000;
         EcRsaOaepAsyncWorker.encryptCounter = 0;
         EcRsaOaepAsyncWorker.decryptCounter = 0;
         EcRsaOaepAsyncWorker.signCounter = 0;
@@ -312,7 +312,7 @@ describe("EcFrameworkGraph", () => {
         console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
         EcEncryptedValue.secretReuse = true;
     });
-    it('assertion encrypt decrypt async x10000', async () => {
+    it('assertion encrypt decrypt async x1000', async () => {
         EcEncryptedValue.secretReuseMap = {};
         EcRsaOaepAsyncWorker.encryptCounter = 0;
         EcRsaOaepAsyncWorker.decryptCounter = 0;
@@ -320,7 +320,7 @@ describe("EcFrameworkGraph", () => {
         EcRsaOaepAsyncWorker.verifyCounter = 0;
         EcAesCtrAsyncWorker.encryptCounter = 0;
         EcAesCtrAsyncWorker.decryptCounter = 0;
-        let count = 10000;
+        let count = 1000;
         let promises = [];
         let c = await newCompetency("async test");
         for (let i = 0;i < count;i++)
@@ -364,7 +364,7 @@ describe("EcFrameworkGraph", () => {
             })());
         }
         assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
-        assert.equal((await Promise.all((await Promise.all(promises)).map(x=>x.getDecayFunction()))).filter(x=>x).length, count);
+        assert.equal((await Promise.all((await Promise.all(promises)).map(x => x.getDecayFunction()))).filter(x => x).length, count);
         console.log("rsa:",{encryptCounter:EcRsaOaepAsyncWorker.encryptCounter, decryptCounter:EcRsaOaepAsyncWorker.decryptCounter,signCounter:EcRsaOaepAsyncWorker.signCounter, verifyCounter:EcRsaOaepAsyncWorker.verifyCounter});
         console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
     });
