@@ -28,7 +28,7 @@ require("../../general/AuditLogger.js")
 module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	// Reuse secrets across instances of EcEncryptedValue when the readers and owners match, rotate
 	static secretReuse = true;
-	static secretReuseTimeout = 10000;
+	static secretReuseTimeout = 20000;
 	static secretReuseMap = {};
 	static encryptOnSaveMap = null;
 	static revive(partiallyRehydratedObject) {
@@ -318,7 +318,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 						if (readers == null) readers = [];
 						let reuse = EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")];
 						if (reuse != null) {
-							if (reuse.expires > Date.now() && reuse.iv == newIv && reuse.secret == newSecret) {
+							if (reuse.expires > Date.now() && reuse.secret == newSecret) {
 								if (reuse.encryptedSecret?.[pk] == null) {
 									let eSecret = new EbacEncryptedSecret();
 									eSecret.secret = newSecret;

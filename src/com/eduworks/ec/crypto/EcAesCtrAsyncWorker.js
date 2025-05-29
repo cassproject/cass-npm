@@ -12,6 +12,8 @@ let cassReturnAsPromise = require("../promises/helpers.js").cassReturnAsPromise;
  *  @module com.eduworks.ec
  */
 module.exports = class EcAesCtrAsyncWorker {
+	static encryptCounter = 0;
+	static decryptCounter = 0;
 	/**
 	 *  Asynchronous form of {{#crossLink
 	 *  "EcAesCtr/encrypt:method"}}EcAesCtr.encrypt{{/crossLink}}
@@ -43,6 +45,7 @@ module.exports = class EcAesCtrAsyncWorker {
 		o["text"] = forge.util.encodeUtf8(plaintext);
 		o["cmd"] = "encryptAesCtr";
 		o["origin"] = "cassproject";
+		EcAesCtrAsyncWorker.encryptCounter++;
 		return EcRsaOaepAsyncWorker.w[worker].postMessage(o, 'cassproject');
 	}
 	/**
@@ -92,6 +95,7 @@ module.exports = class EcAesCtrAsyncWorker {
 				EcCrypto.decryptionCache[secret + iv + ciphertext] = decrypted;
 				return decrypted;
 			});
+		EcAesCtrAsyncWorker.decryptCounter++;
 		return cassPromisify(p, success, failure);
 	}
 };
