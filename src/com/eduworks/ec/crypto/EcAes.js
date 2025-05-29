@@ -1,4 +1,5 @@
 const forge = require("node-forge");
+const realCrypto = require('crypto');
 /**
  *  AES encryption tasks common across all variants of AES.
  *  @class EcAes
@@ -26,6 +27,6 @@ module.exports = class EcAes {
 	 */
 	static newIv = function(i) {
 		if (i == null) throw new Error("Undefined iv length.");
-		return forge.util.encode64(forge.random.getBytesSync(i));
+		return realCrypto.randomBytes(i).toString('base64');
 	};
 };

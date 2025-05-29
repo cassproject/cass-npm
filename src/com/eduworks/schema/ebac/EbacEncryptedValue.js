@@ -57,6 +57,13 @@ module.exports = class EbacEncryptedValue extends EcRemoteLinkedData {
 	 *  @type string[]
 	 */
 	secret = null;
+	/**
+	 *  IV of the AES encryption used to encrypt the payload.
+	 *
+	 *  @property iv
+	 *  @type string
+	 */
+	iv = null;
 	copyFrom(that) {
 		let me = this;
 		for (let key in me) delete me[key];

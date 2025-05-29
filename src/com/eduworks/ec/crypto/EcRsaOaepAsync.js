@@ -111,7 +111,7 @@ module.exports = class EcRsaOaepAsync {
 			EcAesCtrAsync.fipsOn();
 			try {
 				result = forge.util.decodeUtf8(EcCrypto.ab2str(p1));
-			} catch (ex) {
+			} catch {
 				result = EcCrypto.ab2str(p1);
 			}
 			if (EcCrypto.caching) {
