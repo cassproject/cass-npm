@@ -198,7 +198,7 @@ describe("EcFrameworkGraph", () => {
         assert.deepEqual(result, [1]);
     })
     it('assertion encrypt decrypt async noSecretCaching x10000', async () => {
-        let count = 1000;
+        let count = 10000;
         EcEncryptedValue.secretReuse = false;
         EcEncryptedValue.secretReuseMap = {};
         let promises = [];
@@ -249,7 +249,7 @@ describe("EcFrameworkGraph", () => {
     });
     it('assertion encrypt decrypt async x10000', async () => {
         EcEncryptedValue.secretReuseMap = {};
-        let count = 1000;
+        let count = 10000;
         let promises = [];
         let c = await newCompetency("async test");
         for (let i = 0;i < count;i++)
