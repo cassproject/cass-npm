@@ -5,6 +5,7 @@ const EcAes = require("../../../../com/eduworks/ec/crypto/EcAes");
 const EcAesCtrAsync = require("../../../../com/eduworks/ec/crypto/EcAesCtrAsync");
 const EcPk = require("../../../../com/eduworks/ec/crypto/EcPk");
 const EcRsaOaepAsyncWorker = require("../../../../com/eduworks/ec/crypto/EcRsaOaepAsyncWorker");
+const EcAesCtrAsyncWorker = require("../../../../com/eduworks/ec/crypto/EcAesCtrAsyncWorker");
 const {cassPromisify, cassReturnAsPromise} = require("../../../../com/eduworks/ec/promises/helpers");
 const EbacEncryptedSecret = require("../../../../com/eduworks/schema/ebac/EbacEncryptedSecret");
 const EbacEncryptedValue = require("../../../../com/eduworks/schema/ebac/EbacEncryptedValue");
@@ -303,7 +304,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		failure
 	) {
 		return cassPromisify(
-			EcAesCtrAsync.encrypt(text, secret, iv).then((encryptedText) => {
+			EcAesCtrAsyncWorker.encrypt(text, secret, iv).then((encryptedText) => {
 				v.payload = encryptedText;
 				v.iv = iv;
 				v.owner = owners;
@@ -469,7 +470,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 								base64.decode(decryptSecret.iv).slice(0, 16)
 							);
 					}
-					return EcAesCtrAsync.decrypt(
+					return EcAesCtrAsyncWorker.decrypt(
 						this.payload,
 						decryptSecret.secret,
 						this.iv || decryptSecret.iv
@@ -533,7 +534,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 			let p = null;
 			if (EcEncryptedValue.secretReuse){
 				eim.secretCache = eim.secretCache || {};
-				p = eim.secretCache[[ppk,'+',encryptedSecret,'wrt',...eim.ids.map(x=>x.ppk.toPem())].join(",")];
+				p = eim.secretCache[[ppk.toPem(),'+',encryptedSecret,'wrt',...eim.ids.map(x=>x.ppk.toPem())].join(",")];
 			}
 			if (p == null) {
 				p = EcRsaOaepAsyncWorker.decrypt(ppk, encryptedSecret).then(
@@ -552,7 +553,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 					}
 				)				
 				if (EcEncryptedValue.secretReuse)
-					eim.secretCache[[ppk,'+',encryptedSecret,'wrt',...eim.ids.map(x=>x.ppk.toPem())].join(",")] = p;
+					eim.secretCache[[ppk.toPem(),'+',encryptedSecret,'wrt',...eim.ids.map(x=>x.ppk.toPem())].join(",")] = p;
 			};
 			resolve(p);
 		};

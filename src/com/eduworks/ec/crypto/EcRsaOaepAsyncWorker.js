@@ -21,6 +21,7 @@ const EcRsaOaep = require("./EcRsaOaep.js")
  */
 module.exports = class EcRsaOaepAsyncWorker {
 	static rotator = 0;
+	static rotations = 8;
 	static w = null;
 	static teardown() {
 		if (this.w != null)
@@ -37,7 +38,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 		}
 		this.rotator = 0;
 		this.w = [];
-		for (let index = 0; index < 8; index++) {
+		for (let index = 0; index < EcRsaOaepAsyncWorker.rotations; index++) {
 			this.createWorker(index);
 		}
 	}
@@ -94,7 +95,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.encrypt(pk, plaintext), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["pk"] = pk.toPem();
 		o["text"] = plaintext;
@@ -131,7 +132,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.decrypt(ppk, ciphertext), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["ppk"] = ppk.toPem();
 		o["text"] = ciphertext;
@@ -168,7 +169,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.sign(ppk, text), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["ppk"] = ppk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
@@ -197,7 +198,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.signSha256(ppk, text), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["ppk"] = ppk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
@@ -226,7 +227,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 			return cassPromisify(EcRsaOaepAsync.verify(pk, text, signature), success, failure);
 		}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["pk"] = pk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
@@ -256,7 +257,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 			return cassPromisify(EcRsaOaepAsync.verify(pk, text, signature), success, failure);
 		}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["pk"] = pk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);

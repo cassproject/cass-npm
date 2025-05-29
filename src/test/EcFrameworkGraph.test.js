@@ -295,6 +295,15 @@ describe("EcFrameworkGraph", () => {
         assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
         assert.equal((await Promise.all((await Promise.all(promises)).map(x=>x.getDecayFunction()))).filter(x=>x).length, count);
     });
+    it('newIv a bunch of times', async()=>{
+        let count = 100000;
+        let promises = [];
+        for (let i = 0;i < count;i++)
+        {
+            promises.push(EcAes.newIv(16));
+        }
+        assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
+    })
     it('basic false test', async () => {
         let f = await newFramework("basic false framework");
         let c = await newCompetency("Add");

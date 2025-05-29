@@ -36,7 +36,7 @@ module.exports = class EcAesCtrAsyncWorker {
 			);
 		}
 		let worker = EcRsaOaepAsyncWorker.rotator++;
-		EcRsaOaepAsyncWorker.rotator = EcRsaOaepAsyncWorker.rotator % 8;
+		EcRsaOaepAsyncWorker.rotator = EcRsaOaepAsyncWorker.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["secret"] = secret;
 		o["iv"] = iv;
@@ -76,7 +76,7 @@ module.exports = class EcAesCtrAsyncWorker {
 			);
 		}
 		let worker = EcRsaOaepAsyncWorker.rotator++;
-		EcRsaOaepAsyncWorker.rotator = EcRsaOaepAsyncWorker.rotator % 8;
+		EcRsaOaepAsyncWorker.rotator = EcRsaOaepAsyncWorker.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["secret"] = secret;
 		o["iv"] = iv;
