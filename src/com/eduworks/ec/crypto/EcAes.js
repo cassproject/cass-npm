@@ -16,7 +16,7 @@ module.exports = class EcAes {
 	 */
 	static newSecret = function(i) {
 		if (i == null) throw new Error("Undefined secret length.");
-		return forge.util.encode64(forge.random.getBytesSync(i));
+		return realCrypto.randomBytes(i).toString('base64');
 	};
 	/**
 	 *  Generates a random Initialization Vector of length @i
