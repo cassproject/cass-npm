@@ -36,17 +36,8 @@ let assert = chai.assert;
 after(()=>EcRsaOaepAsyncWorker.teardown());
 
 let deleteById = async function (id) {
-    await EcRepository.get(
-        id,
-        function (p1) {
-            EcRepository._delete(p1, null, function (p1) {
-                console.log(p1);
-            });
-        },
-        function (p1) {
-            console.log(p1);
-        }
-    );
+    let p1 = await EcRepository.get(id);    
+    await EcRepository._delete(p1);
 };
 let failure = function (p1) {
     console.trace(p1);
@@ -92,6 +83,7 @@ let newId1 = null;
 describe("EcRepository (L0 Cache)", () => {
     let id = null;
     let rld = null;
+    let emptyEim = new EcIdentityManager();
     it('create', async () => {
         EcRepository.caching = false;
         EcRepository.cachingL2 = false;
@@ -125,6 +117,9 @@ describe("EcRepository (L0 Cache)", () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheck(rld);
     }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
+    }).timeout(10000);
     it('encrypt some more', async () => {
         await changeNameAndSaveAndCheck(rld);
         rld = await EcEncryptedValue.toEncryptedValue(rld);
@@ -135,6 +130,9 @@ describe("EcRepository (L0 Cache)", () => {
         rld = await EcEncryptedValue.toEncryptedValue(rld);
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await repo.saveTo(rld);
+    }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
     }).timeout(10000);
     it('search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
@@ -166,6 +164,9 @@ describe("EcRepository (L0 Cache)", () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheck(rld);
     }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
+    }).timeout(10000);
     it('search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
@@ -184,6 +185,13 @@ describe("EcRepository (L0 Cache)", () => {
         assert.equal(results.length, 1);
         assert.equal(results[0].shortId(), rld.shortId());
     }).timeout(10000);
+    it('delete', async () => {
+        await deleteById(rld.shortId());
+        let results = await repo.search(`@id:"${rld.shortId()}"`);
+        assert.equal(results.length, 0);
+        let results2 = await EcRepository.get(rld.shortId(), null, null, repo);
+        assert.equal(results2, null);
+    }).timeout(10000);
     it('create', async () => {
         rld = new schema.Thing();
         rld.generateId(repo.selectedServer);
@@ -197,6 +205,9 @@ describe("EcRepository (L0 Cache)", () => {
     it('encrypt and save (ecrepository)', async () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheckRepo(rld);
+    }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
     }).timeout(10000);
     it('search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
@@ -219,6 +230,9 @@ describe("EcRepository (L0 Cache)", () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheckRepo(rld);
     }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
+    }).timeout(10000);
     it('search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
@@ -232,6 +246,13 @@ describe("EcRepository (L0 Cache)", () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
         assert.equal(results[0].shortId(), rld.shortId());
+    }).timeout(10000);
+    it('delete', async () => {
+        await deleteById(rld.shortId());
+        let results = await repo.search(`@id:"${rld.shortId()}"`);
+        assert.equal(results.length, 0);
+        let results2 = await EcRepository.get(rld.shortId(), null, null, repo);
+        assert.equal(results2, null);
     }).timeout(10000);
     it('create', async () => {
         rld = new schema.Thing();
@@ -247,6 +268,9 @@ describe("EcRepository (L0 Cache)", () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheckMultiput(rld);
     }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
+    }).timeout(10000);
     it('search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
@@ -268,6 +292,9 @@ describe("EcRepository (L0 Cache)", () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheckMultiput(rld);
     }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
+    }).timeout(10000);
     it('search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
@@ -281,6 +308,13 @@ describe("EcRepository (L0 Cache)", () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
         assert.equal(results[0].shortId(), rld.shortId());
+    }).timeout(10000);
+    it('delete', async () => {
+        await deleteById(rld.shortId());
+        let results = await repo.search(`@id:"${rld.shortId()}"`);
+        assert.equal(results.length, 0);
+        let results2 = await EcRepository.get(rld.shortId(), null, null, repo);
+        assert.equal(results2, null);
     }).timeout(10000);
     it('registered create', async () => {
         rld = new schema.Thing();
@@ -295,6 +329,9 @@ describe("EcRepository (L0 Cache)", () => {
     it('registered encrypt and save (to)', async () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheck(rld);
+    }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
     }).timeout(10000);
     it('registered search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
@@ -313,6 +350,9 @@ describe("EcRepository (L0 Cache)", () => {
     it('registered encrypt and save (to)', async () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheck(rld);
+    }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
     }).timeout(10000);
     it('registered search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
@@ -341,6 +381,9 @@ describe("EcRepository (L0 Cache)", () => {
     it('registered encrypt and save (multiput)', async () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheckMultiput(rld);
+    }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
     }).timeout(10000);
     it('registered search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
@@ -362,6 +405,9 @@ describe("EcRepository (L0 Cache)", () => {
     it('registered encrypt and save (multiput)', async () => {
         EcEncryptedValue.encryptOnSave(rld.shortId(), true);
         await changeNameAndSaveAndCheckMultiput(rld);
+    }).timeout(10000);
+    it('cannot be accessed by anonymous users', async () => {
+        assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
     }).timeout(10000);
     it('registered search', async () => {
         let results = await repo.search(`@id:"${rld.shortId()}"`);
@@ -381,6 +427,67 @@ describe("EcRepository (L0 Cache)", () => {
         let history = await EcRepository.history(rld.shortId(),repo);
         assert.isTrue(history.length == 6,"History is not populated.");
     }).timeout(10000);
+    it('registered delete', async () => {
+        await repo.deleteRegistered(rld);
+        let results = await repo.search(`@id:"${rld.shortId()}"`);
+        assert.equal(results.length, 0);
+        let results2 = await EcRepository.get(rld.shortId(), null, null, repo);
+        assert.equal(results2, null);
+    }).timeout(10000);
+    it('multidelete', async () => {
+        rld = new schema.Thing();
+        rld.generateId(repo.selectedServer);
+        rld.addOwner(newId1.ppk.toPk());
+        rld.setName("Some Thing");
+        rld.setDescription("Some Description");
+        let rld2 = new schema.Thing();
+        rld2.generateId(repo.selectedServer);
+        rld2.addOwner(newId1.ppk.toPk());
+        rld2.setName("Some Thing2");
+        rld2.setDescription("Some Description");
+        EcEncryptedValue.encryptOnSave(rld2.shortId(), true);
+        let rld3 = new schema.Thing();
+        rld3.id = "https://this.object.is.not.here/"+EcCrypto.generateUUID();
+        rld3.addOwner(newId1.ppk.toPk());
+        rld3.setName("Some Thing3");
+        rld3.setDescription("Some Description");
+        let rld4 = new schema.Thing();
+        rld4.id = "https://this.object.is.not.here/"+EcCrypto.generateUUID();
+        rld4.addOwner(newId1.ppk.toPk());
+        rld4.setName("Some Thing4");
+        rld4.setDescription("Some Description");
+        EcEncryptedValue.encryptOnSave(rld4.shortId(), true);
+        await repo.multiput([rld, rld2, rld3, rld4]);
+        let results = await repo.search(`@id:"${rld.shortId()}"`);
+        assert.equal(results.length, 1);
+        assert.equal(results[0].shortId(), rld.shortId());
+        results = await repo.search(`@id:"${rld2.shortId()}"`);
+        assert.equal(results.length, 1);
+        assert.equal(results[0].shortId(), rld2.shortId());
+        results = await repo.search(`@id:"${rld3.shortId()}"`);
+        assert.equal(results.length, 1);
+        assert.equal(results[0].shortId(), rld3.shortId());
+        results = await repo.search(`@id:"${rld4.shortId()}"`);
+        assert.equal(results.length, 1);
+        assert.equal(results[0].shortId(), rld4.shortId());
+        await repo.multidelete([rld, rld2, rld3, rld4]);
+        results = await repo.search(`@id:"${rld.shortId()}"`);
+        assert.equal(results.length, 0);
+        results = await repo.search(`@id:"${rld2.shortId()}"`);
+        assert.equal(results.length, 0);
+        results = await repo.search(`@id:"${rld3.shortId()}"`);
+        assert.equal(results.length, 0);
+        results = await repo.search(`@id:"${rld4.shortId()}"`);
+        assert.equal(results.length, 0);
+        let results2 = await EcRepository.get(rld.shortId(), null, null, repo);
+        assert.equal(results2, null);
+        results2 = await EcRepository.get(rld2.shortId(), null, null, repo);
+        assert.equal(results2, null);
+        results2 = await EcRepository.get(rld3.shortId(), null, null, repo);
+        assert.equal(results2, null);
+        results2 = await EcRepository.get(rld4.shortId(), null, null, repo);
+        assert.equal(results2, null);
+    });
     it('Turn off caching', async () => {
         EcRepository.caching = false;
         EcRepository.cachingL2 = false;

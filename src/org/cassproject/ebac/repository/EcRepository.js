@@ -1230,6 +1230,47 @@ module.exports = class EcRepository {
 		return cassPromisify(p, success, failure);
 	};
 	/**
+	 *  Deletes multiple records from the server.
+	 *
+	 *  @param {String[]}  urls List of Data ID Urls that should be precached
+	 *  @param {EcIdentityManager} eim Identity manager to use for signing the request
+	 *  @memberOf EcRepository
+	 *  @method multidelete
+	 */
+	multidelete = async function (urls, eim) {
+		if (urls == null) {
+			throw new Error("urls not defined.");
+		}
+		urls = urls.map(
+			url => {
+				let version = EcRemoteLinkedData.getVersionFromUrl(url);
+				if (url.startsWith(this.selectedServer))
+					return url.replace(this.selectedServer, "").replace("custom/", "");
+				// This double slash is intentional to support parsing the versioned url
+				return "data//" + EcCrypto.md5(EcRemoteLinkedData.trimVersionFromUrl(url)) + (version != null ? ("/" + version) : "");
+			}
+		);
+		let fd = new FormData();
+		fd.append("data", JSON.stringify(urls));
+		let p = new Promise((resolve, reject) => resolve());
+		if (!EcRepository.unsigned)
+			p = p.then(() => {
+				return (eim || EcIdentityManager.default).signatureSheet(
+					300000 + this.timeOffset,
+					this.selectedServer, null, null, this.signatureSheetHashAlgorithm
+				).then((signatureSheet) => {
+					fd.append("signatureSheet", signatureSheet);
+				});
+			});
+		p = p.then(() => EcRemote.postExpectingObject(
+					this.selectedServer,
+					"sky/repo/multiDelete",
+					fd
+				)
+			);
+		return cassPromisify(p, success, failure);
+	};
+	/**
 	 *  Returns an array of JSON-LD objects from the places designated by the given URIs.
 	 *  <p>
 	 *  Uses a signature sheet gathered from {@link EcIdentityManager}.
