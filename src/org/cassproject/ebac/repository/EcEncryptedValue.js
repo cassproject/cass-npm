@@ -5,6 +5,7 @@ const EcAes = require("../../../../com/eduworks/ec/crypto/EcAes");
 const EcAesCtrAsync = require("../../../../com/eduworks/ec/crypto/EcAesCtrAsync");
 const EcPk = require("../../../../com/eduworks/ec/crypto/EcPk");
 const EcRsaOaepAsyncWorker = require("../../../../com/eduworks/ec/crypto/EcRsaOaepAsyncWorker");
+const EcAesCtrAsyncWorker = require("../../../../com/eduworks/ec/crypto/EcAesCtrAsyncWorker");
 const {cassPromisify, cassReturnAsPromise} = require("../../../../com/eduworks/ec/promises/helpers");
 const EbacEncryptedSecret = require("../../../../com/eduworks/schema/ebac/EbacEncryptedSecret");
 const EbacEncryptedValue = require("../../../../com/eduworks/schema/ebac/EbacEncryptedValue");
@@ -25,6 +26,10 @@ require("../../general/AuditLogger.js")
  *  @extends EbacEncryptedValue
  */
 module.exports = class EcEncryptedValue extends EbacEncryptedValue {
+	// Reuse secrets across instances of EcEncryptedValue when the readers and owners match, rotate
+	static secretReuse = true;
+	static secretReuseTimeout = 20000;
+	static secretReuseMap = {};
 	static encryptOnSaveMap = null;
 	static revive(partiallyRehydratedObject) {
 		if (partiallyRehydratedObject == null) return null;
@@ -104,6 +109,40 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 			.replace("https://", "")
 			.replace(/\//g, ".");
 	}
+	static getIvSecret(length, owners, readers) {
+		if (EcEncryptedValue.secretReuse)
+		{
+			readers = readers || [];
+			let reuse = EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")];
+			if (reuse != null) {
+				if (reuse.expires > Date.now()) {
+					return reuse;
+				} else {
+					delete EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")];
+				}
+			}
+		}
+		let response = {secret: EcAes.newIv(length)};
+		if (EcEncryptedValue.secretReuse) {
+			let reuse = EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")];
+			if (reuse == null) {
+				reuse = {
+					secret: response.secret,
+					expires: Date.now() + EcEncryptedValue.secretReuseTimeout
+				};
+				reuse.handle = setTimeout(()=>{delete EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")]}, EcEncryptedValue.secretReuseTimeout);
+				EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")] = reuse;
+			} else {
+				reuse.secret = response.secret;
+				delete reuse.encryptedSecret;
+				if (reuse.handle != null)
+					clearTimeout(reuse.handle);
+				reuse.handle = setTimeout(()=>{delete EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")]}, EcEncryptedValue.secretReuseTimeout);
+				reuse.expires = Date.now() + EcEncryptedValue.secretReuseTimeout;
+			}
+		}
+		return response;
+	}
 	/**
 	 *  Converts a piece of remote linked data to an encrypted value
 	 *
@@ -132,19 +171,20 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		if (d["Markings"] != null) {
 			v.Markings = d["Markings"];
 		}
-		let newIv = EcAes.newIv(16);
-		let newSecret = EcAes.newIv(16);
-		return this.encryptValueActual(
+		let iv = EcAes.newIv(16);
+		let {secret} = EcEncryptedValue.getIvSecret(16, d.owner, d.reader);
+		let response = this.encryptValueActual(
 			v,
 			d.toJson(),
-			newIv,
-			newSecret,
+			iv,
+			secret,
 			d.id,
 			d.owner,
 			d.reader,
 			success,
 			failure
 		);
+		return response;
 	}
 	/**
 	 *  Converts a piece of remote linked data to an encrypted value,
@@ -181,13 +221,13 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 *  @deprecated
 	 */
 	static encryptValueOld(text, id, owner) {
-		let newIv = EcAes.newIv(16);
-		let newSecret = EcAes.newIv(16);
+		let iv = EcAes.newIv(16);
+		let {secret} = EcEncryptedValue.getIvSecret(16, [owner], );
 		return this.encryptValueActual(
 			new EcEncryptedValue(),
 			text,
-			newIv,
-			newSecret,
+			iv,
+			secret,
 			id,
 			[owner],
 			null,
@@ -209,13 +249,13 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 */
 	static encryptValue(text, id, owners, readers) {
 		let v = new EcEncryptedValue();
-		let newIv = EcAes.newIv(16);
-		let newSecret = EcAes.newIv(16);
+		let iv = EcAes.newIv(16);
+		let {secret} = EcEncryptedValue.getIvSecret(16, owners, readers);
 		return this.encryptValueActual(
 			v,
 			text,
-			newIv,
-			newSecret,
+			iv,
+			secret,
 			id,
 			owners,
 			readers,
@@ -237,13 +277,13 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 */
 	static encryptValueAsync(text, id, owners, readers, success, failure) {
 		let v = new EcEncryptedValue();
-		let newIv = EcAes.newIv(16);
-		let newSecret = EcAes.newIv(16);
+		let iv = EcAes.newIv(16);
+		let {secret} = EcEncryptedValue.getIvSecret(16, owners, readers);
 		return this.encryptValueActual(
 			v,
 			text,
-			newIv,
-			newSecret,
+			iv,
+			secret,
 			id,
 			owners,
 			readers,
@@ -264,16 +304,40 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		failure
 	) {
 		return cassPromisify(
-			EcAesCtrAsync.encrypt(text, secret, iv).then((encryptedText) => {
+			EcAesCtrAsyncWorker.encrypt(text, secret, iv).then((encryptedText) => {
 				v.payload = encryptedText;
+				v.iv = iv;
 				v.owner = owners;
 				v.reader = readers;
 				v.id = id;
 				let promises = [];
 				let insertSecret = (pk, newIv, newSecret) => {
+					if (EcEncryptedValue.secretReuse)
+					{
+						if (owners == null) owners = [];
+						if (readers == null) readers = [];
+						let reuse = EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")];
+						if (reuse != null) {
+							if (reuse.expires > Date.now() && reuse.secret == newSecret) {
+								if (reuse.encryptedSecret?.[pk] == null) {
+									let eSecret = new EbacEncryptedSecret();
+									eSecret.secret = newSecret;
+									if (reuse.encryptedSecret == null)
+										reuse.encryptedSecret = {};
+									reuse.encryptedSecret[pk] = EcRsaOaepAsyncWorker.encrypt(
+										EcPk.fromPem(pk),
+										eSecret.toEncryptableJson()
+									);
+								}
+								return reuse.encryptedSecret[pk];
+							} else {
+								delete EcEncryptedValue.secretReuseMap[[...owners,...readers].join(",")];
+							}
+						}
+					}
+
 					let eSecret = new EbacEncryptedSecret();
-					eSecret.iv = newIv;
-					eSecret.secret = newSecret;
+					eSecret.secret = newSecret;					
 					return EcRsaOaepAsyncWorker.encrypt(
 						EcPk.fromPem(pk),
 						eSecret.toEncryptableJson()
@@ -406,10 +470,10 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 								base64.decode(decryptSecret.iv).slice(0, 16)
 							);
 					}
-					return EcAesCtrAsync.decrypt(
+					return EcAesCtrAsyncWorker.decrypt(
 						this.payload,
 						decryptSecret.secret,
-						decryptSecret.iv
+						this.iv || decryptSecret.iv
 					);
 				}
 				throw new Error("Could not decrypt secret.");
@@ -467,20 +531,30 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 			let ppk = ppks.pop();
 			let estimatedIndex = estimatedIndices.pop();
 			let encryptedSecret = this.secret[estimatedIndex];
-			let p = EcRsaOaepAsyncWorker.decrypt(ppk, encryptedSecret).then(
-				(decryptedSecret) => {
-					if (
-						decryptedSecret != null &&
-						EcLinkedData.isProbablyJson(decryptedSecret)
-					) {
-						return EbacEncryptedSecret.fromEncryptableJson(
-							JSON.parse(decryptedSecret)
-						);
+			let p = null;
+			if (EcEncryptedValue.secretReuse){
+				eim.secretCache = eim.secretCache || {};
+				p = eim.secretCache[[ppk.toPem(),'+',encryptedSecret,'wrt',...eim.ids.map(x=>x.ppk.toPem())].join(",")];
+			}
+			if (p == null) {
+				p = EcRsaOaepAsyncWorker.decrypt(ppk, encryptedSecret).then(
+					(decryptedSecret) => {
+						if (
+							decryptedSecret != null &&
+							EcLinkedData.isProbablyJson(decryptedSecret)
+						) {
+							let result = EbacEncryptedSecret.fromEncryptableJson(
+								JSON.parse(decryptedSecret)
+							);
+							return result;
+						}
+						global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, "EcEncrValIterate", JSON.stringify(decryptedSecret, null, 2));
+						return new Promise(iterate);
 					}
-					global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, "EcEncrValIterate", JSON.stringify(decryptedSecret, null, 2));
-					return new Promise(iterate);
-				}
-			);
+				)				
+				if (EcEncryptedValue.secretReuse)
+					eim.secretCache[[ppk.toPem(),'+',encryptedSecret,'wrt',...eim.ids.map(x=>x.ppk.toPem())].join(",")] = p;
+			};
 			resolve(p);
 		};
 		return new Promise(iterate);

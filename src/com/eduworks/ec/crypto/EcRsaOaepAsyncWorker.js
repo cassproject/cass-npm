@@ -20,7 +20,12 @@ const EcRsaOaep = require("./EcRsaOaep.js")
  *  @module com.eduworks.ec
  */
 module.exports = class EcRsaOaepAsyncWorker {
+	static encryptCounter = 0;
+	static decryptCounter = 0;
+	static signCounter = 0;
+	static verifyCounter = 0;
 	static rotator = 0;
+	static rotations = 8;
 	static w = null;
 	static teardown() {
 		if (this.w != null)
@@ -37,7 +42,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 		}
 		this.rotator = 0;
 		this.w = [];
-		for (let index = 0; index < 8; index++) {
+		for (let index = 0; index < EcRsaOaepAsyncWorker.rotations; index++) {
 			this.createWorker(index);
 		}
 	}
@@ -94,7 +99,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.encrypt(pk, plaintext), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["pk"] = pk.toPem();
 		o["text"] = plaintext;
@@ -102,6 +107,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 		o["origin"] = "cassproject";
 
 		let p = this.w[worker].postMessage(o, 'cassproject');
+		EcRsaOaepAsyncWorker.encryptCounter++;
 		return cassPromisify(p, success, failure);
 	}
 	/**
@@ -131,7 +137,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.decrypt(ppk, ciphertext), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["ppk"] = ppk.toPem();
 		o["text"] = ciphertext;
@@ -146,6 +152,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 				EcCrypto.decryptionCache[ppk.toPk().fingerprint() + ciphertext] = decrypted;
 				return decrypted;
 			});
+		EcRsaOaepAsyncWorker.decryptCounter++;
 		return cassPromisify(p, success, failure);
 	}
 	/**
@@ -168,13 +175,14 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.sign(ppk, text), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["ppk"] = ppk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
 		o["cmd"] = "signRsaOaep";
 		o["origin"] = "cassproject";
 		let p = this.w[worker].postMessage(o, 'cassproject');
+		EcRsaOaepAsyncWorker.signCounter++;
 		return cassPromisify(p, success, failure);
 	}
 	/**
@@ -197,13 +205,14 @@ module.exports = class EcRsaOaepAsyncWorker {
 				return cassPromisify(EcRsaOaepAsync.signSha256(ppk, text), success, failure);
 			}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["ppk"] = ppk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
 		o["cmd"] = "signSha256RsaOaep";
 		o["origin"] = "cassproject";
 		let p = this.w[worker].postMessage(o, 'cassproject');
+		EcRsaOaepAsyncWorker.signCounter++;
 		return cassPromisify(p, success, failure);
 	};
 	/**
@@ -226,7 +235,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 			return cassPromisify(EcRsaOaepAsync.verify(pk, text, signature), success, failure);
 		}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["pk"] = pk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
@@ -234,6 +243,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 		o["cmd"] = "verifyRsaOaep";
 		o["origin"] = "cassproject";
 		let p = this.w[worker].postMessage(o, 'cassproject');
+		EcRsaOaepAsyncWorker.verifyCounter++;
 		return cassPromisify(p, success, failure);
 	}
 	/**
@@ -256,7 +266,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 			return cassPromisify(EcRsaOaepAsync.verify(pk, text, signature), success, failure);
 		}
 		let worker = this.rotator++;
-		this.rotator = this.rotator % 8;
+		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
 		let o = {};
 		o["pk"] = pk.toPem();
 		o["text"] = forge.util.encodeUtf8(text);
@@ -264,6 +274,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 		o["cmd"] = "verifyRsaOaepSha256";
 		o["origin"] = "cassproject";
 		let p = this.w[worker].postMessage(o, 'cassproject');
+		EcRsaOaepAsyncWorker.verifyCounter++;
 		return cassPromisify(p, success, failure);
 	}
 };

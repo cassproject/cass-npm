@@ -13,11 +13,14 @@ const EcAlignment = require("../org/cass/competency/EcAlignment");
 const EcFramework = require("../org/cass/competency/EcFramework");
 const EcIdentity = require("../org/cassproject/ebac/identity/EcIdentity");
 const EcFrameworkGraph = require("../com/eduworks/ec/graph/EcFrameworkGraph");
+const EcEncryptedValue = require("../org/cassproject/ebac/repository/EcEncryptedValue.js");
+const Assertion = require("../org/cassproject/schema/cass/profile/Assertion.js");
+const EcAesCtrAsyncWorker = require("../com/eduworks/ec/crypto/EcAesCtrAsyncWorker.js");
 
 let hrtime = function () {
     try {
         return [Math.round(performance.now() / 1000), performance.now() * 1000];
-    } catch (e) {
+    } catch {
         try {
             if (typeof process !== 'undefined')
                 return process.hrtime();
@@ -196,48 +199,184 @@ describe("EcFrameworkGraph", () => {
         });
         assert.deepEqual(result, [1]);
     })
-    it('assertion encrypt decrypt async', async () => {
-        let a = new EcAssertion();
+    it('assertion encrypt decrypt async noCrypto x100', async () => {
+        EcRsaOaepAsyncWorker.encryptCounter = 0;
+        EcRsaOaepAsyncWorker.decryptCounter = 0;
+        EcRsaOaepAsyncWorker.signCounter = 0;
+        EcRsaOaepAsyncWorker.verifyCounter = 0;
+        EcAesCtrAsyncWorker.encryptCounter = 0;
+        EcAesCtrAsyncWorker.decryptCounter = 0;
+        let count = 100;
+        let promises = [];
         let c = await newCompetency("async test");
-        a.generateId(repo.selectedServer);
-        await a.addOwner(EcIdentityManager.default.ids[0].ppk.toPk());
-        assert.equal(a.owner[0], EcIdentityManager.default.ids[0].ppk.toPk().toPem());
-        await a.addReader(EcIdentityManager.default.ids[1].ppk.toPk());
-        assert.equal(a.reader[0], EcIdentityManager.default.ids[1].ppk.toPk().toPem());
-        let date = new Date().getTime();
-        a.setSubjectAsync(EcIdentityManager.default.ids[0].ppk.toPk(), async () => {
-            assert.equal((await a.getSubject()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
-            a.getSubjectAsync((subject) => {
-                assert.equal(subject.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
-            })
-            a.setAgentAsync(EcIdentityManager.default.ids[0].ppk.toPk(), async () => {
+        for (let i = 0;i < count;i++)
+        {
+            promises.push((async ()=>{
+                let a = new Assertion();
+                a.generateId(repo.selectedServer);
+                await a.addOwner(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal(a.owner[0], EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.addReader(EcIdentityManager.default.ids[1].ppk.toPk());
+                assert.equal(a.reader[0], EcIdentityManager.default.ids[1].ppk.toPk().toPem());
+                let date = new Date().getTime();
+                await a.setSubject(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal((await a.getSubject()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.getSubjectAsync((subject) => {
+                    assert.equal(subject.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                })
+                await a.setAgent(EcIdentityManager.default.ids[0].ppk.toPk());
                 assert.equal((await a.getAgent()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
-                a.getAgentAsync((agent) => { //NOSONAR This is test code. Cmon man.
+                await a.getAgentAsync((agent) => { //NOSONAR This is test code. Cmon man.
                     assert.equal(agent.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
                 })
-                a.setAssertionDate(date, async () => { //NOSONAR This is test code. Cmon man.
-                    assert.equal(await a.getAssertionDate(), date);
-                    a.getAssertionDateAsync((date2) => {
-                        assert.equal(date2, date);
-                    })
-                    a.setExpirationDate(date + 1000 * 60 * 60, async () => {
-                        assert.equal(await a.getExpirationDate(), date + 1000 * 60 * 60);
-                        a.getExpirationDateAsync((date2) => {
-                            assert.equal(date2, date + 1000 * 60 * 60);
-                        })
-                        a.setDecayFunction("t", async () => {
-                            a.getDecayFunctionAsync((df) => {
-                                assert.equal(df, "t");
-                            });
-                            assert.equal(await a.getDecayFunction(), "t");
-                        });
-                    });
+                await a.setAssertionDate(date);                
+                assert.equal(await a.getAssertionDate(), date);
+                await a.getAssertionDateAsync((date2) => {
+                    assert.equal(date2, date);
+                })
+                await a.setExpirationDate(date + 1000 * 60 * 60);                
+                assert.equal(await a.getExpirationDate(), date + 1000 * 60 * 60);
+                await a.getExpirationDateAsync((date2) => {
+                    assert.equal(date2, date + 1000 * 60 * 60);
+                })
+                await a.setDecayFunction("t");                
+                await a.getDecayFunctionAsync((df) => {
+                    assert.equal(df, "t");
                 });
-            });
-        });
-        a.setCompetency(c.shortId());
-        a.setConfidence(1.0);
+                assert.equal(await a.getDecayFunction(), "t");
+                a.setCompetency(c.shortId());
+                a.setConfidence(1.0);
+                return a;
+            })());
+        }
+        assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
+        assert.equal((await Promise.all((await Promise.all(promises)).map(x=>x.getDecayFunction()))).filter(x=>x).length, count);
+        console.log("rsa:",{encryptCounter:EcRsaOaepAsyncWorker.encryptCounter, decryptCounter:EcRsaOaepAsyncWorker.decryptCounter,signCounter:EcRsaOaepAsyncWorker.signCounter, verifyCounter:EcRsaOaepAsyncWorker.verifyCounter});
+        console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
     });
+    it('assertion encrypt decrypt async noSecretCaching x100', async () => {
+        let count = 100;
+        EcRsaOaepAsyncWorker.encryptCounter = 0;
+        EcRsaOaepAsyncWorker.decryptCounter = 0;
+        EcRsaOaepAsyncWorker.signCounter = 0;
+        EcRsaOaepAsyncWorker.verifyCounter = 0;
+        EcAesCtrAsyncWorker.encryptCounter = 0;
+        EcAesCtrAsyncWorker.decryptCounter = 0;
+        EcEncryptedValue.secretReuse = false;
+        EcEncryptedValue.secretReuseMap = {};
+        let promises = [];
+        let c = await newCompetency("async test");
+        for (let i = 0;i < count;i++)
+        {
+            promises.push((async ()=>{
+                let a = new EcAssertion();
+                a.generateId(repo.selectedServer);
+                await a.addOwner(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal(a.owner[0], EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.addReader(EcIdentityManager.default.ids[1].ppk.toPk());
+                assert.equal(a.reader[0], EcIdentityManager.default.ids[1].ppk.toPk().toPem());
+                let date = new Date().getTime();
+                await a.setSubject(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal((await a.getSubject()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.getSubjectAsync((subject) => {
+                    assert.equal(subject.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                })
+                await a.setAgent(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal((await a.getAgent()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.getAgentAsync((agent) => { //NOSONAR This is test code. Cmon man.
+                    assert.equal(agent.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                })
+                await a.setAssertionDate(date);                
+                assert.equal(await a.getAssertionDate(), date);
+                await a.getAssertionDateAsync((date2) => {
+                    assert.equal(date2, date);
+                })
+                await a.setExpirationDate(date + 1000 * 60 * 60);                
+                assert.equal(await a.getExpirationDate(), date + 1000 * 60 * 60);
+                await a.getExpirationDateAsync((date2) => {
+                    assert.equal(date2, date + 1000 * 60 * 60);
+                })
+                await a.setDecayFunction("t");                
+                await a.getDecayFunctionAsync((df) => {
+                    assert.equal(df, "t");
+                });
+                assert.equal(await a.getDecayFunction(), "t");
+                a.setCompetency(c.shortId());
+                a.setConfidence(1.0);
+                return a;
+            })());
+        }
+        assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
+        assert.equal((await Promise.all((await Promise.all(promises)).map(x=>x.getDecayFunction()))).filter(x=>x).length, count);
+        console.log("rsa:",{encryptCounter:EcRsaOaepAsyncWorker.encryptCounter, decryptCounter:EcRsaOaepAsyncWorker.decryptCounter,signCounter:EcRsaOaepAsyncWorker.signCounter, verifyCounter:EcRsaOaepAsyncWorker.verifyCounter});
+        console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
+        EcEncryptedValue.secretReuse = true;
+    });
+    it('assertion encrypt decrypt async x100', async () => {
+        EcEncryptedValue.secretReuseMap = {};
+        EcRsaOaepAsyncWorker.encryptCounter = 0;
+        EcRsaOaepAsyncWorker.decryptCounter = 0;
+        EcRsaOaepAsyncWorker.signCounter = 0;
+        EcRsaOaepAsyncWorker.verifyCounter = 0;
+        EcAesCtrAsyncWorker.encryptCounter = 0;
+        EcAesCtrAsyncWorker.decryptCounter = 0;
+        let count = 100;
+        let promises = [];
+        let c = await newCompetency("async test");
+        for (let i = 0;i < count;i++)
+        {
+            promises.push((async ()=>{
+                let a = new EcAssertion();
+                a.generateId(repo.selectedServer);
+                await a.addOwner(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal(a.owner[0], EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.addReader(EcIdentityManager.default.ids[1].ppk.toPk());
+                assert.equal(a.reader[0], EcIdentityManager.default.ids[1].ppk.toPk().toPem());
+                let date = new Date().getTime();
+                await a.setSubject(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal((await a.getSubject()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.getSubjectAsync((subject) => {
+                    assert.equal(subject.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                })
+                await a.setAgent(EcIdentityManager.default.ids[0].ppk.toPk());
+                assert.equal((await a.getAgent()).toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                await a.getAgentAsync((agent) => { //NOSONAR This is test code. Cmon man.
+                    assert.equal(agent.toPem(), EcIdentityManager.default.ids[0].ppk.toPk().toPem());
+                })
+                await a.setAssertionDate(date);                
+                assert.equal(await a.getAssertionDate(), date);
+                await a.getAssertionDateAsync((date2) => {
+                    assert.equal(date2, date);
+                })
+                await a.setExpirationDate(date + 1000 * 60 * 60);                
+                assert.equal(await a.getExpirationDate(), date + 1000 * 60 * 60);
+                await a.getExpirationDateAsync((date2) => {
+                    assert.equal(date2, date + 1000 * 60 * 60);
+                })
+                await a.setDecayFunction("t");                
+                await a.getDecayFunctionAsync((df) => {
+                    assert.equal(df, "t");
+                });
+                assert.equal(await a.getDecayFunction(), "t");
+                a.setCompetency(c.shortId());
+                a.setConfidence(1.0);
+                return a;
+            })());
+        }
+        assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
+        assert.equal((await Promise.all((await Promise.all(promises)).map(x => x.getDecayFunction()))).filter(x => x).length, count);
+        console.log("rsa:",{encryptCounter:EcRsaOaepAsyncWorker.encryptCounter, decryptCounter:EcRsaOaepAsyncWorker.decryptCounter,signCounter:EcRsaOaepAsyncWorker.signCounter, verifyCounter:EcRsaOaepAsyncWorker.verifyCounter});
+        console.log("aes:",{encryptCounter:EcAesCtrAsyncWorker.encryptCounter, decryptCounter:EcAesCtrAsyncWorker.decryptCounter});
+    });
+    it('newIv a bunch of times', async()=>{
+        let count = 100000;
+        let promises = [];
+        for (let i = 0;i < count;i++)
+        {
+            promises.push(EcAes.newIv(16));
+        }
+        assert.equal((await Promise.all(promises)).filter(x=>x).length, count);
+    })
     it('basic false test', async () => {
         let f = await newFramework("basic false framework");
         let c = await newCompetency("Add");

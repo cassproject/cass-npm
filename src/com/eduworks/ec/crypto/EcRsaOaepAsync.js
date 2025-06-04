@@ -111,7 +111,7 @@ module.exports = class EcRsaOaepAsync {
 			EcAesCtrAsync.fipsOn();
 			try {
 				result = forge.util.decodeUtf8(EcCrypto.ab2str(p1));
-			} catch (ex) {
+			} catch {
 				result = EcCrypto.ab2str(p1);
 			}
 			if (EcCrypto.caching) {
@@ -149,6 +149,7 @@ module.exports = class EcRsaOaepAsync {
 				.then(afterKeyIsImported)
 				.catch((error) => {
 					global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcRsaOaepAsyncDecrypt", error);
+					console.trace(error);
 					EcAesCtrAsync.fipsOff();
 					return null;
 				}))});

@@ -1,0 +1,18 @@
+FROM node:22
+WORKDIR code
+COPY package.json package.json
+RUN npm install
+
+COPY ca.crt ca.crt
+COPY client.crt client.crt
+COPY client.key client.key
+COPY index.js index.js
+COPY src src
+RUN npm pack > ver.ver
+
+COPY test.js test.js
+COPY ca.crt ca.crt
+COPY client.crt client.crt
+COPY client.key client.key
+RUN sed -i '1crequire("cassproject");' test.js
+ENTRYPOINT npm run mocha
