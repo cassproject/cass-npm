@@ -1237,12 +1237,13 @@ module.exports = class EcRepository {
 	 *  @memberOf EcRepository
 	 *  @method multidelete
 	 */
-	multidelete = async function (urls, eim) {
+	multidelete = async function (urls, success, failure, eim) {
 		if (urls == null) {
 			throw new Error("urls not defined.");
 		}
 		urls = urls.map(
 			url => {
+				if (EcObject.isObject(url)) url = url.shortId();
 				let version = EcRemoteLinkedData.getVersionFromUrl(url);
 				if (url.startsWith(this.selectedServer))
 					return url.replace(this.selectedServer, "").replace("custom/", "");
