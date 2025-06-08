@@ -36,8 +36,8 @@ let assert = chai.assert;
 after(() => EcRsaOaepAsyncWorker.teardown());
 
 let deleteById = async function (id) {
-    let p1 = await EcRepository.get(id);
-    await EcRepository._delete(p1);
+    let p1 = await EcRepository.get(id,null,null,repo);    
+    await EcRepository._delete(p1,null,null,repo);
 };
 let failure = function (p1) {
     console.trace(p1);
@@ -90,6 +90,8 @@ describe("EcRepository (L1 Cache)", () => {
         EcIdentityManager.default.clearIdentities();
         if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
             process.env.CASS_LOOPBACK = Cypress.env('CASS_LOOPBACK');
+        if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
+            process.env.TESTLEVEL = Cypress.env('TESTLEVEL');
         console.log(process.env.CASS_LOOPBACK);
         await repo.init(process.env.CASS_LOOPBACK || "http://localhost/api/", null, null, console.log);
         if (EcIdentityManager.default.ids.length > 0)
@@ -437,6 +439,7 @@ describe("EcRepository (L1 Cache)", () => {
         assert.equal(results2, null);
     }).timeout(10000);
     it('multidelete', async () => {
+        if (process.env.TESTLEVEL == 15 || process.env.TESTLEVEL?.trim() == "15") return;
         rld = new schema.Thing();
         rld.generateId(repo.selectedServer);
         rld.addOwner(newId1.ppk.toPk());

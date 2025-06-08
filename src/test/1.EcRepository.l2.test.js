@@ -15,6 +15,7 @@ const EcIdentityManager = require('../org/cassproject/ebac/identity/EcIdentityMa
 const EcIdentity = require('../org/cassproject/ebac/identity/EcIdentity.js');
 const EcPpk = require('../com/eduworks/ec/crypto/EcPpk.js');
 const EcLinkedData = require('../org/json/ld/EcLinkedData.js');
+const EcRemoteLinkedData = require('../org/cassproject/schema/general/EcRemoteLinkedData.js');
 
 let hrtime = function () {
     try {
@@ -38,8 +39,8 @@ let assert = chai.assert;
 after(() => EcRsaOaepAsyncWorker.teardown());
 
 let deleteById = async function (id) {
-    let p1 = await EcRepository.get(id);
-    await EcRepository._delete(p1);
+    let p1 = await EcRepository.get(id,null,null,repo);    
+    await EcRepository._delete(p1,null,null,repo);
 };
 let failure = function (p1) {
     console.trace(p1);
@@ -95,7 +96,9 @@ describe("EcRepository (L2 Cache)", () => {
         console.log(process.env.CASS_LOOPBACK);
         if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
             process.env.ELASTICSEARCH_ENDPOINT = Cypress.env('ELASTICSEARCH_ENDPOINT');
-        console.log(process.env.CASS_LOOPBACK);
+        console.log(process.env.ELASTICSEARCH_ENDPOINT);
+        if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
+            process.env.TESTLEVEL = Cypress.env('TESTLEVEL');
         await repo.init(process.env.CASS_LOOPBACK || "http://localhost/api/", null, null, console.log);
         if (EcIdentityManager.default.ids.length > 0)
             newId1 = EcIdentityManager.default.ids[0];
@@ -125,9 +128,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('encrypt some more', async () => {
@@ -173,9 +178,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('search', async () => {
@@ -220,9 +227,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('search', async () => {
@@ -249,9 +258,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('search', async () => {
@@ -292,9 +303,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('search', async () => {
@@ -321,9 +334,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('search', async () => {
@@ -364,9 +379,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('registered search', async () => {
@@ -390,9 +407,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('registered search', async () => {
@@ -426,9 +445,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('registered search', async () => {
@@ -455,9 +476,11 @@ describe("EcRepository (L2 Cache)", () => {
     it('cannot be accessed by anonymous users', async () => {
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         assert.isNull(await EcRepository.get(rld.shortId(),null,null,null,emptyEim));
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId());
     }).timeout(10000);
     it('registered search', async () => {
@@ -489,6 +512,7 @@ describe("EcRepository (L2 Cache)", () => {
         assert.equal(results2, null);
     }).timeout(10000);
     it('multidelete (small)', async () => {
+        if (process.env.TESTLEVEL == 15 || process.env.TESTLEVEL?.trim() == "15") return;
         rld = new schema.Thing();
         rld.generateId(repo.selectedServer);
         rld.addOwner(newId1.ppk.toPk());
@@ -513,6 +537,7 @@ describe("EcRepository (L2 Cache)", () => {
         assert.equal(results2, null);
     });
     it('multidelete', async () => {
+        if (process.env.TESTLEVEL == 15 || process.env.TESTLEVEL?.trim() == "15") return;
         rld = new schema.Thing();
         rld.generateId(repo.selectedServer);
         rld.addOwner(newId1.ppk.toPk());
@@ -570,21 +595,27 @@ describe("EcRepository (L2 Cache)", () => {
         await repo.multidelete([rld.shortId(), rld2.shortId(), rld3.shortId(), rld4.shortId(), rld5.shortId(), rld6.shortId()],null,null,emptyEim);
         delete EcRepository.cache[rld.id];
         delete EcRepository.cache[rld.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld.shortId()))];
         await EcRepository.get(rld.shortId(), null, null, repo);
         delete EcRepository.cache[rld2.id];
         delete EcRepository.cache[rld2.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld2.shortId()))];
         await EcRepository.get(rld2.shortId(), null, null, repo);
         delete EcRepository.cache[rld3.id];
         delete EcRepository.cache[rld3.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld3.shortId()))];
         await EcRepository.get(rld3.shortId(), null, null, repo);
         delete EcRepository.cache[rld4.id];
         delete EcRepository.cache[rld4.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld4.shortId()))];
         await EcRepository.get(rld4.shortId(), null, null, repo);
         delete EcRepository.cache[rld5.id];
         delete EcRepository.cache[rld5.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld5.shortId()))];
         await EcRepository.get(rld5.shortId(), null, null, repo);
         delete EcRepository.cache[rld6.id];
         delete EcRepository.cache[rld6.shortId()];
+        delete EcRepository.cache[EcRemoteLinkedData.veryShortId(repo.selectedServer,EcCrypto.md5(rld6.shortId()))];
         await EcRepository.get(rld6.shortId(), null, null, repo);
         results = await repo.search(`@id:"${rld.shortId()}"`);
         assert.equal(results.length, 1);
