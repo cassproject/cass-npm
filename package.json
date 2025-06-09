@@ -1,6 +1,6 @@
 {
 	"name": "cassproject",
-	"version": "1.5.75",
+	"version": "5.0.0",
 	"description": "Competency and Skills Service",
 	"main": "index.js",
 	"scripts": {
