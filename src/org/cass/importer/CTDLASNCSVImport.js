@@ -1,6 +1,30 @@
 const EcArray = require("../../../com/eduworks/ec/array/EcArray");
 const EcRemote = require("../../../com/eduworks/ec/remote/EcRemote");
 
+function setVersionIdentifier(f) {
+	if (f["ceterms:versionIdentifier"]) {
+		if (!Array.isArray(f["ceterms:versionIdentifier"])) {
+			f["ceterms:versionIdentifier"] = [f["ceterms:versionIdentifier"]];
+		}
+		for (let i = f["ceterms:versionIdentifier"].length - 1; i >= 0; i--) {
+			try {
+				let parts = f["ceterms:versionIdentifier"][i].split("~");
+				console.log('parts', parts);
+				f["ceterms:versionIdentifier"][i] = {
+					"ceterms:identifierValueCode": parts[0],
+					"ceterms:identifierTypeName": {
+						"@language": "en-us",
+						"@value": parts[1]
+					},
+					"ceterms:identifierType": parts.length > 2 ? parts[2] : undefined
+				};
+			} catch (e) {
+				delete f["ceterms:versionIdentifier"][i];
+			}
+		}
+	}
+}
+
 module.exports = class CTDLASNCSVImport {
 	static analyzeFile(file, success, failure) {
 		if (file == null) {
@@ -301,6 +325,9 @@ module.exports = class CTDLASNCSVImport {
 								}
 							});
 						}
+
+						setVersionIdentifier(f);
+
 						frameworkArray.push(f);
 						f.competency = [];
 						f.relation = [];
@@ -598,6 +625,7 @@ module.exports = class CTDLASNCSVImport {
 						f["ceasn:minorAlignment"] = null;
 						f["ceasn:prerequisiteAlignment"] = null;
 						f["ceasn:hasChild"] = null;
+						setVersionIdentifier(f);
 						competencies.push(f);
 						competencyRows[f.shortId()] = e;
 					} else if (
@@ -741,6 +769,7 @@ module.exports = class CTDLASNCSVImport {
 								}
 							});
 						}
+						setVersionIdentifier(f);
 						delete f["ceterms:hasMember"];
 						f.relation = [];
 						f.subType = "Collection";
@@ -956,6 +985,7 @@ module.exports = class CTDLASNCSVImport {
 						f["ceasn:prerequisiteAlignment"] = null;
 						f["ceasn:hasChild"] = null;
 						f["ceterms:isMemberOf"] = null;
+						setVersionIdentifier(f);
 						competencies.push(f);
 						competencyRows[f.shortId()] = e;
 					} else if (
