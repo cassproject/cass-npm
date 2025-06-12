@@ -502,8 +502,8 @@ module.exports = class EcRepository {
 			counter > this.repos.length ||
 			this.repos[counter] == null
 		) {
-			delete this.fetching[url];
-			if (this.caching) this.cache[url] = null;
+			delete EcRepository.fetching[url];
+			if (EcRepository.caching) EcRepository.cache[url] = null;
 			return cassReturnAsPromise(null, success, failure, error);
 		}
 		let repo = this.repos[counter];
@@ -741,18 +741,18 @@ module.exports = class EcRepository {
 		if (repo === undefined) {
 			repo = null;
 		}
-		if (this.caching) {
-			delete this.cache[data.id];
-			delete this.cache[data.shortId()];
+		if (EcRepository.caching) {
+			delete EcRepository.cache[data.id];
+			delete EcRepository.cache[data.shortId()];
 			if (repo != null)
 			{
-				delete this.cache[
+				delete EcRepository.cache[
 					EcRemoteLinkedData.veryShortId(
 						repo.selectedServer,
 						data.getGuid()
 					)
 				];
-				delete this.cache[
+				delete EcRepository.cache[
 					EcRemoteLinkedData.veryShortId(
 						repo.selectedServer,
 						EcCrypto.md5(data.shortId())
@@ -875,9 +875,24 @@ module.exports = class EcRepository {
 			return repo.deleteRegistered(data, success, failure, eim);
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		if (this.caching) {
-			delete this.cache[data.id];
-			delete this.cache[data.shortId()];
+		if (EcRepository.caching) {
+			delete EcRepository.cache[data.id];
+			delete EcRepository.cache[data.shortId()];
+			if (repo != null)
+			{
+				delete EcRepository.cache[
+					EcRemoteLinkedData.veryShortId(
+						repo.selectedServer,
+						data.getGuid()
+					)
+				];
+				delete EcRepository.cache[
+					EcRemoteLinkedData.veryShortId(
+						repo.selectedServer,
+						EcCrypto.md5(data.shortId())
+					)
+				];
+			}
 		}
 		let targetUrl;
 		targetUrl = data.shortId();
@@ -918,16 +933,16 @@ module.exports = class EcRepository {
 	deleteRegistered = function (data, success, failure, eim) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		if (this.caching) {
-			delete this.cache[data.id];
-			delete this.cache[data.shortId()];
-			delete this.cache[
+		if (EcRepository.caching) {
+			delete EcRepository.cache[data.id];
+			delete EcRepository.cache[data.shortId()];
+			delete EcRepository.cache[
 				EcRemoteLinkedData.veryShortId(
 					this.selectedServer,
 					data.getGuid()
 				)
 			];
-			delete this.cache[
+			delete EcRepository.cache[
 				EcRemoteLinkedData.veryShortId(
 					this.selectedServer,
 					EcCrypto.md5(data.shortId())
@@ -1227,6 +1242,69 @@ module.exports = class EcRepository {
 				}
 				return cassPromisify(new Promise((resolve, reject) => { resolve(Promise.all(originals.map(url => EcRepository.cacheGet(url))).then(c => c.filter(x => x))) }), success, failure);
 			});
+		return cassPromisify(p, success, failure);
+	};
+	/**
+	 *  Deletes multiple records from the server.
+	 *
+	 *  @param {String[]}  urls List of Data ID Urls that should be precached
+	 *  @param {EcIdentityManager} eim Identity manager to use for signing the request
+	 *  @memberOf EcRepository
+	 *  @method multidelete
+	 */
+	multidelete = async function (urls, success, failure, eim) {
+		if (eim === undefined || eim == null)
+			eim = EcIdentityManager.default;
+		if (urls == null) {
+			throw new Error("urls not defined.");
+		}
+		if (EcRepository.caching) {
+			for (let url of urls)
+			{
+				delete EcRepository.cache[url];
+				delete EcRepository.cache[EcRemoteLinkedData.trimVersionFromUrl(url)];
+				delete EcRepository.cache[
+					EcRemoteLinkedData.veryShortId(
+						this.selectedServer,
+						EcRemoteLinkedData.trimVersionFromUrl(url).split("/").pop()
+					)
+				];
+				delete EcRepository.cache[
+					EcRemoteLinkedData.veryShortId(
+						this.selectedServer,
+						EcCrypto.md5(url)
+					)
+				];
+			}
+		}
+		urls = urls.map(
+			url => {
+				if (EcObject.isObject(url)) url = url.shortId();
+				let version = EcRemoteLinkedData.getVersionFromUrl(url);
+				if (url.startsWith(this.selectedServer))
+					return url.replace(this.selectedServer, "").replace("custom/", "");
+				// This double slash is intentional to support parsing the versioned url
+				return "data//" + EcCrypto.md5(EcRemoteLinkedData.trimVersionFromUrl(url)) + (version != null ? ("/" + version) : "");
+			}
+		);
+		let fd = new FormData();
+		fd.append("data", JSON.stringify(urls));
+		let p = new Promise((resolve, reject) => resolve());
+		if (!EcRepository.unsigned)
+			p = p.then(() => {
+				return (eim || EcIdentityManager.default).signatureSheet(
+					300000 + this.timeOffset,
+					this.selectedServer, null, null, this.signatureSheetHashAlgorithm
+				).then((signatureSheet) => {
+					fd.append("signatureSheet", signatureSheet);
+				});
+			});
+		p = p.then(() => EcRemote.postExpectingObject(
+					this.selectedServer,
+					"sky/repo/multiDelete",
+					fd
+				)
+			);
 		return cassPromisify(p, success, failure);
 	};
 	/**

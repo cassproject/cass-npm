@@ -15,4 +15,4 @@ COPY cypressWebpack.config.js cypressWebpack.config.js
 COPY cypressBrowserify.config.js cypressBrowserify.config.js
 COPY cypressVite cypressVite
 COPY cypressVite.config.js cypressVite.config.js
-ENTRYPOINT cypress run --config-file cypressWebpack.config.js --browser edge -e CASS_LOOPBACK=${CASS_LOOPBACK} --spec "**/!(schema.test.js)" && cypress run --config-file cypressWebpack.config.js --browser chrome -e CASS_LOOPBACK=${CASS_LOOPBACK} --spec "**/!(schema.test.js)" && cypress run --config-file cypressWebpack.config.js -e CASS_LOOPBACK=${CASS_LOOPBACK} --spec "**/!(schema.test.js)"
+ENTRYPOINT cypress run --config-file cypressWebpack.config.js --browser edge -e CASS_LOOPBACK=${CASS_LOOPBACK},TESTLEVEL=${TESTLEVEL} --spec "**/!(4.schema.test.js)" && cypress run --config-file cypressWebpack.config.js --browser chrome -e CASS_LOOPBACK=${CASS_LOOPBACK},TESTLEVEL=${TESTLEVEL} --spec "**/!(4.schema.test.js)" && cypress run --config-file cypressWebpack.config.js -e CASS_LOOPBACK=${CASS_LOOPBACK},TESTLEVEL=${TESTLEVEL} --spec "**/!(4.schema.test.js)"
