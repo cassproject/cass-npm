@@ -31,6 +31,30 @@ const customDocLoader = async (url, options) => {
 	  return result;
 };
 
+function setVersionIdentifier(f) {
+	if (f["ceterms:versionIdentifier"]) {
+		if (!Array.isArray(f["ceterms:versionIdentifier"])) {
+			f["ceterms:versionIdentifier"] = [f["ceterms:versionIdentifier"]];
+		}
+		for (let i = f["ceterms:versionIdentifier"].length - 1; i >= 0; i--) {
+			try {
+				let parts = f["ceterms:versionIdentifier"][i].split("~");
+				console.log('parts', parts);
+				f["ceterms:versionIdentifier"][i] = {
+					"ceterms:identifierValueCode": parts[0],
+					"ceterms:identifierTypeName": {
+						"@language": "en-us",
+						"@value": parts[1]
+					},
+					"ceterms:identifierType": parts.length > 2 ? parts[2] : undefined
+				};
+			} catch (e) {
+				delete f["ceterms:versionIdentifier"][i];
+			}
+		}
+	}
+}
+
 module.exports = class CTDLASNCSVConceptImport {
 	static analyzeFile(file, success, failure) {
 		if (file == null) {
@@ -137,14 +161,6 @@ module.exports = class CTDLASNCSVConceptImport {
 							endpoint,
 							repo
 						);
-						try {
-							let existing = await EcRepository.get(translator.id);
-							if (existing && existing.type !== translator.type) {
-								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
-							}
-						} catch (e) {
-							console.error(e);
-						}
 						if (translator["ceasn:name"] != null) {
 							let name = translator["ceasn:name"];
 							let nameWithLanguage = {};
@@ -204,6 +220,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
+						setVersionIdentifier(f);
 						schemeArray.push(f);
 					} else if (pretranslatedE["@type"] == "skos:Concept") {
 						let translator = new EcLinkedData(null, null);
@@ -401,14 +418,6 @@ module.exports = class CTDLASNCSVConceptImport {
 							endpoint,
 							repo
 						);
-						try {
-							let existing = await EcRepository.get(translator.id);
-							if (existing && existing.type !== translator.type) {
-								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
-							}
-						} catch (e) {
-							console.error(e);
-						}
 						if (translator["ceasn:name"] != null) {
 							let name = translator["ceasn:name"];
 							let nameWithLanguage = {};
