@@ -49,8 +49,11 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 5.0.1
+* Updated CEASN import to include versionIdentifier.
+
 ## 5.0.0
-* Added multidelete to EcRepository
+* Added multidelete to EcRepository.
 * NPM requires semantic versioning coherence, so I must now use big number for version.
 * Added and refined tests to include deleting, multideleting.
 * Made use of EcRepository.cache more consistent.
