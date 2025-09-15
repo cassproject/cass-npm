@@ -169,10 +169,10 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 				}
 				let negative = await assertion.getNegative();
 				if (competencies[assertion.competency] == null)
-					competencies[assertion.competency] = {positives:[],negatives:[]};
-				if (negative) 
+					competencies[assertion.competency] = { positives: [], negatives: [] };
+				if (negative)
 					competencies[assertion.competency].negatives.push(assertion);
-				else 
+				else
 					competencies[assertion.competency].positives.push(assertion);
 			})
 		)
@@ -227,7 +227,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 						)
 					)
 				)
-			).then(async() =>
+			).then(async () =>
 				await Promise.all(
 					this.getInEdges(competency).map(async (alignment) =>
 						await this.getCompetency(alignment.source).then(async (s) =>
@@ -311,7 +311,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 	addToMetaStateArray(metaState, key, value) {
 		if (metaState == null) return;
 		if (metaState[key] == null) metaState[key] = [];
-		metaState[key].push(value);
+		EcArray.setAdd(metaState[key], value);
 	}
 	/**
 	 *  Fetches the Meta Competency (additional state information used to compute profiles or other data) for a competency.
@@ -398,7 +398,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 	}
 	getDefaultEdgeType() {
 		return EcAlignment.NARROWS;
-	}	
+	}
 	inEdgeCache = {};
 	outEdgeCache = {};
 	getInEdges(vertex) {
@@ -446,8 +446,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		delete this.outEdgeCache[vertex.shortId()];
 		return super.removeVertex(vertex);
 	}
-	cacheEdges(e)
-	{
+	cacheEdges(e) {
 		if (this.inEdgeCache[e.destination.shortId()] == null)
 			this.inEdgeCache[e.destination.shortId()] = [];
 		this.inEdgeCache[e.destination.shortId()].push(e.edge);

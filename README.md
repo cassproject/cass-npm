@@ -40,6 +40,7 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
  * Update changelog.
  * `npm install`
  * `npm audit` and fix any audit issues.
+ * Update CaSS server version if necessary in package.json
  * `npm test` - Must not fail any tests.
  * `npm run webpack:cypressFirefoxHttps` See if the firefox test case has changed.
  * Document code coverage output by the previous step.
@@ -48,6 +49,9 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
  * `npm publish` (must be `npm login`ed) 
 
 # Changelog
+
+## 5.0.2
+* Cosmetic and security updates (to dev dependencies)
 
 ## 5.0.1
 * Updated CEASN import to include versionIdentifier.

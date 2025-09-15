@@ -1,0 +1,19 @@
+FROM cypress/included:15.2.0
+RUN apt-get install xvfb
+
+WORKDIR code
+COPY package.json package.json
+RUN npm install
+
+COPY ca.crt ca.crt
+COPY client.crt client.crt
+COPY client.key client.key
+COPY index.js index.js
+COPY src src
+COPY cypressWebpack cypressWebpack
+COPY cypressWebpack.config.js cypressWebpack.config.js
+COPY cypressBrowserify cypressBrowserify
+COPY cypressBrowserify.config.js cypressBrowserify.config.js
+COPY cypressVite cypressVite
+COPY cypressVite.config.js cypressVite.config.js
+ENTRYPOINT cypress run --config-file cypressWebpack.config.js --browser chrome -e CASS_LOOPBACK=${CASS_LOOPBACK},TESTLEVEL=${TESTLEVEL} --spec "**/!(4.schema.test.js)"

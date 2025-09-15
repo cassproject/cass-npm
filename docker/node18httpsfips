@@ -30,7 +30,7 @@ COPY client.crt client.crt
 COPY client.key client.key
 COPY index.js index.js
 COPY src src
-RUN npm pack > ver.ver
+
 
 COPY test.js test.js
 COPY ca.crt ca.crt
