@@ -23,6 +23,7 @@ module.exports = class CSVExport extends Exporter {
 		compExport.downloadCSV(fileName);
 	}
 	static exportCTDLASN(json, name) {
+		console.log('export CTDL');
 		let objects = [];
 		CSVExport.findGraphs(json, objects);
 		CSVExport.exportObjects(objects, name + ".csv", true);
@@ -202,7 +203,16 @@ module.exports = class CSVExport extends Exporter {
 								display += props2[prop2][prop3] + "|";
 							}
 						} else {
-							display += props2[prop2] + "|";
+							if (prop === 'ceterms:versionIdentifier') {
+								if (props2[prop2]['ceterms:identifierValueCode'])
+									display += props2[prop2]['ceterms:identifierValueCode'] + "~";
+								if (props2[prop2]['ceterms:identifierTypeName'])
+									display += Object.values(props2[prop2]['ceterms:identifierTypeName'])[0] + "~";
+								if (props2[prop2]['ceterms:identifierType'])
+									display += props2[prop2]['ceterms:identifierType'] + "|";
+							} else {
+								display += props2[prop2] + "|";
+							}
 						}
 					}
 					display = display.substring(0, display.length - 1);
