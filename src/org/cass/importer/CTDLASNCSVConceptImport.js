@@ -109,7 +109,8 @@ module.exports = class CTDLASNCSVConceptImport {
 		ceo,
 		endpoint,
 		eim,
-		progressionsFlag
+		progressionsFlag,
+		validationRules
 	) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
@@ -123,7 +124,7 @@ module.exports = class CTDLASNCSVConceptImport {
 			failure("Invalid file type");
 		}
 		if (progressionsFlag) {
-			return this.importProgressions(repo, file, success, failure, ceo, endpoint, eim);
+			return this.importProgressions(repo, file, success, failure, ceo, endpoint, eim, validationRules);
 		}
 		Papa.parse(file, {
 			header: true,
@@ -139,14 +140,30 @@ module.exports = class CTDLASNCSVConceptImport {
 				} catch (e) {
 					console.error('Error trimming data', e);
 				}
+
+				// Validate hierarchy before processing (only if validation rules provided)
+				if (validationRules && validationRules.validateHierarchy !== false) {
+					const hierarchyError = CTDLASNCSVConceptImport.validateConceptHierarchy(
+						tabularData,
+						validationRules.hierarchyRules
+					);
+					if (hierarchyError) {
+						failure(hierarchyError);
+						return;
+					}
+				}
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
 				let schemeArray = [];
 				let concepts = [];
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
-					// Probably an empty newline, skip
-					if (!pretranslatedE["@id"]) {
+					// Skip extra lines if found in file
+					if (!pretranslatedE || !pretranslatedE["@type"]) {
 						continue;
+					}
+					if (!pretranslatedE["@id"]) {
+						failure(`Row ${each + 2}: is missing an @id`);
+						return;
 					}
 					if (
 						pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction')
@@ -154,6 +171,19 @@ module.exports = class CTDLASNCSVConceptImport {
 						continue;
 					}
 					if (pretranslatedE["@type"] == "skos:ConceptScheme") {
+						// Validate required properties (only if validation rules provided)
+						if (validationRules && validationRules.requiredProps) {
+							const validationError = CTDLASNCSVConceptImport.validateRequiredProperties(
+								pretranslatedE,
+								"skos:ConceptScheme",
+								each + 2,
+								validationRules.requiredProps
+							);
+							if (validationError) {
+								failure(validationError);
+								return;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -223,6 +253,19 @@ module.exports = class CTDLASNCSVConceptImport {
 						setVersionIdentifier(f);
 						schemeArray.push(f);
 					} else if (pretranslatedE["@type"] == "skos:Concept") {
+						// Validate required properties (only if validation rules provided)
+						if (validationRules && validationRules.requiredProps) {
+							const validationError = CTDLASNCSVConceptImport.validateRequiredProperties(
+								pretranslatedE,
+								"skos:Concept",
+								each + 2,
+								validationRules.requiredProps
+							);
+							if (validationError) {
+								failure(validationError);
+								return;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -251,6 +294,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						let f = new EcConcept();
 						f.copyFrom(e);
 						if (e["id"] == null) {
+							failure(`Row ${each + 2}: Concept is missing an id`);
 							return;
 						}
 						if (
@@ -364,10 +408,11 @@ module.exports = class CTDLASNCSVConceptImport {
 						pretranslatedE["@type"] == null ||
 						pretranslatedE["@type"] == ""
 					) {
+						failure(`Row ${each + 2}: Missing or empty @type`);
 						return;
 					} else {
-						this.error(
-							"Found unknown type:" + pretranslatedE["@type"]
+						failure(
+							`Row ${each + 2}: Found unknown type: ` + pretranslatedE["@type"]
 						);
 						return;
 					}
@@ -384,7 +429,8 @@ module.exports = class CTDLASNCSVConceptImport {
 		failure,
 		ceo,
 		endpoint,
-		eim
+		eim,
+		validationRules
 	) {
 		Papa.parse(file, {
 			header: true,
@@ -400,17 +446,50 @@ module.exports = class CTDLASNCSVConceptImport {
 				} catch (e) {
 					console.error('Error trimming data', e);
 				}
+
+				// Validate hierarchy before processing (only if validation rules provided)
+				if (validationRules && validationRules.validateHierarchy !== false) {
+					const hierarchyError = CTDLASNCSVConceptImport.validateConceptHierarchy(
+						tabularData,
+						validationRules.hierarchyRules
+					);
+					if (hierarchyError) {
+						failure(hierarchyError);
+						return;
+					}
+				}
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
 				let schemeArray = [];
 				let concepts = [];
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
+					// Skip extra lines if found in file
+					if (!pretranslatedE || !pretranslatedE["@type"]) {
+						continue;
+					}
+					if (!pretranslatedE["@id"]) {
+						failure(`Row ${each + 2}: is missing an @id`);
+						return;
+					}
 					if (
 						pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction')
 					) {
 						continue;
 					}
 					if (pretranslatedE["@type"] == "asn:ProgressionModel") {
+						// Validate required properties (only if validation rules provided)
+						if (validationRules && validationRules.requiredProps) {
+							const validationError = CTDLASNCSVConceptImport.validateRequiredProperties(
+								pretranslatedE,
+								"asn:ProgressionModel",
+								each + 2,
+								validationRules.requiredProps
+							);
+							if (validationError) {
+								failure(validationError);
+								return;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -476,6 +555,19 @@ module.exports = class CTDLASNCSVConceptImport {
 						f.subType = "Progression";
 						schemeArray.push(f);
 					} else if (pretranslatedE["@type"] == "asn:ProgressionLevel") {
+						// Validate required properties (only if validation rules provided)
+						if (validationRules && validationRules.requiredProps) {
+							const validationError = CTDLASNCSVConceptImport.validateRequiredProperties(
+								pretranslatedE,
+								"asn:ProgressionLevel",
+								each + 2,
+								validationRules.requiredProps
+							);
+							if (validationError) {
+								failure(validationError);
+								return;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -504,6 +596,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						let f = new EcConcept();
 						f.copyFrom(e);
 						if (e["id"] == null) {
+							failure(`Row ${each + 2}: Concept is missing an id`);
 							return;
 						}
 						if (
@@ -583,10 +676,11 @@ module.exports = class CTDLASNCSVConceptImport {
 						pretranslatedE["@type"] == null ||
 						pretranslatedE["@type"] == ""
 					) {
+						failure(`Row ${each + 2}: Missing or empty @type`);
 						return;
 					} else {
-						this.error(
-							"Found unknown type:" + pretranslatedE["@type"]
+						failure(
+							`Row ${each + 2}: Found unknown type: ` + pretranslatedE["@type"]
 						);
 						return;
 					}
@@ -595,5 +689,76 @@ module.exports = class CTDLASNCSVConceptImport {
 			},
 			error: failure
 		});
+	}
+
+	static validateRequiredProperties(obj, type, rowIndex, requiredProps) {
+		// Use provided validation rules or fall back to defaults
+		if (!requiredProps) {
+			return 'Required properties not defined.'
+		}
+
+		const props = requiredProps[type];
+		if (!props) return null;
+
+		const missing = [];
+		for (const prop of props) {
+			if (!obj[prop] || (typeof obj[prop] === 'string' && obj[prop].trim() === '')) {
+				missing.push(prop);
+			}
+		}
+
+		if (missing.length > 0) {
+			return `Row ${rowIndex}: Missing required properties for ${type}: ${missing.join(', ')}`;
+		}
+		return null;
+	}
+
+	static validateConceptHierarchy(tabularData, hierarchyRules) {
+		// Use provided hierarchy rules or fall back to defaults
+		if (!hierarchyRules) {
+			return 'Hierarchy rules not defined.'
+		}
+
+		// Check each type defined in hierarchy rules
+		for (const [type, rules] of Object.entries(hierarchyRules)) {
+			const hasType = tabularData.some(r => r && r["@type"] === type);
+			if (!hasType) continue;
+
+			let hasRequiredProp = false;
+			let hasChildProp = false;
+
+			for (const row of tabularData) {
+				if (!row || !row["@type"]) continue;
+
+				// Check if this row has any of the required properties
+				if (row["@type"] === type && rules.requiredProperties) {
+					for (const prop of rules.requiredProperties) {
+						if (row[prop]) {
+							hasRequiredProp = true;
+							break;
+						}
+					}
+				}
+
+				// Check if any row has child properties
+				if (rules.childProperties) {
+					for (const prop of rules.childProperties) {
+						if (row[prop]) {
+							hasChildProp = true;
+							break;
+						}
+					}
+				}
+
+				if (hasRequiredProp && hasChildProp) break;
+			}
+
+			// Validate that at least one of the hierarchy properties exists
+			if (!hasRequiredProp && !hasChildProp) {
+				return rules.errorMessage || `CSV must contain hierarchy properties for ${type}`;
+			}
+		}
+
+		return null;
 	}
 };
