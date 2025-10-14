@@ -716,18 +716,7 @@ module.exports = class CTDLASNCSVConceptImport {
 	static validateConceptHierarchy(tabularData, hierarchyRules) {
 		// Use provided hierarchy rules or fall back to defaults
 		if (!hierarchyRules) {
-			hierarchyRules = {
-				"skos:ConceptScheme": {
-					requiredProperties: ["skos:hasTopConcept"],
-					childProperties: ["skos:inScheme", "skos:topConceptOf"],
-					errorMessage: "CSV must contain at least one of: skos:hasTopConcept (for scheme level) or skos:inScheme/skos:topConceptOf (for concept level)"
-				},
-				"asn:ProgressionModel": {
-					requiredProperties: ["skos:hasTopConcept"],
-					childProperties: ["skos:inScheme", "skos:topConceptOf"],
-					errorMessage: "CSV must contain at least one of: skos:hasTopConcept (for progression model level) or skos:inScheme/skos:topConceptOf (for progression level)"
-				}
-			};
+			return 'Hierarchy rules not defined.'
 		}
 
 		// Check each type defined in hierarchy rules

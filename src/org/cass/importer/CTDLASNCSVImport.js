@@ -1353,18 +1353,7 @@ module.exports = class CTDLASNCSVImport {
 	static validateFrameworkHierarchy(tabularData, hierarchyRules) {
 		// Use provided hierarchy rules or fall back to defaults
 		if (!hierarchyRules) {
-			hierarchyRules = {
-				"ceasn:CompetencyFramework": {
-					requiredProperties: ["ceasn:hasTopChild"],
-					childProperties: ["ceasn:isPartOf", "ceasn:isTopChildOf"],
-					errorMessage: "CSV must contain at least one of: ceasn:hasTopChild (for framework level) or ceasn:isPartOf/ceasn:isTopChildOf (for competency level)"
-				},
-				"ceterms:Collection": {
-					requiredProperties: ["ceterms:hasMember"],
-					childProperties: ["ceterms:isMemberOf"],
-					errorMessage: "CSV must contain at least one of: ceterms:hasMember (for collection level) or ceterms:isMemberOf (for competency level)"
-				}
-			};
+			return 'Hierarchy rules not defined.'
 		}
 
 		// Check each type defined in hierarchy rules
