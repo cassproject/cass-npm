@@ -165,6 +165,10 @@ module.exports = class CTDLASNCSVConceptImport {
 						failure(`Row ${each + 2}: is missing an @id`);
 						return;
 					}
+					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
+						failure(`row ${i + 2}: @id must be a valid URI or start with 'ce-'`)
+						return;
+					}
 					if (
 						pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction')
 					) {

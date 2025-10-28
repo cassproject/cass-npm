@@ -106,10 +106,10 @@ module.exports = class CTDLASNCSVImport {
 							col[typeCol].trim() == "ceasn:Competency"
 						) {
 							competencyCounter++;
-							if (colCompetencyText && !col[colCompetencyText].trim()) {
-								this.error('CTDLASN Parse Error: Competency text is empty on line ' + (i+1));
-								return;
-							}
+							// if (colCompetencyText && !col[colCompetencyText].trim()) {
+							// 	this.error('CTDLASN Parse Error: Competency text is empty on line ' + (i+1));
+							// 	return;
+							// }
 						} else if (col[typeCol] == null || col[typeCol] == "" || col[typeCol].toLowerCase().startsWith('sample') || col[typeCol].toLowerCase().startsWith('instruction'))
 							continue;
 						else {
@@ -213,6 +213,10 @@ module.exports = class CTDLASNCSVImport {
 					}
 					if (!pretranslatedE["@id"]) {
 						failure(`Row ${i + 2}: is missing an @id`)
+						return;
+					}
+					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
+						failure(`row ${i + 2}: @id must be a valid URI or start with 'ce-'`)
 						return;
 					}
 					if (
@@ -415,7 +419,7 @@ module.exports = class CTDLASNCSVImport {
 						}
 						if (e["ceasn:isPartOf"] != null) {
 							let shortId = EcRemoteLinkedData.trimVersionFromUrl(e["ceasn:isPartOf"]);
-							frameworks[shortId].competency.push(f.shortId());
+							frameworks[shortId]?.competency.push(f.shortId());
 						} else {
 							let parent = e;
 							let done = false;
@@ -494,7 +498,7 @@ module.exports = class CTDLASNCSVImport {
 						}
 						if (e["owner"] == null) {
 							if (
-								frameworkRows[EcRemoteLinkedData.trimVersionFromUrl(e["ceasn:isPartOf"])][
+								frameworkRows[EcRemoteLinkedData.trimVersionFromUrl(e["ceasn:isPartOf"])]?.[
 									"owner"
 								] != null
 							)
