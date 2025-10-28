@@ -50,6 +50,10 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 5.0.3
+* Updates to CEASN import/export.
+* Security updates.
+
 ## 5.0.2
 * Cosmetic and security updates (to dev dependencies)
 
