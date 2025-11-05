@@ -1,4 +1,4 @@
-FROM cypress/included:15.2.0
+FROM cypress/included:15.5.0
 RUN apt-get install xvfb
 
 WORKDIR code
@@ -16,4 +16,4 @@ COPY cypressBrowserify cypressBrowserify
 COPY cypressBrowserify.config.js cypressBrowserify.config.js
 COPY cypressVite cypressVite
 COPY cypressVite.config.js cypressVite.config.js
-ENTRYPOINT cypress run --config-file cypressWebpack.config.js --browser edge -e CASS_LOOPBACK=${CASS_LOOPBACK},TESTLEVEL=${TESTLEVEL} --spec "**/!(4.schema.test.js)"
+ENTRYPOINT cypress run --config-file cypressWebpack.config.js --headless --browser edge -e CASS_LOOPBACK=${CASS_LOOPBACK},TESTLEVEL=${TESTLEVEL} --spec "**/!(4.schema.test.js)"
