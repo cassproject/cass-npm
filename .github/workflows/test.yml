@@ -28,6 +28,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run test15
+      env:
+        NO_CYPRESS: true
   test15Fips:
     runs-on: ubuntu-latest
     services:
@@ -46,6 +48,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run test15Fips
+      env:
+        NO_CYPRESS: true
   test15Https11:
     runs-on: ubuntu-latest
     services:
@@ -64,6 +68,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run test15Https11
+      env:
+        NO_CYPRESS: true
   test15Https:
     runs-on: ubuntu-latest
     services:
@@ -82,6 +88,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run test15Https
+      env:
+        NO_CYPRESS: true
   test15Https11Fips:
     runs-on: ubuntu-latest
     services:
@@ -100,6 +108,8 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run test15Https11Fips
+      env:
+        NO_CYPRESS: true
   test15HttpsFips:
     runs-on: ubuntu-latest
     services:
@@ -118,3 +128,5 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run test15HttpsFips
+      env:
+        NO_CYPRESS: true

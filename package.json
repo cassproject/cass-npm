@@ -89,8 +89,8 @@
 		"testNode12": "docker build --progress plain -f docker/node12 -t npm-cass12 . && docker run --network cass-net -e CASS_LOOPBACK -e TESTLEVEL --rm npm-cass12",
 		"testNode12Https": "docker build --progress plain -f docker/node12https -t npm-cass12https . && docker run --network cass-net -e CASS_LOOPBACK -e TESTLEVEL --rm npm-cass12https",
 
-		"testCypress": "concurrently --kill-others-on-fail \"npm run testCypressEdge\" \"npm run testCypressElectron\" \"npm run testCypressChrome\"",
-		"testCypressHttps": "concurrently --kill-others-on-fail \"npm run testCypressEdgeHttps\" \"npm run testCypressElectronHttps\" \"npm run testCypressChromeHttps\"",
+		"testCypress": "if [ -n \"$NO_CYPRESS\" ]; then; else concurrently --kill-others-on-fail \"npm run testCypressEdge\" \"npm run testCypressElectron\" \"npm run testCypressChrome\"; fi",
+		"testCypressHttps": "if [ -n \"$NO_CYPRESS\" ]; then; else concurrently --kill-others-on-fail \"npm run testCypressEdgeHttps\" \"npm run testCypressElectronHttps\" \"npm run testCypressChromeHttps\"; fi",
 		"testCypressEdge": "docker build --progress plain -f docker/cypressEdge -t npm-casscypressedge . && docker run --network cass-net -e CASS_LOOPBACK -e TESTLEVEL --rm npm-casscypressedge",
 		"testCypressEdgeHttps": "docker build --progress plain -f docker/cypressHttpsEdge -t npm-casscypressedgehttps . && docker run --network cass-net -e CASS_LOOPBACK -e TESTLEVEL --rm npm-casscypressedgehttps",
 		"testCypressElectron": "docker build --progress plain -f docker/cypressElectron -t npm-casscypresselectron . && docker run --network cass-net -e CASS_LOOPBACK -e TESTLEVEL --rm npm-casscypresselectron",
