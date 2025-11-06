@@ -61,6 +61,14 @@ module.exports = class Relation extends schema.CreativeWork {
 	 *  @static
 	 *  @type string
 	 */
+	static IMPLIES = "implies";
+	/**
+	 *  Relation type when information from one object is used in another.
+	 *
+	 *  @property IMPLIES
+	 *  @static
+	 *  @type string
+	 */
 	static IS_RELATED_TO = "isRelatedTo";
 	/**
 	 *  Relation type when one object is equivalent to another.

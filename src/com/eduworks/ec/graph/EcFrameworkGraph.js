@@ -263,17 +263,31 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 				)
 			).then(async () =>
 				await Promise.all(
-					this.getOutEdges(competency).map(async (alignment) =>
-						await this.getCompetency(alignment.target).then(async (s) =>
-							await this.processAssertionBooleanInward(
-								alignment,
-								s,
-								assertions,
-								negative,
-								visited
+					alignment.relationType == Relation.IMPLIES 
+					?
+						this.getOutEdges(competency).map(async (alignment) =>
+							await this.getCompetency(alignment.target).then(async (t) =>
+								await this.processAssertionBooleanOutward(
+									alignment,
+									t,
+									assertions,
+									negative,
+									visited
+								)
 							)
 						)
-					)
+					: 
+						this.getOutEdges(competency).map(async (alignment) =>
+							await this.getCompetency(alignment.target).then(async (s) =>
+								await this.processAssertionBooleanInward(
+									alignment,
+									s,
+									assertions,
+									negative,
+									visited
+								)
+							)
+						)
 				)
 			);
 		}
@@ -285,7 +299,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		negative,
 		visited
 	) {
-		if (alignment.relationType == Relation.NARROWS || alignment.relationType == Relation.IS_EQUIVALENT_TO)
+		if (alignment.relationType == Relation.NARROWS || alignment.relationType == Relation.IS_EQUIVALENT_TO || alignment.relationType == Relation.IMPLIES)
 			await this.processAssertionsBooleanPerAssertion(
 				assertions,
 				negative,
