@@ -50,6 +50,9 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 5.0.5
+* Added implies relation.
+
 ## 5.0.4
 * Updates to CEASN CSV Import validation
 * Security updates.
