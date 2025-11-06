@@ -263,31 +263,26 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 				)
 			).then(async () =>
 				await Promise.all(
-					alignment.relationType == Relation.IMPLIES 
-					?
-						this.getOutEdges(competency).map(async (alignment) =>
-							await this.getCompetency(alignment.target).then(async (t) =>
-								await this.processAssertionBooleanOutward(
-									alignment,
-									t,
-									assertions,
-									negative,
-									visited
-								)
+					this.getOutEdges(competency).map(async (alignment) =>
+						await this.getCompetency(alignment.target).then(
+							alignment.relationType == Relation.IMPLIES
+								? async (t) =>
+							await this.processAssertionBooleanOutward(
+								alignment,
+								t,
+								assertions,
+								negative,
+								visited
+							) : async (s) =>
+							await this.processAssertionBooleanInward(
+								alignment,
+								s,
+								assertions,
+								negative,
+								visited
 							)
 						)
-					: 
-						this.getOutEdges(competency).map(async (alignment) =>
-							await this.getCompetency(alignment.target).then(async (s) =>
-								await this.processAssertionBooleanInward(
-									alignment,
-									s,
-									assertions,
-									negative,
-									visited
-								)
-							)
-						)
+					)
 				)
 			);
 		}
