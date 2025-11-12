@@ -202,7 +202,7 @@
 		"node-polyfill-webpack-plugin": "^4.1.0",
 		"nodemon": "^3.1.10",
 		"nyc": "^17.1.0",
-		"sinon": "^19.0.5",
+		"sinon": "^21.0.0",
 		"url-polyfill": "^1.1.14",
 		"wait-on": "^8.0.5",
 		"webpack": "^5.102.1",
