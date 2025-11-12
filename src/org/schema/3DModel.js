@@ -6,7 +6,7 @@ schema.MediaObject = require("./MediaObject.js");
 case of a single file published after Zip compression, the convention of appending '+zip' to the [[encodingFormat]] can be used. Geospatial, AR/VR, artistic/animation, gaming, engineering and scientific content can all be represented using [[3DModel]].
  *
  * @author schema.org
- * @class 3DModel
+ * @class ThreeDModel
  * @module org.schema
  * @extends MediaObject
  */
