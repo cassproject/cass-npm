@@ -112,7 +112,6 @@
 		"docs": "npm install yuidocjs yuidoc-ember-cli-theme && yuidoc -c yuidoc.json -o docs -e .js src && npm remove yuidocjs yuidoc-ember-cli-theme",
 		"doclint": "npm install yuidocjs yuidoc-ember-cli-theme && yuidoc --lint -c yuidoc.json -o docs -e .js src",
 		"cypress:install": "cypress install",
-		"cypress:run": "cypress run --headless",
 		"browserify:cypress:open": "cypress open --config-file cypressBrowserify.config.js",
 		"browserify:cypress:open:https": "cypress open -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressBrowserify.config.js",
 		"vite:cypress:open": "cypress open --config-file cypressVite.config.js",
