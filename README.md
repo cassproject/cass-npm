@@ -50,6 +50,9 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 5.0.6
+* Fixed bug using success in precache with L2 caching.
+
 ## 5.0.5
 * Added implies relation.
 

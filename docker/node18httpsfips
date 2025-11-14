@@ -31,11 +31,8 @@ COPY client.key client.key
 COPY index.js index.js
 COPY src src
 
-
-COPY test.js test.js
 COPY ca.crt ca.crt
 COPY client.crt client.crt
 COPY client.key client.key
-RUN sed -i '1crequire("cassproject");' test.js
 
 ENTRYPOINT npm run mocha:clientSideCertificates

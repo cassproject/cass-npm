@@ -1205,7 +1205,7 @@ module.exports = class EcRepository {
 							EcRepository.cacheBacking[cached.id] = cached;
 						}
 					}
-					let objResults = await me.precache.call(me, results, success, failure, eim, true, versionedUrls);
+					let objResults = await me.precache.call(me, results, null, null, eim, true, versionedUrls);
 					if (objResults.length == results.length) 
 						return objResults;
 					//Second attempt, in case the indexed object URL doesn't match the permanent URL.
@@ -1215,7 +1215,7 @@ module.exports = class EcRepository {
 						.map(u => EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
 					if (missingUris.length > 0)
 						objResults.push(...await me.precache.call(me, missingUris, null, null, eim, true));
-					return objResults;
+					return cassPromisify(objResults, success, failure);
 				} 
 				for (let i = 0; i < results.length; i++) {
 					let d = new EcRemoteLinkedData(null, null);
