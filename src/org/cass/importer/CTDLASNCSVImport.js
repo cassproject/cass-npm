@@ -1134,10 +1134,10 @@ module.exports = class CTDLASNCSVImport {
 		} else if (translator["type"] == "ceasn:Competency") {
 			context = "https://schema.cassproject.org/0.4/";
 			type = "Competency";
-		} else if (translator["type"] == "skos:ConceptScheme") {
+		} else if (translator["type"] == "skos:ConceptScheme" || translator["type"] == "ceasn:ConceptScheme") {
 			context = "https://schema.cassproject.org/0.4/skos/";
 			type = "ConceptScheme";
-		} else if (translator["type"] == "ceasn:Concept") {
+		} else if (translator["type"] == "ceasn:Concept" || translator["type"] === 'skos:Concept') {
 			context = "https://schema.cassproject.org/0.4/skos/";
 			type = "Concept";
 		}
