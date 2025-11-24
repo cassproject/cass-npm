@@ -191,7 +191,7 @@ module.exports = class CTDLASNCSVImport {
 					}
 					let pretranslatedE = tabularData[i];
 					// Skip extra lines if found in file
-					if (!pretranslatedE || !pretranslatedE["@type"]) {
+					if (!pretranslatedE) {
 						continue;
 					}
 					if (pretranslatedE["@type"].toLowerCase() && 
@@ -213,6 +213,10 @@ module.exports = class CTDLASNCSVImport {
 					}
 					if (!pretranslatedE["@id"]) {
 						failure(`Row ${i + 2}: is missing an @id`)
+						return;
+					}
+					if (!pretranslatedE["@type"]) {
+						failure(`Row ${i + 2}: is missing a @type`);
 						return;
 					}
 					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
@@ -741,8 +745,20 @@ module.exports = class CTDLASNCSVImport {
 				for (let i = 0; i < tabularData.length; i++) {
 					let pretranslatedE = tabularData[i];
 					// Skip extra lines if found in file
-					if (!pretranslatedE || !pretranslatedE["@type"]) {
+					if (!pretranslatedE) {
 						continue;
+					}
+					if (!pretranslatedE["@id"]) {
+						failure(`Row ${i + 2}: is missing an @id`);
+						return;
+					}
+					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
+						failure(`row ${i + 2}: @id must be a valid URI or start with 'ce-'`)
+						return;
+					}
+					if (!pretranslatedE["@type"]) {
+						failure(`Row ${i + 2}: is missing a @type`);
+						return;
 					}
 					if (
 						pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction')

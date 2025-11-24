@@ -158,15 +158,19 @@ module.exports = class CTDLASNCSVConceptImport {
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
 					// Skip extra lines if found in file
-					if (!pretranslatedE || !pretranslatedE["@type"]) {
+					if (!pretranslatedE) {
 						continue;
 					}
 					if (!pretranslatedE["@id"]) {
 						failure(`Row ${each + 2}: is missing an @id`);
 						return;
 					}
+					if (!pretranslatedE["@type"]) {
+						failure(`Row ${each + 2}: is missing a @type`);
+						return;
+					}
 					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
-						failure(`row ${i + 2}: @id must be a valid URI or start with 'ce-'`)
+						failure(`row ${each + 2}: @id must be a valid URI or start with 'ce-'`)
 						return;
 					}
 					if (
@@ -404,6 +408,36 @@ module.exports = class CTDLASNCSVConceptImport {
 								}
 							}
 						}
+						if (e["skos:inScheme"] != null) {
+							let scheme = e["skos:inScheme"];
+							console.log('scheme', scheme);
+							for (
+								let i = 0;
+								i < schemeArray.length;
+								i++
+							) {
+								let schemeObj = schemeArray[i];
+								if (scheme == schemeObj["id"]) {
+									if (
+										schemeObj[
+											"skos:hasTopConcept"
+										] == null
+									) {
+										let hasTopConcept = [];
+										schemeObj[
+											"skos:hasTopConcept"
+										] = hasTopConcept;
+									}
+									let conceptId = f.shortId();
+									EcArray.setAdd(
+										schemeObj[
+											"skos:hasTopConcept"
+										],
+										conceptId
+									);
+								}
+							}
+						}
 						f[
 							"schema:dateModified"
 						] = new Date().toISOString();
@@ -468,11 +502,15 @@ module.exports = class CTDLASNCSVConceptImport {
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
 					// Skip extra lines if found in file
-					if (!pretranslatedE || !pretranslatedE["@type"]) {
+					if (!pretranslatedE) {
 						continue;
 					}
 					if (!pretranslatedE["@id"]) {
 						failure(`Row ${each + 2}: is missing an @id`);
+						return;
+					}
+					if (!pretranslatedE["@type"]) {
+						failure(`Row ${each + 2}: is missing a @type`);
 						return;
 					}
 					if (
@@ -644,6 +682,35 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						if (e["skos:topConceptOf"] != null) {
 							let scheme = e["skos:topConceptOf"];
+							for (
+								let i = 0;
+								i < schemeArray.length;
+								i++
+							) {
+								let schemeObj = schemeArray[i];
+								if (scheme == schemeObj["id"]) {
+									if (
+										schemeObj[
+											"skos:hasTopConcept"
+										] == null
+									) {
+										let hasTopConcept = [];
+										schemeObj[
+											"skos:hasTopConcept"
+										] = hasTopConcept;
+									}
+									let conceptId = f.shortId();
+									EcArray.setAdd(
+										schemeObj[
+											"skos:hasTopConcept"
+										],
+										conceptId
+									);
+								}
+							}
+						}
+						if (e["skos:inScheme"] != null) {
+							let scheme = e["skos:inScheme"];
 							for (
 								let i = 0;
 								i < schemeArray.length;
