@@ -209,12 +209,18 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		}
 		visited.push(competency);
 		if (negative) {
-			for (let assertion of assertions)
+			let msc = this.getMetaStateCompetency(competency);
+			for (let assertion of assertions) {
+				if (visited.length > 1 && msc.positiveAssertion?.some(a => a.registration == assertion.registration))
+					continue;
+				if (visited.length > 1 && msc.negativeAssertion?.some(a => a.registration == assertion.registration))
+					continue;
 				this.addToMetaStateArray(
-					this.getMetaStateCompetency(competency),
+					msc,
 					"negativeAssertion",
 					assertion
 				);
+			}
 			await Promise.all(
 				this.getOutEdges(competency).map(async (alignment) =>
 					await this.getCompetency(alignment.target).then(async (t) =>
@@ -243,12 +249,18 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 				)
 			);
 		} else {
-			for (let assertion of assertions)
+			let msc = this.getMetaStateCompetency(competency);
+			for (let assertion of assertions) {
+				if (visited.length > 1 && msc.positiveAssertion?.some(a => a.registration == assertion.registration))
+					continue;
+				if (visited.length > 1 && msc.negativeAssertion?.some(a => a.registration == assertion.registration))
+					continue;
 				this.addToMetaStateArray(
-					this.getMetaStateCompetency(competency),
+					msc,
 					"positiveAssertion",
 					assertion
 				);
+			}
 			await Promise.all(
 				this.getInEdges(competency).map(async (alignment) =>
 					await this.getCompetency(alignment.source).then(async (t) =>
@@ -267,20 +279,20 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 						await this.getCompetency(alignment.target).then(
 							alignment.relationType == Relation.IMPLIES
 								? async (t) =>
-							await this.processAssertionBooleanOutward(
-								alignment,
-								t,
-								assertions,
-								negative,
-								visited
-							) : async (s) =>
-							await this.processAssertionBooleanInward(
-								alignment,
-								s,
-								assertions,
-								negative,
-								visited
-							)
+									await this.processAssertionBooleanOutward(
+										alignment,
+										t,
+										assertions,
+										negative,
+										visited
+									) : async (s) =>
+									await this.processAssertionBooleanInward(
+										alignment,
+										s,
+										assertions,
+										negative,
+										visited
+									)
 						)
 					)
 				)
@@ -317,11 +329,12 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 				visited
 			);
 	}
-	addToMetaStateArray(metaState, key, value) {
-		if (metaState == null) return;
-		if (metaState[key] == null) metaState[key] = [];
-		EcArray.setAdd(metaState[key], value);
-	}
+	addToMetaStateArray(metaState, key, value)  {
+            if (metaState == null) return;
+            if (metaState[key] == null) metaState[key] = [];
+            if (metaState[key].some(e => e.shortId() == value.shortId())) return;
+            metaState[key].push(value);
+        }
 	/**
 	 *  Fetches the Meta Competency (additional state information used to compute profiles or other data) for a competency.
 	 *
