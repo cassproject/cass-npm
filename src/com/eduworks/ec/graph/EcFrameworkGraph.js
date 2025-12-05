@@ -211,9 +211,9 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		if (negative) {
 			let msc = this.getMetaStateCompetency(competency);
 			for (let assertion of assertions) {
-				if (visited.length > 1 && msc.positiveAssertion?.some(a => a.registration == assertion.registration))
+				if (visited.length > 1 && assertion.registration && msc.positiveAssertion?.some(a => a.registration == assertion.registration))
 					continue;
-				if (visited.length > 1 && msc.negativeAssertion?.some(a => a.registration == assertion.registration))
+				if (visited.length > 1 && assertion.registration && msc.negativeAssertion?.some(a => a.registration == assertion.registration))
 					continue;
 				this.addToMetaStateArray(
 					msc,
@@ -251,9 +251,9 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		} else {
 			let msc = this.getMetaStateCompetency(competency);
 			for (let assertion of assertions) {
-				if (visited.length > 1 && msc.positiveAssertion?.some(a => a.registration == assertion.registration))
+				if (visited.length > 1 && assertion.registration && msc.positiveAssertion?.some(a => a.registration == assertion.registration))
 					continue;
-				if (visited.length > 1 && msc.negativeAssertion?.some(a => a.registration == assertion.registration))
+				if (visited.length > 1 && assertion.registration && msc.negativeAssertion?.some(a => a.registration == assertion.registration))
 					continue;
 				this.addToMetaStateArray(
 					msc,
