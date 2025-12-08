@@ -612,12 +612,20 @@ describe("EcFrameworkGraph", () => {
                 let result = [];
                 if (fg.getMetaStateCompetency(c)["positiveAssertion"] != null)
                 result.push(fg.getMetaStateCompetency(c)["positiveAssertion"].length);
+                else
+                result.push(0);
                 if (fg.getMetaStateCompetency(c2)["positiveAssertion"] != null)
                 result.push(fg.getMetaStateCompetency(c2)["positiveAssertion"].length);
+                else
+                result.push(0);
                 if (fg.getMetaStateCompetency(c)["negativeAssertion"] != null)
                 result.push(fg.getMetaStateCompetency(c)["negativeAssertion"].length);
+                else
+                result.push(0);
                 if (fg.getMetaStateCompetency(c2)["negativeAssertion"] != null)
                 result.push(fg.getMetaStateCompetency(c2)["negativeAssertion"].length);
+                else
+                result.push(0);
                 return result;
             }).catch((err) => {
                 assert.fail(err);
