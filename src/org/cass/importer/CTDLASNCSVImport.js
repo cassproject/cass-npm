@@ -155,6 +155,7 @@ module.exports = class CTDLASNCSVImport {
 			encoding: "UTF-8",
 			complete: async function(results) {
 				let tabularData = results["data"];
+				let errors = []; // Collect all errors to display at once
 				try {
 					for (let data of tabularData) {
 						for (let [key, value] of Object.entries(data)) {
@@ -172,8 +173,7 @@ module.exports = class CTDLASNCSVImport {
 						validationRules.hierarchyRules
 					);
 					if (hierarchyError) {
-						failure(hierarchyError);
-						return;
+						errors.push(hierarchyError);
 					}
 				}
 
@@ -185,6 +185,7 @@ module.exports = class CTDLASNCSVImport {
 				let competencyRows = {};
 				let relations = [];
 				let relationById = {};
+				let rowsWithErrors = new Set(); // Track rows that have errors to avoid duplicate processing
 				for (let i = 0; i < tabularData.length; i++) {
 					if (!tabularData[i]) {
 						continue;
@@ -194,7 +195,7 @@ module.exports = class CTDLASNCSVImport {
 					if (!pretranslatedE) {
 						continue;
 					}
-					if (pretranslatedE["@type"].toLowerCase() && 
+					if (pretranslatedE["@type"] && pretranslatedE["@type"].toLowerCase() &&
 						(pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction'))
 					) {
 						continue;
@@ -211,17 +212,24 @@ module.exports = class CTDLASNCSVImport {
 							continue;
 						}
 					}
+
+					// Validate basic required fields and collect errors
+					let rowHasError = false;
 					if (!pretranslatedE["@id"]) {
-						failure(`Row ${i + 2}: is missing an @id`)
-						return;
+						errors.push(`Row ${i + 2}: is missing an @id`);
+						rowHasError = true;
 					}
 					if (!pretranslatedE["@type"]) {
-						failure(`Row ${i + 2}: is missing a @type`);
-						return;
+						errors.push(`Row ${i + 2}: is missing a @type`);
+						rowHasError = true;
 					}
-					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
-						failure(`row ${i + 2}: @id must be a valid URI or start with 'ce-'`)
-						return;
+					if (pretranslatedE["@id"] && !pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
+						errors.push(`Row ${i + 2}: @id must be a valid URI or start with 'ce-'`);
+						rowHasError = true;
+					}
+					if (rowHasError) {
+						rowsWithErrors.add(i);
+						continue;
 					}
 					if (
 						pretranslatedE["@type"] ==
@@ -229,15 +237,20 @@ module.exports = class CTDLASNCSVImport {
 					) {
 						// Validate required properties (only if validation rules provided)
 						if (validationRules && validationRules.requiredProps) {
-							const validationError = CTDLASNCSVImport.validateRequiredProperties(
+							const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 								pretranslatedE,
 								"ceasn:CompetencyFramework",
 								i + 2,
 								validationRules.requiredProps
 							);
-							if (validationError) {
-								failure(validationError);
-								return;
+							if (validationErrors) {
+								if (Array.isArray(validationErrors)) {
+									errors.push(...validationErrors);
+								} else {
+									errors.push(validationErrors);
+								}
+								rowsWithErrors.add(i);
+								continue;
 							}
 						}
 
@@ -251,7 +264,9 @@ module.exports = class CTDLASNCSVImport {
 						try {
 							let existing = await EcRepository.get(translator.id);
 							if (existing && existing.type !== 'Framework') {
-								return failure(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
+								errors.push(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
+								rowsWithErrors.add(i);
+								continue;
 							}
 						} catch (e) {
 							console.error(e);
@@ -371,15 +386,20 @@ module.exports = class CTDLASNCSVImport {
 					) {
 					// Validate required properties (only if validation rules provided)
 					if (validationRules && validationRules.requiredProps) {
-						const validationError = CTDLASNCSVImport.validateRequiredProperties(
+						const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 							pretranslatedE,
 							"ceasn:Competency",
 							i + 2,
 							validationRules.requiredProps
 						);
-						if (validationError) {
-							failure(validationError);
-							return;
+						if (validationErrors) {
+							if (Array.isArray(validationErrors)) {
+								errors.push(...validationErrors);
+							} else {
+								errors.push(validationErrors);
+							}
+							rowsWithErrors.add(i);
+							continue;
 						}
 					}
 
@@ -418,8 +438,9 @@ module.exports = class CTDLASNCSVImport {
 						let f = new EcCompetency();
 						f.copyFrom(e);
 						if (e["id"] == null) {
-							failure(`Row ${i+2}: Competency is missing an id`);
-							return;
+							errors.push(`Row ${i+2}: Competency is missing an id`);
+							rowsWithErrors.add(i);
+							continue;
 						}
 						if (e["ceasn:isPartOf"] != null) {
 							let shortId = EcRemoteLinkedData.trimVersionFromUrl(e["ceasn:isPartOf"]);
@@ -461,10 +482,11 @@ module.exports = class CTDLASNCSVImport {
 								}
 							}
 							if (!done) {
-								failure(
+								errors.push(
 									`Row ${i+2}: Could not find framework:${e["type"]} (Possibly missing ceasn:isPartOf or ceasn:isChildOf)`
 								);
-								return;
+								rowsWithErrors.add(i);
+								continue;
 							}
 							if (parent != null) {
 								if (parent["type"] == "Framework") {
@@ -479,18 +501,20 @@ module.exports = class CTDLASNCSVImport {
 										)
 									].competency.push(f.shortId());
 								} else {
-									failure(
+									errors.push(
 										`Row ${i+2}: Object cannot trace to framework:` +
 											e["type"]
 									);
-									return;
+									rowsWithErrors.add(i);
+									continue;
 								}
 							} else {
-								failure(
+								errors.push(
 									`Row ${i+2}: Object has no framework:` +
 										e["type"]
 								);
-								return;
+								rowsWithErrors.add(i);
+								continue;
 							}
 						}
 						if (
@@ -682,14 +706,21 @@ module.exports = class CTDLASNCSVImport {
 						pretranslatedE["@type"] == null ||
 						pretranslatedE["@type"] == ""
 					) {
-						failure(`Row ${i+2}: Missing or empty @type`);
-						return;
+						errors.push(`Row ${i+2}: Missing or empty @type`);
+						rowsWithErrors.add(i);
+						continue;
 					} else {
-						failure(
+						errors.push(
 							`Row ${i+2}: Found unknown type:` + pretranslatedE["@type"]
 						);
-						return;
+						rowsWithErrors.add(i);
+						continue;
 					}
+				}
+				// If there are any errors, report them all at once
+				if (errors.length > 0) {
+					failure(errors);
+					return;
 				}
 				success(frameworkArray, competencies, relations);
 			},
@@ -712,6 +743,7 @@ module.exports = class CTDLASNCSVImport {
 			encoding: "UTF-8",
 			complete: async function(results) {
 				let tabularData = results["data"];
+				let errors = []; // Collect all errors to display at once
 				try {
 					for (let data of tabularData) {
 						for (let [key, value] of Object.entries(data)) {
@@ -729,8 +761,7 @@ module.exports = class CTDLASNCSVImport {
 						validationRules.hierarchyRules
 					);
 					if (hierarchyError) {
-						failure(hierarchyError);
-						return;
+						errors.push(hierarchyError);
 					}
 				}
 
@@ -742,23 +773,31 @@ module.exports = class CTDLASNCSVImport {
 				let competencyRows = {};
 				let relations = [];
 				let relationById = {};
+				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let i = 0; i < tabularData.length; i++) {
 					let pretranslatedE = tabularData[i];
 					// Skip extra lines if found in file
 					if (!pretranslatedE) {
 						continue;
 					}
+
+					// Validate basic required fields and collect errors
+					let rowHasError = false;
 					if (!pretranslatedE["@id"]) {
-						failure(`Row ${i + 2}: is missing an @id`);
-						return;
+						errors.push(`Row ${i + 2}: is missing an @id`);
+						rowHasError = true;
 					}
-					if (!pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
-						failure(`row ${i + 2}: @id must be a valid URI or start with 'ce-'`)
-						return;
+					if (pretranslatedE["@id"] && !pretranslatedE["@id"].startsWith('http') && !pretranslatedE["@id"].startsWith('ce-')) {
+						errors.push(`Row ${i + 2}: @id must be a valid URI or start with 'ce-'`);
+						rowHasError = true;
 					}
 					if (!pretranslatedE["@type"]) {
-						failure(`Row ${i + 2}: is missing a @type`);
-						return;
+						errors.push(`Row ${i + 2}: is missing a @type`);
+						rowHasError = true;
+					}
+					if (rowHasError) {
+						rowsWithErrors.add(i);
+						continue;
 					}
 					if (
 						pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction')
@@ -783,15 +822,20 @@ module.exports = class CTDLASNCSVImport {
 					) {
 						// Validate required properties (only if validation rules provided)
 						if (validationRules && validationRules.requiredProps) {
-							const validationError = CTDLASNCSVImport.validateRequiredProperties(
+							const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 								pretranslatedE,
 								"ceterms:Collection",
 								i + 2,
 								validationRules.requiredProps
 							);
-							if (validationError) {
-								failure(validationError);
-								return;
+							if (validationErrors) {
+								if (Array.isArray(validationErrors)) {
+									errors.push(...validationErrors);
+								} else {
+									errors.push(validationErrors);
+								}
+								rowsWithErrors.add(i);
+								continue;
 							}
 						}
 						let translator = new EcLinkedData(null, null);
@@ -867,15 +911,20 @@ module.exports = class CTDLASNCSVImport {
 					) {
 						// Validate required properties (only if validation rules provided)
 						if (validationRules && validationRules.requiredProps) {
-							const validationError = CTDLASNCSVImport.validateRequiredProperties(
+							const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 								pretranslatedE,
 								"ceterms:Collection:Competency",
 								i + 2,
 								validationRules.requiredProps
 							);
-							if (validationError) {
-								failure(validationError);
-								return;
+							if (validationErrors) {
+								if (Array.isArray(validationErrors)) {
+									errors.push(...validationErrors);
+								} else {
+									errors.push(validationErrors);
+								}
+								rowsWithErrors.add(i);
+								continue;
 							}
 						}
 						let translator = new EcLinkedData(null, null);
@@ -901,8 +950,9 @@ module.exports = class CTDLASNCSVImport {
 						let f = new EcCompetency();
 						f.copyFrom(e);
 						if (e["id"] == null) {
-							failure(`Row ${i+2}: Competency is missing an id`);
-							return;
+							errors.push(`Row ${i+2}: Competency is missing an id`);
+							rowsWithErrors.add(i);
+							continue;
 						}
 						if (e["ceterms:isMemberOf"] != null) {
 							if (!EcArray.isArray(e["ceterms:isMemberOf"])) {
@@ -1095,14 +1145,21 @@ module.exports = class CTDLASNCSVImport {
 						pretranslatedE["@type"] == null ||
 						pretranslatedE["@type"] == ""
 					) {
-						failure(`Row ${i+2}: Missing or empty @type`);
-						return;
+						errors.push(`Row ${i+2}: Missing or empty @type`);
+						rowsWithErrors.add(i);
+						continue;
 					} else {
-						failure(
+						errors.push(
 							`Row ${i+2}: Found unknown type:` + pretranslatedE["@type"]
 						);
-						return;
+						rowsWithErrors.add(i);
+						continue;
 					}
+				}
+				// If there are any errors, report them all at once
+				if (errors.length > 0) {
+					failure(errors);
+					return;
 				}
 				success(frameworkArray, competencies, relations);
 			},
