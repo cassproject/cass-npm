@@ -50,6 +50,10 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 # Changelog
 
+## 5.0.8
+* Security updates
+* CTDL-ASN import fixes
+
 ## 5.0.7
 * Security updates
 * Assertions with the same registration will no longer propagate to the same inferred assertions.

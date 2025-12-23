@@ -1,6 +1,6 @@
 {
 	"name": "cassproject",
-	"version": "5.0.7",
+	"version": "5.0.8",
 	"description": "Competency and Skills Service",
 	"main": "index.js",
 	"scripts": {
@@ -193,18 +193,18 @@
 		"chai": "4.5.0",
 		"concurrently": "^9.2.1",
 		"convert-hrtime": "^5.0.0",
-		"cypress": "^15.7.1",
+		"cypress": "^15.8.1",
 		"cypress-fail-fast": "^7.1.1",
-		"eslint": "^9.39.1",
+		"eslint": "^9.39.2",
 		"fake-indexeddb": "^6.2.5",
 		"mocha": "^11.7.5",
 		"node-polyfill-webpack-plugin": "^4.1.0",
 		"nodemon": "^3.1.11",
 		"nyc": "^17.1.0",
-		"sinon": "^21.0.0",
+		"sinon": "^21.0.1",
 		"url-polyfill": "^1.1.14",
 		"wait-on": "^9.0.3",
-		"webpack": "^5.103.0",
+		"webpack": "^5.104.1",
 		"webpack-cli": "^6.0.1"
 	},
 	"packageManager": "npm@11.3.0+sha512.96eb611483f49c55f7fa74df61b588de9e213f80a256728e6798ddc67176c7b07e4a1cfc7de8922422cbce02543714367037536955221fa451b0c4fefaf20c66"
