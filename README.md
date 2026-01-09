@@ -2,6 +2,14 @@ cass-npm
 
 CaSS NPM is the CaSS Library, published and available on NPM.
 
+# Documentation
+Documentation for the CaSS Library can be found in the [documentation](file:///c:/workspace/cass-npm/documentation/) folder:
+* [Requirements](file:///c:/workspace/cass-npm/documentation/REQUIREMENTS.md)
+* [Architecture](file:///c:/workspace/cass-npm/documentation/ARCHITECTURE.md)
+* [Coding Rules and Standards](file:///c:/workspace/cass-npm/documentation/RULES.md)
+* [Design Patterns and Principles](file:///c:/workspace/cass-npm/documentation/DESIGN.md)
+
+
 # Getting Started as a user of the library
 We're assuming you're coming from the NPM / GitHub space. To see a developer guide, go to https://devs.cassproject.org/
 
@@ -21,7 +29,8 @@ Running `npm test` requires Docker.
 
 ## Release testing
 
- * `npm test` - Runs unit tests in docker images against the CaSS 1.5 repositories using Node versions 12-16 and Cypress against Edge, Chrome, Firefox and Electron. Takes some time.
+  * `npm test` - Runs unit tests in docker images against the CaSS 1.5 repositories using supported Node versions (18+) and Cypress against Edge, Chrome, Firefox and Electron. Takes some time.
+
 
 ## Development unit testing
 Development unit tests presume you have a CaSS Repository running on `localhost:80`. You may get one by running `docker run -d --name cass-test -p80:80 cassproject/cass:1.5.0`
@@ -349,7 +358,8 @@ Verify only* may fall back to SHA-1 verification if SHA-256 negotiation failed, 
 * Added mocha test suite. `npm run mocha` or `npm run automocha` to execute.
 
 ## 0.5.4 to 0.5.5
-* Now testing against Node 12-16
+* Now testing against supported Node versions (18+)
+
 * Fixed node async worker based cryptography.
 
 ## 0.5.3 to 0.5.4
