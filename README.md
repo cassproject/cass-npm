@@ -3,11 +3,13 @@ cass-npm
 CaSS NPM is the CaSS Library, published and available on NPM.
 
 # Documentation
-Documentation for the CaSS Library can be found in the [documentation](file:///c:/workspace/cass-npm/documentation/) folder:
-* [Requirements](file:///c:/workspace/cass-npm/documentation/REQUIREMENTS.md)
-* [Architecture](file:///c:/workspace/cass-npm/documentation/ARCHITECTURE.md)
-* [Coding Rules and Standards](file:///c:/workspace/cass-npm/documentation/RULES.md)
-* [Design Patterns and Principles](file:///c:/workspace/cass-npm/documentation/DESIGN.md)
+
+Documentation for the CaSS Library can be found in the [documentation](documentation/) folder:
+
+* **[Architecture & Walkthrough](documentation/ARCHITECTURE.md)**: An overview of the library's architecture, core components, and common workflows.
+* **[Coding Rules & Standards](documentation/RULES.md)**: Guidelines, conventions, and architectural rules for contributors.
+* **[Requirements](documentation/REQUIREMENTS.md)**: Project requirements and scope.
+* **[Design Patterns](documentation/DESIGN.md)**: Detailed design principles and patterns.
 
 
 # Getting Started as a user of the library
@@ -18,6 +20,7 @@ We're assuming you're coming from the NPM / GitHub space. To see a developer gui
 # Getting Started as a contributor
 
 The CaSS Library is a library, and as such can only be run self-contained against unit tests.
+
 
 # Dependencies
 
