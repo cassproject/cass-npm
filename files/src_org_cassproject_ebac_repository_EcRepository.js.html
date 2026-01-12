@@ -1852,8 +1852,7 @@ module.exports = class EcRepository {
 		if (EcRepository.caching) {
 			delete EcRepository.cache[data.id];
 			delete EcRepository.cache[data.shortId()];
-			if (repo != null)
-			{
+			if (repo != null) {
 				delete EcRepository.cache[
 					EcRemoteLinkedData.veryShortId(
 						repo.selectedServer,
@@ -1986,8 +1985,7 @@ module.exports = class EcRepository {
 		if (EcRepository.caching) {
 			delete EcRepository.cache[data.id];
 			delete EcRepository.cache[data.shortId()];
-			if (repo != null)
-			{
+			if (repo != null) {
 				delete EcRepository.cache[
 					EcRemoteLinkedData.veryShortId(
 						repo.selectedServer,
@@ -2314,7 +2312,7 @@ module.exports = class EcRepository {
 						}
 					}
 					let objResults = await me.precache.call(me, results, null, null, eim, true, versionedUrls);
-					if (objResults.length == results.length) 
+					if (objResults.length == results.length)
 						return objResults;
 					//Second attempt, in case the indexed object URL doesn&#x27;t match the permanent URL.
 					let missingUris = results
@@ -2324,7 +2322,7 @@ module.exports = class EcRepository {
 					if (missingUris.length &gt; 0)
 						objResults.push(...await me.precache.call(me, missingUris, null, null, eim, true));
 					return cassPromisify(objResults, success, failure);
-				} 
+				}
 				for (let i = 0; i &lt; results.length; i++) {
 					let d = new EcRemoteLinkedData(null, null);
 					d.copyFrom(results[i]);
@@ -2343,7 +2341,7 @@ module.exports = class EcRepository {
 					if (!versionedUrls[&#x60;${md5Id}/${timestamp}&#x60;] &amp;&amp; !versionedUrls[d.id] &amp;&amp; !versionedUrls[&#x60;${veryShortId}/${timestamp}&#x60;]) {
 						if (!d.shortId().startsWith(this.selectedServer))
 							EcRepository.cache[md5Id] = d;
-						EcRepository.cache[shortId] = d; 
+						EcRepository.cache[shortId] = d;
 						EcRepository.cache[veryShortId] = d;
 					}
 					EcRepository.cache[d.id] = d;
@@ -2367,8 +2365,7 @@ module.exports = class EcRepository {
 			throw new Error(&quot;urls not defined.&quot;);
 		}
 		if (EcRepository.caching) {
-			for (let url of urls)
-			{
+			for (let url of urls) {
 				delete EcRepository.cache[url];
 				delete EcRepository.cache[EcRemoteLinkedData.trimVersionFromUrl(url)];
 				delete EcRepository.cache[
@@ -2408,11 +2405,11 @@ module.exports = class EcRepository {
 				});
 			});
 		p = p.then(() =&gt; EcRemote.postExpectingObject(
-					this.selectedServer,
-					&quot;sky/repo/multiDelete&quot;,
-					fd
-				)
-			);
+			this.selectedServer,
+			&quot;sky/repo/multiDelete&quot;,
+			fd
+		)
+		);
 		return cassPromisify(p, success, failure);
 	};
 	/**
@@ -2549,8 +2546,7 @@ module.exports = class EcRepository {
 					throw &quot;Error in search. See HTTP request for more details.&quot;;
 				}
 				//If we got an array of strings, multiget it.
-				if (results.length &gt; 0 &amp;&amp; typeof (results[0]) == &#x27;string&#x27;)
-				{
+				if (results.length &gt; 0 &amp;&amp; typeof (results[0]) == &#x27;string&#x27;) {
 					let objResults = await me.precache.call(me, results, null, null, eim, true);
 					if (eachSuccess) {
 						for (let each of objResults) {
@@ -2561,10 +2557,10 @@ module.exports = class EcRepository {
 						return objResults;
 					//Second attempt, in case the indexed object URL doesn&#x27;t match the permanent URL.
 					let missingUris = results
-						.filter(r=&gt;!objResults.some(rr=&gt;r.indexOf(rr.shortId()) != -1))
-						.map(u=&gt;EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
+						.filter(r =&gt; !objResults.some(rr =&gt; r.indexOf(rr.shortId()) != -1))
+						.map(u =&gt; EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
 					if (missingUris.length &gt; 0)
-						objResults.push(...await me.precache.call(me,missingUris,null,null,eim,true));
+						objResults.push(...await me.precache.call(me, missingUris, null, null, eim, true));
 					return objResults;
 				} else {
 					results = results
@@ -3132,9 +3128,18 @@ module.exports = class EcRepository {
 		return cassPromisify(
 			repo.searchWithParams(query, paramObj, null, null, null, eim).then((p1s) =&gt; {
 				return Promise.all(
-					p1s.map((p1) =&gt; EcEncryptedValue.fromEncryptedValue(p1, null, null, eim))
+					p1s.map(
+						async (p1) =&gt; {
+							try {
+								return await EcEncryptedValue.fromEncryptedValue(p1, null, null, eim)
+							} catch (e) {
+								console.log(&quot;SearchAs error: &quot; + e);
+								return null;
+							}
+						}
+					)
 				).then((results) =&gt;
-					results.map((result) =&gt; factory().copyFrom(result))
+					results.filter(x =&gt; x).map((result) =&gt; factory().copyFrom(result))
 				);
 			}),
 			success,
