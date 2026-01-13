@@ -24,3 +24,21 @@ The project uses ESLint to enforce coding standards. Key rules include:
 ## Documentation
 - API documentation is generated using `yuidoc`.
 - Use JSDoc-style comments for functions and classes.
+
+## Versioning
+- Use semantic versioning (e.g., 1.2.3).
+- Update version numbers in `package.json` and `README.md`.
+
+## Security
+- Use secure coding practices.
+- Implement proper input validation and sanitization.
+- Use secure authentication and authorization mechanisms.
+- Use secure communication channels (e.g., HTTPS).
+
+## Performance
+- Optimize code for performance.
+- Use caching where appropriate.
+- Use lazy loading for modules and resources.
+
+## Agents
+- The test15 and test16 related scripts in the package.json file are used to test the code in different environments like CaSS 1.5, CaSS 1.6, not node 15 or node 16. Those are further down in the file.
