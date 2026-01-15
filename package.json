@@ -111,7 +111,7 @@
 		"webpack:cypressEdgeHttps": "cypress run -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressWebpack.config.js --browser edge",
 		"webpack:cypressFirefoxHttps": "cypress run -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressWebpack.config.js --browser firefox",
 		"version": "node scripts/sync-version.js && git add yuidoc.json",
-		"changelog": "node scripts/update-changelog.js"
+		"changelog": "node scripts/update-changelog.js && git add CHANGELOG.md"
 	},
 	"contributors": [
 		{

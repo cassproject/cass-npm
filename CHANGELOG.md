@@ -3,6 +3,7 @@
 Please note some upgrade steps are at the bottom of this file.
 
 ## 5.0.9
+* Added automation to bring git messages into the changelog.
 * Automating some steps.
 * Updated rules and docs
 * Fixes around corrupt encrypted data with no secrets.
@@ -11,6 +12,7 @@ Please note some upgrade steps are at the bottom of this file.
 * Added documentation deployment branch and action.
 * Adds documentation and upgrades dependencies
 * Removes Browserify and Vite Cypress configurations
+
 ## 5.0.8
 * Security updates
 * CTDL-ASN import fixes
