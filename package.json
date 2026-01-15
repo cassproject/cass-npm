@@ -1,6 +1,6 @@
 {
 	"name": "cassproject",
-	"version": "5.0.8",
+	"version": "5.0.9",
 	"description": "Competency and Skills Service",
 	"main": "index.js",
 	"scripts": {
@@ -109,7 +109,8 @@
 		"webpack:cypressHttps": "cypress run -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressWebpack.config.js --headless --browser chrome",
 		"webpack:cypressEdge": "cypress run --config-file cypressWebpack.config.js --headless --browser edge",
 		"webpack:cypressEdgeHttps": "cypress run -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressWebpack.config.js --browser edge",
-		"webpack:cypressFirefoxHttps": "cypress run -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressWebpack.config.js --browser firefox"
+		"webpack:cypressFirefoxHttps": "cypress run -e CASS_LOOPBACK=https://localhost/api/ --config-file cypressWebpack.config.js --browser firefox",
+		"version": "node scripts/sync-version.js && git add yuidoc.json"
 	},
 	"contributors": [
 		{

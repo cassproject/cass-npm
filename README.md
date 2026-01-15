@@ -47,20 +47,25 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 
 ## Publish checklist
 
- * `npm upgrade --save` Review dependencies, autocomplete version numbers to latest versions.
- * Increment version number in package.json and yuidoc.json.
- * Update changelog.
- * `npm install`
- * `npm audit` and fix any audit issues.
- * Update CaSS server version if necessary in package.json
- * `npm test` - Must not fail any tests.
- * `npm run webpack:cypressFirefoxHttps` See if the firefox test case has changed.
- * Document code coverage output by the previous step.
- * Commit changes to GitHub.
- * Tag release with semantic version from package.json, push tag.
- * `npm publish` (must be `npm login`ed) 
+  * `npm upgrade --save` Review dependencies, autocomplete version numbers to latest versions.
+  * Increment version number using `npm version <patch|minor|major>`. This automatically updates `package.json` and `yuidoc.json`.
+  * Update changelog.
+  * `npm install`
+  * `npm audit` and fix any audit issues.
+  * Update CaSS server version if necessary in package.json
+  * `npm test` - Must not fail any tests.
+  * `npm run webpack:cypressFirefoxHttps` See if the firefox test case has changed.
+  * Document code coverage output by the previous step.
+  * Commit changes to GitHub.
+  * Tag release with semantic version from package.json, push tag.
+  * `npm publish` (must be `npm login`ed) 
 
 # Changelog
+
+## 5.0.9
+* Fixed issue with decrypting malformed encrypted data with no secret.
+* Security updates
+* Rearranged some files & Documentation.
 
 ## 5.0.8
 * Security updates
