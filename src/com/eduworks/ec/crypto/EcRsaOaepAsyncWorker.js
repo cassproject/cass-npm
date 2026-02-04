@@ -51,13 +51,13 @@ module.exports = class EcRsaOaepAsyncWorker {
 		let wkr = null;
 		let me = this;
 		try {
-			wkr = new Worker(path.resolve(__dirname, 'forgeAsyncNode.js'));
+			wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, 'forgeAsyncNode.js')));
 		} catch (e) {
 			global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcRsaOaepAsyncWorker", e);
 		}
 		if (wkr == null)
 			try {
-				wkr = new Worker(path.resolve(__dirname, 'forgeAsync.js'));
+				wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, 'forgeAsync.js')));
 			} catch (e) {
 				global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcRsaOaepAsyncWorker", e);
 			}
