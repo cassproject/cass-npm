@@ -110,7 +110,8 @@ module.exports = class CTDLASNCSVConceptImport {
 		endpoint,
 		eim,
 		progressionsFlag,
-		validationRules
+		validationRules,
+		duplicateChecks
 	) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
@@ -155,6 +156,7 @@ module.exports = class CTDLASNCSVConceptImport {
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
 				let schemeArray = [];
 				let concepts = [];
+				let conceptCtids = {};
 				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
@@ -461,6 +463,7 @@ module.exports = class CTDLASNCSVConceptImport {
 							"schema:dateModified"
 						] = new Date().toISOString();
 						concepts.push(f);
+						conceptCtids[f.shortId()] = pretranslatedE["ceterms:ctid"] || pretranslatedE["@id"];
 					} else if (
 						pretranslatedE["@type"] == null ||
 						pretranslatedE["@type"] == ""
@@ -475,6 +478,13 @@ module.exports = class CTDLASNCSVConceptImport {
 						rowsWithErrors.add(each);
 						continue;
 					}
+				}
+				// Run duplicate CTID checks if any were provided by the caller
+				const checks = duplicateChecks || [];
+				const conceptIds = concepts.map(c => c.shortId());
+				for (const check of checks) {
+					const checkErrors = await check(repo, conceptIds, schemeArray, conceptCtids);
+					errors.push(...checkErrors);
 				}
 				// If there are any errors, report them all at once
 				if (errors.length > 0) {
@@ -494,7 +504,8 @@ module.exports = class CTDLASNCSVConceptImport {
 		ceo,
 		endpoint,
 		eim,
-		validationRules
+		validationRules,
+		duplicateChecks
 	) {
 		Papa.parse(file, {
 			header: true,
@@ -525,6 +536,7 @@ module.exports = class CTDLASNCSVConceptImport {
 				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
 				let schemeArray = [];
 				let concepts = [];
+				let conceptCtids = {};
 				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
@@ -788,6 +800,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						] = new Date().toISOString();
 						f.subType = "Progression";
 						concepts.push(f);
+						conceptCtids[f.shortId()] = pretranslatedE["ceterms:ctid"] || pretranslatedE["@id"];
 					} else if (
 						pretranslatedE["@type"] == null ||
 						pretranslatedE["@type"] == ""
@@ -802,6 +815,13 @@ module.exports = class CTDLASNCSVConceptImport {
 						rowsWithErrors.add(each);
 						continue;
 					}
+				}
+				// Run duplicate CTID checks if any were provided by the caller
+				const checks = duplicateChecks || [];
+				const conceptIds = concepts.map(c => c.shortId());
+				for (const check of checks) {
+					const checkErrors = await check(repo, conceptIds, schemeArray, conceptCtids);
+					errors.push(...checkErrors);
 				}
 				// If there are any errors, report them all at once
 				if (errors.length > 0) {
