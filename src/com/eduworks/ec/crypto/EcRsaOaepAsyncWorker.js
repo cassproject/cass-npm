@@ -10,6 +10,7 @@ const cassPromisify = require("../promises/helpers.js").cassPromisify;
 const cassReturnAsPromise = require("../promises/helpers.js").cassReturnAsPromise;
 require("../../../../org/cassproject/general/AuditLogger.js");
 const EcRsaOaep = require("./EcRsaOaep.js")
+const EcRsaOaepAsync = require("./EcRsaOaepAsync.js")
 
 /**
  *  Asynchronous implementation of {{#crossLink
@@ -263,7 +264,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 	static verifySha256(pk, text, signature, success, failure) {
 		this.initWorker();
 		if (this.w?.[this.rotator] == null) {
-			return cassPromisify(EcRsaOaepAsync.verify(pk, text, signature), success, failure);
+			return cassPromisify(EcRsaOaepAsync.verifySha256(pk, text, signature), success, failure);
 		}
 		let worker = this.rotator++;
 		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
