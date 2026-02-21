@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.9
+              Version: 5.0.11
             </div>
             
         </div>
@@ -1118,6 +1118,7 @@ const cassPromisify = require(&quot;../promises/helpers.js&quot;).cassPromisify;
 const cassReturnAsPromise = require(&quot;../promises/helpers.js&quot;).cassReturnAsPromise;
 require(&quot;../../../../org/cassproject/general/AuditLogger.js&quot;);
 const EcRsaOaep = require(&quot;./EcRsaOaep.js&quot;)
+const EcRsaOaepAsync = require(&quot;./EcRsaOaepAsync.js&quot;)
 
 /**
  *  Asynchronous implementation of {{#crossLink
@@ -1371,7 +1372,7 @@ module.exports = class EcRsaOaepAsyncWorker {
 	static verifySha256(pk, text, signature, success, failure) {
 		this.initWorker();
 		if (this.w?.[this.rotator] == null) {
-			return cassPromisify(EcRsaOaepAsync.verify(pk, text, signature), success, failure);
+			return cassPromisify(EcRsaOaepAsync.verifySha256(pk, text, signature), success, failure);
 		}
 		let worker = this.rotator++;
 		this.rotator = this.rotator % EcRsaOaepAsyncWorker.rotations;
