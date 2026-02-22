@@ -2,6 +2,18 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.11
+* Updated libraries
+* Update ctdlasncsv imports to accept custom duplicate check function params
+
+## 5.0.10
+* Fix web-worker incompatibility
+* Fix worker fallbacks
+* Upgrade dependencies (except chai)
+* Revert mocha breaking change
+* Update libraries
+* Updating documentation
+
 ## 5.0.9
 * Added automation to bring git messages into the changelog.
 * Automating some steps.
