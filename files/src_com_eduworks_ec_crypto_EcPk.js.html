@@ -1106,7 +1106,7 @@
 </div>
 
 <pre class="code prettyprint linenums">
-let pemJwk = require(&quot;pem-jwk&quot;);
+
 let forge = require(&quot;node-forge&quot;);
 /**
  *  Helper classes for dealing with RSA Public Keys.
@@ -1133,7 +1133,7 @@ module.exports = class EcPk {
 	 */
 	static fromPem(pem) {
 		let pk = EcPk.cache[pem];
-		if (pk != null) 
+		if (pk != null)
 			return pk;
 		pk = new EcPk();
 		try {
@@ -1177,11 +1177,11 @@ module.exports = class EcPk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs1Pem
 	 */
-	toPkcs1Pem = function() {
+	toPkcs1Pem = function () {
 		return forge.pki
 			.publicKeyToRSAPublicKeyPem(this.pk)
-				.replace(/\r/g, &quot;&quot;)
-				.replace(/\n/g, &quot;&quot;);
+			.replace(/\r/g, &quot;&quot;)
+			.replace(/\n/g, &quot;&quot;);
 	};
 	/**
 	 *  Encodes the public key into a PEM encoded SubjectPublicKeyInfo (PKCS#8) formatted RSA Public Key.
@@ -1190,16 +1190,24 @@ module.exports = class EcPk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs8Pem
 	 */
-	toPkcs8Pem = function() {
+	toPkcs8Pem = function () {
 		return forge.pki
 			.publicKeyToPem(this.pk)
-				.replace(/\r/g, &quot;&quot;)
-				.replace(/\n/g, &quot;&quot;);
+			.replace(/\r/g, &quot;&quot;)
+			.replace(/\n/g, &quot;&quot;);
 	};
 
 	toJwk() {
-		if (this.jwk == null)
-			this.jwk = pemJwk.pem2jwk(forge.pki.publicKeyToPem(this.pk));
+		if (this.jwk == null) {
+			let pem = forge.pki.publicKeyToPem(this.pk);
+			try {
+				const nodeCrypto = require(&#x27;crypto&#x27;);
+				const pk = nodeCrypto.createPublicKey(pem);
+				this.jwk = pk.export({ format: &#x27;jwk&#x27; });
+			} catch (e) {
+				// Fallback or error handling if needed
+			}
+		}
 		return this.jwk;
 	}
 	/**
@@ -1209,7 +1217,7 @@ module.exports = class EcPk {
 	 *  @method fingerprint
 	 */
 	fingerprint() {
-		return forge.ssh.getPublicKeyFingerprint(this.pk, {encoding:&quot;hex&quot;});
+		return forge.ssh.getPublicKeyFingerprint(this.pk, { encoding: &quot;hex&quot; });
 	}
 	verify(bytes, decode64) {
 		return this.pk.verify(bytes, decode64);
