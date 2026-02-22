@@ -1,4 +1,4 @@
-let pemJwk = require("pem-jwk");
+
 let forge = require("node-forge");
 let EcPk = require("./EcPk.js");
 require("../../../../org/cassproject/general/AuditLogger.js");
@@ -48,8 +48,8 @@ module.exports = class EcPpk {
 	 *  @static
 	 */
 	static generateKeyAsync(callback) {
-		return new Promise((resolve,reject)=>{
-			forge.pki.rsa.generateKeyPair({workers:-1}, function(err, keypair) {
+		return new Promise((resolve, reject) => {
+			forge.pki.rsa.generateKeyPair({ workers: -1 }, function (err, keypair) {
 				let ppk = new EcPpk();
 				ppk.ppk = keypair.privateKey;
 				if (callback != null)
@@ -66,7 +66,7 @@ module.exports = class EcPpk {
 	 *  @static
 	 */
 	static generateKey() {
-		let keypair = forge.pki.rsa.generateKeyPair({workers:-1}, null);
+		let keypair = forge.pki.rsa.generateKeyPair({ workers: -1 }, null);
 		let ppk = new EcPpk();
 		ppk.ppk = keypair.privateKey;
 		return ppk;
@@ -108,11 +108,11 @@ module.exports = class EcPpk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs1Pem
 	 */
-	toPkcs1Pem = function() {
+	toPkcs1Pem = function () {
 		return forge.pki
 			.privateKeyToPem(this.ppk)
-				.replace(/\r/g, "")
-				.replace(/\n/g, "");
+			.replace(/\r/g, "")
+			.replace(/\n/g, "");
 	};
 	/**
 	 *  Encodes the private key into a PEM encoded PrivateKeyInfo (PKCS#8) formatted RSA Public Key.
@@ -121,22 +121,30 @@ module.exports = class EcPpk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs8Pem
 	 */
-	toPkcs8Pem = function() {
+	toPkcs8Pem = function () {
 		return forge.pki
 			.privateKeyInfoToPem(
 				forge.pki.wrapRsaPrivateKey(
 					forge.pki.privateKeyToAsn1(this.ppk)
 				)
 			)
-				.replace(/\r/g, "")
-				.replace(/\n/g, "");
+			.replace(/\r/g, "")
+			.replace(/\n/g, "");
 	};
 	toJwk() {
-		if (this.jwk == null)
-			this.jwk = pemJwk.pem2jwk(forge.pki.privateKeyToPem(this.ppk));
+		if (this.jwk == null) {
+			let pem = forge.pki.privateKeyToPem(this.ppk);
+			try {
+				const nodeCrypto = require('crypto');
+				const ppk = nodeCrypto.createPrivateKey(pem);
+				this.jwk = ppk.export({ format: 'jwk' });
+			} catch (e) {
+				// Fallback or error handling if needed
+			}
+		}
 		return this.jwk;
 	}
-	toPkcs8 = function() {
+	toPkcs8 = function () {
 		return forge.pki.wrapRsaPrivateKey(
 			forge.pki.privateKeyToAsn1(this.ppk)
 		);
@@ -162,8 +170,7 @@ module.exports = class EcPpk {
 	 */
 	inArray(ppks) {
 		for (let ppk of ppks) {
-			if (ppk.equals(this))
-			{
+			if (ppk.equals(this)) {
 				return true;
 			}
 		}

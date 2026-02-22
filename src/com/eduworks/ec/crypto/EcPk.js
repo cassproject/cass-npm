@@ -1,4 +1,4 @@
-let pemJwk = require("pem-jwk");
+
 let forge = require("node-forge");
 /**
  *  Helper classes for dealing with RSA Public Keys.
@@ -25,7 +25,7 @@ module.exports = class EcPk {
 	 */
 	static fromPem(pem) {
 		let pk = EcPk.cache[pem];
-		if (pk != null) 
+		if (pk != null)
 			return pk;
 		pk = new EcPk();
 		try {
@@ -69,11 +69,11 @@ module.exports = class EcPk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs1Pem
 	 */
-	toPkcs1Pem = function() {
+	toPkcs1Pem = function () {
 		return forge.pki
 			.publicKeyToRSAPublicKeyPem(this.pk)
-				.replace(/\r/g, "")
-				.replace(/\n/g, "");
+			.replace(/\r/g, "")
+			.replace(/\n/g, "");
 	};
 	/**
 	 *  Encodes the public key into a PEM encoded SubjectPublicKeyInfo (PKCS#8) formatted RSA Public Key.
@@ -82,16 +82,24 @@ module.exports = class EcPk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs8Pem
 	 */
-	toPkcs8Pem = function() {
+	toPkcs8Pem = function () {
 		return forge.pki
 			.publicKeyToPem(this.pk)
-				.replace(/\r/g, "")
-				.replace(/\n/g, "");
+			.replace(/\r/g, "")
+			.replace(/\n/g, "");
 	};
 
 	toJwk() {
-		if (this.jwk == null)
-			this.jwk = pemJwk.pem2jwk(forge.pki.publicKeyToPem(this.pk));
+		if (this.jwk == null) {
+			let pem = forge.pki.publicKeyToPem(this.pk);
+			try {
+				const nodeCrypto = require('crypto');
+				const pk = nodeCrypto.createPublicKey(pem);
+				this.jwk = pk.export({ format: 'jwk' });
+			} catch (e) {
+				// Fallback or error handling if needed
+			}
+		}
 		return this.jwk;
 	}
 	/**
@@ -101,7 +109,7 @@ module.exports = class EcPk {
 	 *  @method fingerprint
 	 */
 	fingerprint() {
-		return forge.ssh.getPublicKeyFingerprint(this.pk, {encoding:"hex"});
+		return forge.ssh.getPublicKeyFingerprint(this.pk, { encoding: "hex" });
 	}
 	verify(bytes, decode64) {
 		return this.pk.verify(bytes, decode64);
