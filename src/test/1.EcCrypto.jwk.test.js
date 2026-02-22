@@ -1,5 +1,6 @@
 let EcPpk = require("../com/eduworks/ec/crypto/EcPpk.js");
 let EcRsaOaepAsync = require("../com/eduworks/ec/crypto/EcRsaOaepAsync.js");
+let EcRsaOaep = require("../com/eduworks/ec/crypto/EcRsaOaep.js");
 let EcAes = require("../com/eduworks/ec/crypto/EcAes.js");
 let chai = require("chai");
 
@@ -46,7 +47,7 @@ describe("EcCrypto JWK", () => {
         // by `.toJwk()` is perfectly valid for use with crypto.subtle.
 
         let encrypted = await EcRsaOaepAsync.encrypt(pk, randomString);
-        let decrypted = await EcRsaOaepAsync.decrypt(ppk, encrypted);
+        let decrypted = await EcRsaOaep.decrypt(ppk, encrypted);
 
         assert.isTrue(randomString === decrypted, "Decrypted string should match original");
     });
@@ -55,7 +56,7 @@ describe("EcCrypto JWK", () => {
         let randomString = EcAes.newIv(256 * 4);
 
         let signature = await EcRsaOaepAsync.signSha256(ppk, randomString);
-        let verified = await EcRsaOaepAsync.verifySha256(pk, randomString, signature);
+        let verified = await EcRsaOaep.verifySha256(pk, randomString, signature);
 
         assert.isTrue(verified, "Signature should be successfully verified");
     });

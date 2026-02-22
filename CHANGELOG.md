@@ -2,6 +2,11 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.12
+* Switch to native JWK export for public and private keys
+* Updated libraries
+* Removed forge, pem-jwk, rdf-canonize libraries, and some dev dependencies.
+
 ## 5.0.11
 * Updated libraries
 * Update ctdlasncsv imports to accept custom duplicate check function params

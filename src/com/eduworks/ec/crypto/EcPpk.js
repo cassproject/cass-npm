@@ -133,14 +133,26 @@ module.exports = class EcPpk {
 	};
 	toJwk() {
 		if (this.jwk == null) {
-			let pem = forge.pki.privateKeyToPem(this.ppk);
-			try {
-				const nodeCrypto = require('crypto');
-				const ppk = nodeCrypto.createPrivateKey(pem);
-				this.jwk = ppk.export({ format: 'jwk' });
-			} catch (e) {
-				// Fallback or error handling if needed
-			}
+			const bnToBase64Url = (bn) => {
+				let hex = bn.toString(16);
+				if (hex.length % 2 !== 0) {
+					hex = '0' + hex;
+				}
+				const bytes = forge.util.hexToBytes(hex);
+				const b64 = forge.util.encode64(bytes);
+				return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+			};
+			this.jwk = {
+				kty: "RSA",
+				n: bnToBase64Url(this.ppk.n),
+				e: bnToBase64Url(this.ppk.e),
+				d: bnToBase64Url(this.ppk.d),
+				p: bnToBase64Url(this.ppk.p),
+				q: bnToBase64Url(this.ppk.q),
+				dp: bnToBase64Url(this.ppk.dP),
+				dq: bnToBase64Url(this.ppk.dQ),
+				qi: bnToBase64Url(this.ppk.qInv)
+			};
 		}
 		return this.jwk;
 	}

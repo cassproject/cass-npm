@@ -91,14 +91,20 @@ module.exports = class EcPk {
 
 	toJwk() {
 		if (this.jwk == null) {
-			let pem = forge.pki.publicKeyToPem(this.pk);
-			try {
-				const nodeCrypto = require('crypto');
-				const pk = nodeCrypto.createPublicKey(pem);
-				this.jwk = pk.export({ format: 'jwk' });
-			} catch (e) {
-				// Fallback or error handling if needed
-			}
+			const bnToBase64Url = (bn) => {
+				let hex = bn.toString(16);
+				if (hex.length % 2 !== 0) {
+					hex = '0' + hex;
+				}
+				const bytes = forge.util.hexToBytes(hex);
+				const b64 = forge.util.encode64(bytes);
+				return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+			};
+			this.jwk = {
+				kty: "RSA",
+				n: bnToBase64Url(this.pk.n),
+				e: bnToBase64Url(this.pk.e)
+			};
 		}
 		return this.jwk;
 	}

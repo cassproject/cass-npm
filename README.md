@@ -46,10 +46,10 @@ Development unit tests presume you have a CaSS Repository running on `localhost:
 ## Publish checklist
 
   * `npm upgrade --save` Review dependencies, autocomplete version numbers to latest versions.
-  * Increment version number using `npm version <patch|minor|major>`. This automatically updates `package.json` and `yuidoc.json`.
+  * Increment version number using `npm version --no-git-tag-version <patch|minor|major>`. This automatically updates `package.json` and `yuidoc.json`.
   * Update changelog using `npm run changelog`, and review the changes in `CHANGELOG.md`.
   * `npm install`
-  * `npm audit` and fix any audit issues.
+  * `npm audit` and fix any audit issues. Stop if `npm audit --omit=dev` has findings.
   * Update CaSS server version if necessary in package.json
   * `npm test` - Must not fail any tests.
   * `npm run webpack:cypressFirefoxHttps` See if the firefox test case has changed.
