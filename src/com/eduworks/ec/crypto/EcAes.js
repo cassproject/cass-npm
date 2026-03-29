@@ -1,5 +1,7 @@
 const forge = require("node-forge");
 const realCrypto = require('crypto');
+const base64 = require("base64-arraybuffer");
+
 /**
  *  AES encryption tasks common across all variants of AES.
  *  @class EcAes
@@ -16,7 +18,13 @@ module.exports = class EcAes {
 	 */
 	static newSecret = function(i) {
 		if (i == null) throw new Error("Undefined secret length.");
-		return realCrypto.randomBytes(i).toString('base64');
+		let array = new Uint8Array(i);
+		if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+			crypto.getRandomValues(array);
+		} else {
+			realCrypto.webcrypto.getRandomValues(array);
+		}
+		return base64.encode(array.buffer);
 	};
 	/**
 	 *  Generates a random Initialization Vector of length @i
@@ -27,6 +35,12 @@ module.exports = class EcAes {
 	 */
 	static newIv = function(i) {
 		if (i == null) throw new Error("Undefined iv length.");
-		return realCrypto.randomBytes(i).toString('base64');
+		let array = new Uint8Array(i);
+		if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+			crypto.getRandomValues(array);
+		} else {
+			realCrypto.webcrypto.getRandomValues(array);
+		}
+		return base64.encode(array.buffer);
 	};
 };
