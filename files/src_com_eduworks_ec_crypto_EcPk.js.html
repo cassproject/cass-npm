@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.11
+              Version: 5.0.13
             </div>
             
         </div>
@@ -1199,14 +1199,20 @@ module.exports = class EcPk {
 
 	toJwk() {
 		if (this.jwk == null) {
-			let pem = forge.pki.publicKeyToPem(this.pk);
-			try {
-				const nodeCrypto = require(&#x27;crypto&#x27;);
-				const pk = nodeCrypto.createPublicKey(pem);
-				this.jwk = pk.export({ format: &#x27;jwk&#x27; });
-			} catch (e) {
-				// Fallback or error handling if needed
-			}
+			const bnToBase64Url = (bn) =&gt; {
+				let hex = bn.toString(16);
+				if (hex.length % 2 !== 0) {
+					hex = &#x27;0&#x27; + hex;
+				}
+				const bytes = forge.util.hexToBytes(hex);
+				const b64 = forge.util.encode64(bytes);
+				return b64.replace(/\+/g, &#x27;-&#x27;).replace(/\//g, &#x27;_&#x27;).replace(/=/g, &#x27;&#x27;);
+			};
+			this.jwk = {
+				kty: &quot;RSA&quot;,
+				n: bnToBase64Url(this.pk.n),
+				e: bnToBase64Url(this.pk.e)
+			};
 		}
 		return this.jwk;
 	}

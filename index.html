@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.11
+              Version: 5.0.13
             </div>
             
         </div>
@@ -1142,10 +1142,10 @@
 <h2>Publish checklist</h2>
 <ul>
 <li><code>npm upgrade --save</code> Review dependencies, autocomplete version numbers to latest versions.</li>
-<li>Increment version number using <code>npm version &lt;patch|minor|major&gt;</code>. This automatically updates <code>package.json</code> and <code>yuidoc.json</code>.</li>
+<li>Increment version number using <code>npm version --no-git-tag-version &lt;patch|minor|major&gt;</code>. This automatically updates <code>package.json</code> and <code>yuidoc.json</code>.</li>
 <li>Update changelog using <code>npm run changelog</code>, and review the changes in <code>CHANGELOG.md</code>.</li>
 <li><code>npm install</code></li>
-<li><code>npm audit</code> and fix any audit issues.</li>
+<li><code>npm audit</code> and fix any audit issues. Stop if <code>npm audit --omit=dev</code> has findings.</li>
 <li>Update CaSS server version if necessary in package.json</li>
 <li><code>npm test</code> - Must not fail any tests.</li>
 <li><code>npm run webpack:cypressFirefoxHttps</code> See if the firefox test case has changed.</li>

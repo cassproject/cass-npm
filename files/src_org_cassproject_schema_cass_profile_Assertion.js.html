@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.11
+              Version: 5.0.13
             </div>
             
         </div>
@@ -1354,13 +1354,13 @@ module.exports = class Assertion extends schema.CreativeWork {
 		success(this.decayFunction);
 	}
 	getNegative() {
-		return &quot;true&quot;.equals(this.negative);
+		return &quot;true&quot;.equals(this.negative) | this.negative === true;
 	}
 	setNegative(negativeB) {
 		this.negative = negativeB;
 	}
 	getNegativeAsync(success, failure) {
-		success(&quot;true&quot;.equals(this.negative));
+		success(&quot;true&quot;.equals(this.negative) | this.negative === true);
 	}
 	setCompetency(competencyUrl) {
 		this.competency = competencyUrl;

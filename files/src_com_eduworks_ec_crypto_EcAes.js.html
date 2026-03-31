@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.11
+              Version: 5.0.13
             </div>
             
         </div>
@@ -1108,6 +1108,8 @@
 <pre class="code prettyprint linenums">
 const forge = require(&quot;node-forge&quot;);
 const realCrypto = require(&#x27;crypto&#x27;);
+const base64 = require(&quot;base64-arraybuffer&quot;);
+
 /**
  *  AES encryption tasks common across all variants of AES.
  *  @class EcAes
@@ -1124,7 +1126,13 @@ module.exports = class EcAes {
 	 */
 	static newSecret = function(i) {
 		if (i == null) throw new Error(&quot;Undefined secret length.&quot;);
-		return realCrypto.randomBytes(i).toString(&#x27;base64&#x27;);
+		let array = new Uint8Array(i);
+		if (typeof crypto !== &quot;undefined&quot; &amp;&amp; crypto.getRandomValues) {
+			crypto.getRandomValues(array);
+		} else {
+			realCrypto.webcrypto.getRandomValues(array);
+		}
+		return base64.encode(array.buffer);
 	};
 	/**
 	 *  Generates a random Initialization Vector of length @i
@@ -1135,7 +1143,13 @@ module.exports = class EcAes {
 	 */
 	static newIv = function(i) {
 		if (i == null) throw new Error(&quot;Undefined iv length.&quot;);
-		return realCrypto.randomBytes(i).toString(&#x27;base64&#x27;);
+		let array = new Uint8Array(i);
+		if (typeof crypto !== &quot;undefined&quot; &amp;&amp; crypto.getRandomValues) {
+			crypto.getRandomValues(array);
+		} else {
+			realCrypto.webcrypto.getRandomValues(array);
+		}
+		return base64.encode(array.buffer);
 	};
 };
 
