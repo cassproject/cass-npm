@@ -1,4 +1,4 @@
-let pemJwk = require("pem-jwk");
+
 let forge = require("node-forge");
 let EcPk = require("./EcPk.js");
 require("../../../../org/cassproject/general/AuditLogger.js");
@@ -48,8 +48,8 @@ module.exports = class EcPpk {
 	 *  @static
 	 */
 	static generateKeyAsync(callback) {
-		return new Promise((resolve,reject)=>{
-			forge.pki.rsa.generateKeyPair({workers:-1}, function(err, keypair) {
+		return new Promise((resolve, reject) => {
+			forge.pki.rsa.generateKeyPair({ workers: -1 }, function (err, keypair) {
 				let ppk = new EcPpk();
 				ppk.ppk = keypair.privateKey;
 				if (callback != null)
@@ -66,7 +66,7 @@ module.exports = class EcPpk {
 	 *  @static
 	 */
 	static generateKey() {
-		let keypair = forge.pki.rsa.generateKeyPair({workers:-1}, null);
+		let keypair = forge.pki.rsa.generateKeyPair({ workers: -1 }, null);
 		let ppk = new EcPpk();
 		ppk.ppk = keypair.privateKey;
 		return ppk;
@@ -108,11 +108,11 @@ module.exports = class EcPpk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs1Pem
 	 */
-	toPkcs1Pem = function() {
+	toPkcs1Pem = function () {
 		return forge.pki
 			.privateKeyToPem(this.ppk)
-				.replace(/\r/g, "")
-				.replace(/\n/g, "");
+			.replace(/\r/g, "")
+			.replace(/\n/g, "");
 	};
 	/**
 	 *  Encodes the private key into a PEM encoded PrivateKeyInfo (PKCS#8) formatted RSA Public Key.
@@ -121,22 +121,42 @@ module.exports = class EcPpk {
 	 *  @return {string} PEM encoded public key without whitespace.
 	 *  @method toPkcs8Pem
 	 */
-	toPkcs8Pem = function() {
+	toPkcs8Pem = function () {
 		return forge.pki
 			.privateKeyInfoToPem(
 				forge.pki.wrapRsaPrivateKey(
 					forge.pki.privateKeyToAsn1(this.ppk)
 				)
 			)
-				.replace(/\r/g, "")
-				.replace(/\n/g, "");
+			.replace(/\r/g, "")
+			.replace(/\n/g, "");
 	};
 	toJwk() {
-		if (this.jwk == null)
-			this.jwk = pemJwk.pem2jwk(forge.pki.privateKeyToPem(this.ppk));
+		if (this.jwk == null) {
+			const bnToBase64Url = (bn) => {
+				let hex = bn.toString(16);
+				if (hex.length % 2 !== 0) {
+					hex = '0' + hex;
+				}
+				const bytes = forge.util.hexToBytes(hex);
+				const b64 = forge.util.encode64(bytes);
+				return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+			};
+			this.jwk = {
+				kty: "RSA",
+				n: bnToBase64Url(this.ppk.n),
+				e: bnToBase64Url(this.ppk.e),
+				d: bnToBase64Url(this.ppk.d),
+				p: bnToBase64Url(this.ppk.p),
+				q: bnToBase64Url(this.ppk.q),
+				dp: bnToBase64Url(this.ppk.dP),
+				dq: bnToBase64Url(this.ppk.dQ),
+				qi: bnToBase64Url(this.ppk.qInv)
+			};
+		}
 		return this.jwk;
 	}
-	toPkcs8 = function() {
+	toPkcs8 = function () {
 		return forge.pki.wrapRsaPrivateKey(
 			forge.pki.privateKeyToAsn1(this.ppk)
 		);
@@ -162,8 +182,7 @@ module.exports = class EcPpk {
 	 */
 	inArray(ppks) {
 		for (let ppk of ppks) {
-			if (ppk.equals(this))
-			{
+			if (ppk.equals(this)) {
 				return true;
 			}
 		}

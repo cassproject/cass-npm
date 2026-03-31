@@ -134,7 +134,8 @@ module.exports = class CTDLASNCSVImport {
 		eim,
 		collectionsFlag,
 		skip,
-		validationRules
+		validationRules,
+		duplicateChecks
 	) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
@@ -185,6 +186,7 @@ module.exports = class CTDLASNCSVImport {
 				let competencyRows = {};
 				let relations = [];
 				let relationById = {};
+				let competencyCtids = {};
 				let rowsWithErrors = new Set(); // Track rows that have errors to avoid duplicate processing
 				for (let i = 0; i < tabularData.length; i++) {
 					if (!tabularData[i]) {
@@ -701,6 +703,7 @@ module.exports = class CTDLASNCSVImport {
 						f["ceasn:hasChild"] = null;
 						setVersionIdentifier(f);
 						competencies.push(f);
+						competencyCtids[f.shortId()] = pretranslatedE["ceterms:ctid"] || pretranslatedE["@id"];
 						competencyRows[f.shortId()] = e;
 					} else if (
 						pretranslatedE["@type"] == null ||
@@ -716,6 +719,13 @@ module.exports = class CTDLASNCSVImport {
 						rowsWithErrors.add(i);
 						continue;
 					}
+				}
+				// Run duplicate CTID checks if any were provided by the caller
+				const checks = duplicateChecks || [];
+				const competencyIds = competencies.map(comp => comp.shortId());
+				for (const check of checks) {
+					const checkErrors = await check(repo, competencyIds, frameworkArray, competencyCtids);
+					errors.push(...checkErrors);
 				}
 				// If there are any errors, report them all at once
 				if (errors.length > 0) {
@@ -736,7 +746,8 @@ module.exports = class CTDLASNCSVImport {
 		endpoint,
 		eim,
 		skip,
-		validationRules
+		validationRules,
+		duplicateChecks
 	) {
 		Papa.parse(file, {
 			header: true,
@@ -773,6 +784,7 @@ module.exports = class CTDLASNCSVImport {
 				let competencyRows = {};
 				let relations = [];
 				let relationById = {};
+				let competencyCtids = {};
 				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let i = 0; i < tabularData.length; i++) {
 					let pretranslatedE = tabularData[i];
@@ -1140,6 +1152,7 @@ module.exports = class CTDLASNCSVImport {
 						f["ceterms:isMemberOf"] = null;
 						setVersionIdentifier(f);
 						competencies.push(f);
+						competencyCtids[f.shortId()] = pretranslatedE["ceterms:ctid"] || pretranslatedE["@id"];
 						competencyRows[f.shortId()] = e;
 					} else if (
 						pretranslatedE["@type"] == null ||
@@ -1155,6 +1168,13 @@ module.exports = class CTDLASNCSVImport {
 						rowsWithErrors.add(i);
 						continue;
 					}
+				}
+				// Run duplicate CTID checks if any were provided by the caller
+				const checks = duplicateChecks || [];
+				const competencyIds = competencies.map(comp => comp.shortId());
+				for (const check of checks) {
+					const checkErrors = await check(repo, competencyIds, frameworkArray, competencyCtids);
+					errors.push(...checkErrors);
 				}
 				// If there are any errors, report them all at once
 				if (errors.length > 0) {
