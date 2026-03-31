@@ -246,13 +246,13 @@ module.exports = class Assertion extends schema.CreativeWork {
 		success(this.decayFunction);
 	}
 	getNegative() {
-		return "true".equals(this.negative);
+		return "true".equals(this.negative) | this.negative === true;
 	}
 	setNegative(negativeB) {
 		this.negative = negativeB;
 	}
 	getNegativeAsync(success, failure) {
-		success("true".equals(this.negative));
+		success("true".equals(this.negative) | this.negative === true);
 	}
 	setCompetency(competencyUrl) {
 		this.competency = competencyUrl;
