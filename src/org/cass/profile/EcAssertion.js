@@ -19,20 +19,34 @@ module.exports = class EcAssertion extends Assertion {
 	async decrypt(eim) {
 		eim = eim || EcIdentityManager.default;
 		let a = new Assertion().copyFrom(this);
-		if (a.subject != null)
-		a.setSubject(await this.getSubject(eim));
-		if (a.agent != null)
-		a.setAgent(await this.getAgent(eim));
-		if (a.assertionDate != null)
-		a.setAssertionDate(await this.getAssertionDate(eim));
-		if (a.expirationDate != null)
-		a.setExpirationDate(await this.getExpirationDate(eim));
-		if (a.evidence != null)
-		a.setEvidence(await this.getEvidences(eim));
-		if (a.negative != null)
-		a.setNegative(await this.getNegative(eim));
-		if (a.decayFunction != null)
-		a.setDecayFunction(await this.getDecayFunction(eim));
+		let subject = this.getSubject(eim);
+		let agent = this.getAgent(eim);
+		let assertionDate = this.getAssertionDate(eim);
+		let expirationDate = this.getExpirationDate(eim);
+		let evidences = this.getEvidences(eim);
+		let negative = this.getNegative(eim);
+		let decayFunction = this.getDecayFunction(eim);
+		subject = await subject;
+		agent = await agent;
+		assertionDate = await assertionDate;
+		expirationDate = await expirationDate;
+		evidences = await evidences;
+		negative = await negative;
+		decayFunction = await decayFunction;
+		if (subject)
+			a.setSubject(subject);
+		if (agent)
+			a.setAgent(agent);
+		if (assertionDate)
+			a.setAssertionDate(assertionDate);
+		if (expirationDate)
+			a.setExpirationDate(expirationDate);
+		if (evidences)
+			a.setEvidence(evidences);
+		if (negative)
+			a.setNegative(negative);
+		if (decayFunction)
+			a.setDecayFunction(decayFunction);
 		a.setCompetency(this.competency);
 		a.setLevel(this.level);
 		a.setConfidence(this.confidence);

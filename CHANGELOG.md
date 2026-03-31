@@ -2,6 +2,14 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.13
+* 5.0.13
+* Updated libraries.
+* Auto stash before merge of "5.0" and "origin/5.0"
+* Update test16HttpsFips to always pull the docker image
+* Switch to webcrypto for AES secret and IV generation
+* Release 5.0.12 - Switches to native JWK export for keys
+
 ## 5.0.12
 * Switch to native JWK export for public and private keys
 * Updated libraries
