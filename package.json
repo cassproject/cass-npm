@@ -173,7 +173,7 @@
 		"chai": "^4.5.0",
 		"concurrently": "^9.2.1",
 		"cypress": "^15.13.1",
-		"cypress-fail-fast": "^7.1.1",
+		"cypress-fail-fast": "^8.1.0",
 		"eslint": "^10.2.0",
 		"fake-indexeddb": "^6.2.5",
 		"mocha": "^11.7.5",
