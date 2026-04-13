@@ -2,8 +2,12 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.14
+* Bump nyc from 17.1.0 to 18.0.0
+* Bump cypress-fail-fast from 7.1.1 to 8.1.0
+* Updated libraries.
+
 ## 5.0.13
-* 5.0.13
 * Updated libraries.
 * Auto stash before merge of "5.0" and "origin/5.0"
 * Update test16HttpsFips to always pull the docker image
