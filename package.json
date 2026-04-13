@@ -170,7 +170,7 @@
 	"homepage": "https://github.com/cassproject/cass-npm#readme",
 	"devDependencies": {
 		"@cypress/webpack-preprocessor": "^7.0.2",
-		"chai": "^4.5.0",
+		"chai": "^6.2.2",
 		"concurrently": "^9.2.1",
 		"cypress": "^15.13.1",
 		"cypress-fail-fast": "^8.1.0",
