@@ -146,7 +146,9 @@ module.exports = class EcRepository {
 	postMaxSize = null;
 	init(selectedServer, success, failure, loginObjectCallback) {
 		this.selectedServer = selectedServer;
-		return this.negotiateTimeOffset(success, failure, loginObjectCallback);
+		return this.negotiateTimeOffset(success, failure, loginObjectCallback).then(()=>{
+			return this.fetchServerAdminKeys()
+		});
 	}
 	negotiateTimeOffset = function (success, failure, loginObjectCallback) {
 		let oldTimeout = EcRemote.timeout;
@@ -781,16 +783,7 @@ module.exports = class EcRepository {
 		} else {
 			offset = repo.timeOffset;
 		}
-		if (data.owner != null && data.owner.length > 0) {
-			p = eim.signatureSheetFor(
-				data.owner,
-				300000 + offset,
-				data.id,
-				null, null, repo != null ? repo.signatureSheetHashAlgorithm : null
-			);
-		} else {
-			p = eim.signatureSheet(300000 + offset, data.id, null, null, repo != null ? repo.signatureSheetHashAlgorithm : null);
-		}
+		p = eim.signatureSheet(300000 + offset, data.id, null, null, repo != null ? repo.signatureSheetHashAlgorithm : null);
 		p = p.then((signatureSheet) => {
 			let fd = new FormData();
 			fd.append("data", data.toJson());
@@ -895,23 +888,18 @@ module.exports = class EcRepository {
 		let targetUrl;
 		targetUrl = data.shortId();
 		let offset = this.setOffset(data.id);
-		if (data.owner != null && data.owner.length > 0) {
-			return eim.signatureSheetFor(
-				data.owner,
-				300000 + offset,
-				data.id,
-				null, null, repo != null ? repo.signatureSheetHashAlgorithm : null
-			).then((signatureSheet) => {
-				return EcRemote._delete(
-					targetUrl,
-					signatureSheet,
-					success,
-					failure
-				);
-			});
-		} else {
-			return EcRemote._delete(targetUrl, [], success, failure);
-		}
+		return eim.signatureSheet(
+			300000 + offset,
+			data.id,
+			null, null, repo != null ? repo.signatureSheetHashAlgorithm : null
+		).then((signatureSheet) => {
+			return EcRemote._delete(
+				targetUrl,
+				signatureSheet,
+				success,
+				failure
+			);
+		});
 	};
 	/**
 	 *  Attempts to delete a piece of data.
@@ -965,23 +953,18 @@ module.exports = class EcRepository {
 				EcCrypto.md5(data.shortId())
 			);
 		let offset = EcRepository.setOffset(data.id);
-		if (data.owner != null && data.owner.length > 0) {
-			return eim.signatureSheetFor(
-				data.owner,
-				300000 + offset,
-				data.id,
-				null, null, this != null ? this.signatureSheetHashAlgorithm : null
-			).then((signatureSheet) => {
-				return EcRemote._delete(
-					targetUrl,
-					signatureSheet,
-					success,
-					failure
-				);
-			});
-		} else {
-			return EcRemote._delete(targetUrl, [], success, failure);
-		}
+		return eim.signatureSheet(
+			300000 + offset,
+			data.id,
+			null, null, this != null ? this.signatureSheetHashAlgorithm : null
+		).then((signatureSheet) => {
+			return EcRemote._delete(
+				targetUrl,
+				signatureSheet,
+				success,
+				failure
+			);
+		});
 	};
 	/**
 	 *  Attempts to save many pieces of data. Does some checks before saving to
@@ -1001,7 +984,6 @@ module.exports = class EcRepository {
 	multiput = function (data, success, failure, eim) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		let allOwners = [];
 		for (let d of data) {
 			if (d.invalid())
 				throw new Error("Cannot save data. It is missing a vital component.");
@@ -1034,9 +1016,6 @@ module.exports = class EcRepository {
 					)
 				];
 			}
-			if (d.owner != null)
-				for (let j = 0; j < d.owner.length; j++)
-					EcArray.setAdd(allOwners, d.owner[j]);
 		}
 		let encryptionAndSigningPromises = data.map((d) => {
 			return cassReturnAsPromise(d)
@@ -1064,19 +1043,10 @@ module.exports = class EcRepository {
 		return Promise.all(encryptionAndSigningPromises)
 			.then((readyToSendData) => {
 				preparedData = readyToSendData;
-				if (allOwners != null && allOwners.length > 0) {
-					return eim.signatureSheetFor(
-						allOwners,
-						300000 + this.timeOffset,
-						this.selectedServer,
-						null, null, this.signatureSheetHashAlgorithm
-					);
-				} else {
-					return eim.signatureSheet(
-						300000 + this.timeOffset,
-						this.selectedServer, null, null, this.signatureSheetHashAlgorithm
-					);
-				}
+				return eim.signatureSheet(
+					300000 + this.timeOffset,
+					this.selectedServer, null, null, this.signatureSheetHashAlgorithm
+				);
 			})
 			.then((signatureSheet) => {
 				let fd = new FormData();
@@ -1950,7 +1920,7 @@ module.exports = class EcRepository {
 			service = "/sky/admin";
 		}
 		let me = this;
-		EcRemote.getExpectingObject(
+		return EcRemote.getExpectingObject(
 			this.selectedServer,
 			service,
 			function (p1) {
@@ -1981,9 +1951,7 @@ module.exports = class EcRepository {
 				} else
 					return p1;
 			}
-			p1 = await EcEncryptedValue.fromEncryptedValue(
-				p1, null, null, eim
-			);
+			p1 = await EcEncryptedValue.fromEncryptedValue(p1, null, null, eim);
 			if (p1.isAny(result.getTypes())) {
 				result.copyFrom(p1, eim);
 				if (this.caching) {
