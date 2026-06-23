@@ -2,6 +2,10 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.16
+* Upgraded libraries.
+* Refactor repository initialization and data signing
+
 ## 5.0.14
 * Bump nyc from 17.1.0 to 18.0.0
 * Bump cypress-fail-fast from 7.1.1 to 8.1.0

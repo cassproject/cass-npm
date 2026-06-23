@@ -122,13 +122,12 @@ module.exports = class EcLevel extends Level {
 		repo, eim
 	) {
 		let a = new EcAlignment();
-		a.source = this.id;
-		a.target = targetLevel.id;
+		a.source = this.shortId();
+		a.target = targetLevel.shortId();
 		a.relationType = alignmentType;
 		a.addOwner(identity.toPk());
 		if (repo?.selectedServer != null)
 			a.generateId(repo.selectedServer);
-		await a.signWith(identity);
 		await a.save(success, failure, repo, eim);
 		return a;
 	}

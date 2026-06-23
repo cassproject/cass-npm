@@ -1929,10 +1929,16 @@ module.exports = class EcRepository {
 				for (let i = 0; i < ary.length; i++) {
 					me.adminKeys.push(ary[i]);
 				}
-				success(ary);
+				if (success != null)
+					success(ary);
+				else 
+					return ary;
 			},
 			function (p1) {
-				failure("");
+				if (failure != null)
+					failure(p1);
+				else 
+					throw new Error(p1);
 			}
 		);
 	};
