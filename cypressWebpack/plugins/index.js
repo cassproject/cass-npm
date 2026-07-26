@@ -25,10 +25,21 @@ module.exports = (on, config) => {
 
   on('file:preprocessor', webpackPreprocessor({
       webpackOptions: {
+      // webpack 5.109 changed experiments.typescript to default to "auto", which
+      // turns on resolve.tsconfig. The resolver then reads the nearest
+      // tsconfig.json for every bundled module and follows its "extends". Several
+      // transitive deps of node-polyfill-webpack-plugin (pbkdf2, side-channel,
+      // typed-array-buffer) ship a tsconfig.json extending "@ljharb/tsconfig",
+      // which is one of their devDependencies and so is never installed. That
+      // makes the extends unresolvable and fails the compilation. This project has
+      // no TypeScript, so turn the experiment off.
+      experiments: {
+        typescript: false,
+      },
       plugins: [new NodePolyfillPlugin(),
         new webpack.ProvidePlugin({
           process: 'process/browser',
-        }), 
+        }),
       ],
         externals: {
           "http2-wrapper": "http2",

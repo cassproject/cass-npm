@@ -1,4 +1,7 @@
-FROM cypress/included:15.7.0
+# Keep this tag in sync with the exact "cypress" version in package.json: the
+# image ships the Cypress binary at this version and the ENTRYPOINT runs it, so a
+# floating npm range here would silently pair one Cypress with another's binary.
+FROM cypress/included:15.19.0
 RUN apt-get install xvfb
 
 WORKDIR code
