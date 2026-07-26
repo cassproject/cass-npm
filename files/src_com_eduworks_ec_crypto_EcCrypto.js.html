@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.14
+              Version: 5.0.16
             </div>
             
         </div>
@@ -1106,7 +1106,6 @@
 </div>
 
 <pre class="code prettyprint linenums">
-const { v4: uuidv4 } = require(&#x27;uuid&#x27;);
 let forge = require(&quot;node-forge&quot;);
 /**
  *  @author Fritz
@@ -1179,10 +1178,20 @@ module.exports = class EcCrypto {
 		return new TextEncoder(&quot;utf-8&quot;).encode(str).buffer;
 	}
 	static generateUUID()
-	{  
-		let uuid = uuidv4();
-		uuid = uuid.substr(0,9)+&#x27;c455&#x27;+uuid.substr(13);
-		return uuid;
+	{
+		var d = new Date().getTime(); //Timestamp
+		var d2 = ((typeof performance !== &#x27;undefined&#x27;) &amp;&amp; performance.now &amp;&amp; (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
+		return &#x27;xxxxxxxx-c455-4xxx-yxxx-xxxxxxxxxxxx&#x27;.replace(/[xy]/g, function (c) {
+			var r = Math.random() * 16;//random number between 0 and 16
+			if (d &gt; 0) {//Use timestamp until depleted
+				r = (d + r) % 16 | 0;
+				d = Math.floor(d / 16);
+			} else {//Use microseconds since page-load if supported
+				r = (d2 + r) % 16 | 0;
+				d2 = Math.floor(d2 / 16);
+			}
+			return (c === &#x27;x&#x27; ? r : (r &amp; 0x3 | 0x8)).toString(16);
+		});
 	}
 };
 
