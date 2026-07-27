@@ -134,6 +134,23 @@ module.exports = class EcRepository {
 			return Reflect.deleteProperty(...arguments);
 		}
 	});
+	/**
+	 *  Empties the in-memory cache and, if L2 caching is enabled, the
+	 *  IndexedDB backing store. Do not reassign cacheBacking to clear the
+	 *  cache -- the cache proxy permanently wraps the original object.
+	 *
+	 *  @memberOf EcRepository
+	 *  @method clearCache
+	 *  @static
+	 */
+	static clearCache = () => {
+		for (let prop of Object.keys(EcRepository.cacheBacking))
+			delete EcRepository.cacheBacking[prop];
+		if (EcRepository.cachingL2 == true && EcRepository.cacheDB != null) {
+			const transaction = EcRepository.cacheDB.transaction(EcRepository.LONGIDS, "readwrite");
+			transaction.objectStore(EcRepository.LONGIDS).clear();
+		}
+	};
 	static fetching = {};
 	static repos = [];
 	static defaultPlugins = [];
