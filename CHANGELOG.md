@@ -2,6 +2,12 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.17
+* Add tests for `EcRepository` caching and `clearCache`
+* Add `clearCache` method to repository
+* Upgrade dev dependencies and fix Webpack compilation
+* Add CASS 1.7 test infrastructure
+
 ## 5.0.16
 * Upgraded libraries.
 * Refactor repository initialization and data signing
