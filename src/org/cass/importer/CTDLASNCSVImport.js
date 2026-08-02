@@ -255,6 +255,20 @@ module.exports = class CTDLASNCSVImport {
 								continue;
 							}
 						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"ceasn:CompetencyFramework",
+								i + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
+								rowsWithErrors.add(i);
+								continue;
+							}
+						}
 
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
@@ -400,6 +414,20 @@ module.exports = class CTDLASNCSVImport {
 							} else {
 								errors.push(validationErrors);
 							}
+							rowsWithErrors.add(i);
+							continue;
+						}
+					}
+					// Validate registry URL fields (only if url rules provided)
+					if (validationRules && validationRules.urlRules) {
+						const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+							pretranslatedE,
+							"ceasn:Competency",
+							i + 2,
+							validationRules.urlRules
+						);
+						if (urlErrors) {
+							errors.push(...urlErrors);
 							rowsWithErrors.add(i);
 							continue;
 						}
@@ -850,6 +878,20 @@ module.exports = class CTDLASNCSVImport {
 								continue;
 							}
 						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"ceterms:Collection",
+								i + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
+								rowsWithErrors.add(i);
+								continue;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -935,6 +977,20 @@ module.exports = class CTDLASNCSVImport {
 								} else {
 									errors.push(validationErrors);
 								}
+								rowsWithErrors.add(i);
+								continue;
+							}
+						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"ceasn:Competency",
+								i + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
 								rowsWithErrors.add(i);
 								continue;
 							}
@@ -1445,6 +1501,48 @@ module.exports = class CTDLASNCSVImport {
 			return `Row ${rowIndex}: Missing required properties for ${type}: ${missing.join(', ')}`;
 		}
 		return null;
+	}
+
+	/*
+	 * Validates that reference fields contain either a CTID (ce-...) or a
+	 * credential registry URL whose origin is allowed for this environment.
+	 * CTIDs are resolved by the CTID pipeline (getIdFromCtid); any other value
+	 * must be an http(s) URL with an origin listed in urlRules.allowedOrigins.
+	 *
+	 * urlRules = {
+	 *     fields: { "<@type>": ["ceasn:creator", ...], ... },
+	 *     allowedOrigins: ["https://sandbox.credentialengineregistry.org", ...]
+	 * }
+	 *
+	 * Returns an array of error strings, or null when everything passes.
+	 */
+	static validateRegistryUrls(obj, type, rowIndex, urlRules) {
+		if (!urlRules) return null;
+		const fields = urlRules.fields ? urlRules.fields[type] : null;
+		const allowedOrigins = urlRules.allowedOrigins;
+		if (!fields || !allowedOrigins || allowedOrigins.length === 0) return null;
+
+		const ctidPattern = /^ce-[0-9a-fA-F-]+$/;
+		const errors = [];
+		for (const field of fields) {
+			const raw = obj[field];
+			if (raw == null) continue;
+			const values = Array.isArray(raw) ? raw : String(raw).split("|");
+			for (let value of values) {
+				value = String(value).trim();
+				if (value === "" || ctidPattern.test(value)) continue;
+				let origin = null;
+				try {
+					origin = new URL(value).origin;
+				} catch (e) {
+					// Not parseable as a URL; falls through to the error below.
+				}
+				if (origin == null || !allowedOrigins.includes(origin)) {
+					errors.push(`Row ${rowIndex}: ${field} must be a CTID or a credential registry URL for this environment (got: ${value})`);
+				}
+			}
+		}
+		return errors.length > 0 ? errors : null;
 	}
 
 	static validateFrameworkHierarchy(tabularData, hierarchyRules) {

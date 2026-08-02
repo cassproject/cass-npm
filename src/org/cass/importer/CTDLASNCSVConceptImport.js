@@ -207,6 +207,20 @@ module.exports = class CTDLASNCSVConceptImport {
 								continue;
 							}
 						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"skos:ConceptScheme",
+								each + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
+								rowsWithErrors.add(each);
+								continue;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -290,6 +304,20 @@ module.exports = class CTDLASNCSVConceptImport {
 								} else {
 									errors.push(validationErrors);
 								}
+								rowsWithErrors.add(each);
+								continue;
+							}
+						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"skos:Concept",
+								each + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
 								rowsWithErrors.add(each);
 								continue;
 							}
@@ -583,6 +611,20 @@ module.exports = class CTDLASNCSVConceptImport {
 								continue;
 							}
 						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"asn:ProgressionModel",
+								each + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
+								rowsWithErrors.add(each);
+								continue;
+							}
+						}
 						let translator = new EcLinkedData(null, null);
 						translator.copyFrom(pretranslatedE);
 						CTDLASNCSVImport.cleanUpTranslator(
@@ -662,6 +704,20 @@ module.exports = class CTDLASNCSVConceptImport {
 								} else {
 									errors.push(validationErrors);
 								}
+								rowsWithErrors.add(each);
+								continue;
+							}
+						}
+						// Validate registry URL fields (only if url rules provided)
+						if (validationRules && validationRules.urlRules) {
+							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
+								pretranslatedE,
+								"asn:ProgressionLevel",
+								each + 2,
+								validationRules.urlRules
+							);
+							if (urlErrors) {
+								errors.push(...urlErrors);
 								rowsWithErrors.add(each);
 								continue;
 							}
