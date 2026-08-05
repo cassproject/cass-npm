@@ -2,6 +2,9 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.18
+* feat: Validate registry URLs in CTDL-ASN CSV imports
+
 ## 5.0.17
 * Add tests for `EcRepository` caching and `clearCache`
 * Add `clearCache` method to repository
