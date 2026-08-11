@@ -6,6 +6,7 @@ const EcPpkFacade = require("../../../../com/eduworks/ec/crypto/EcPpkFacade.js")
 const EcRsaOaepAsyncWorker = require("../../../../com/eduworks/ec/crypto/EcRsaOaepAsyncWorker.js");
 const EcLinkedData = require("../../../json/ld/EcLinkedData.js");
 const Ebac = require("./Ebac.js");
+const FormData = require("../../../../com/eduworks/ec/remote/EcRemote.js").FormData;
 require("../../general/AuditLogger.js")
 
 /**
@@ -539,6 +540,19 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 				'" AND \\*encryptedType:"' +
 				types[i].substring(lastSlash + 1) +
 				'")';
+		}
+		//Replace http with https in schema or visa versa and then do it again
+		for (let i = 0; i < types.length; i++) {
+			if (result != "") result += " OR ";
+			let lastSlash = types[i].lastIndexOf("/");
+			let context = types[i].substring(0, lastSlash + 1);
+			if (context.startsWith("http://")) {
+				let httpsContext = context.replace("http://", "https://");
+				result += '(@context:"' + httpsContext + '" AND @type:"' + types[i].substring(lastSlash + 1) + '")';
+			} else if (context.startsWith("https://")) {
+				let httpContext = context.replace("https://", "http://");
+				result += '(@context:"' + httpContext + '" AND @type:"' + types[i].substring(lastSlash + 1) + '")';
+			}
 		}
 		return "(" + result + ")";
 	}

@@ -1,13 +1,10 @@
-if (typeof process !== 'undefined' && process.version && process.version.startsWith("v16")) {
-	console.log("Loading polyfill for FormData.");
-	FormData = eval("require('undici').FormData");
-}
 const EcObject = require("../../../../com/eduworks/ec/array/EcObject");
 const EcEncryptedValue = require("./EcEncryptedValue");
 const EcIdentityManager = require("../identity/EcIdentityManager");
 const EcRekeyRequest = require("../identity/EcRekeyRequest");
 const EcArray = require("../../../../com/eduworks/ec/array/EcArray");
 const EcRemote = require("../../../../com/eduworks/ec/remote/EcRemote");
+const FormData = EcRemote.FormData;
 const { cassPromisify, cassReturnAsPromise, cassReturnNullAsPromise } = require("../../../../com/eduworks/ec/promises/helpers");
 const EcRemoteLinkedData = require("../../schema/general/EcRemoteLinkedData");
 const EcCrypto = require("../../../../com/eduworks/ec/crypto/EcCrypto");

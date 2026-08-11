@@ -10,16 +10,27 @@ if (typeof process === 'object') {
     }
   }
 }
+let httpFormData = typeof FormData !== 'undefined' ? FormData : undefined;
 if (isNode)
-{	
-	let undici = eval("require('undici');");
+{
+	let undici = null;
+	try {
+		undici = eval("require('undici');");
+	} catch (ex) {
+		//undici is optional. Fall back to the platform's fetch and FormData.
+	}
 	if (undici != null)
 	{
 		var {setGlobalDispatcher,Agent,fetch} = undici; //NOSONAR - Intentional use of var to allow for global scope.
+		//fetch and FormData must come from the same implementation. undici's fetch
+		//does not recognize the platform's FormData and serializes it as text/plain.
+		httpFormData = undici.FormData;
 		setGlobalDispatcher(new Agent({
 			allowH2: process.env.HTTP2 != null ? process.env.HTTP2.trim() == 'true' : true
 		}))
 	}
+	else if (typeof globalThis.fetch === 'function')
+		var fetch = globalThis.fetch; //NOSONAR - Intentional use of var; the destructuring above hoists `fetch` to module scope, which would otherwise shadow the global with undefined.
 }
 if (typeof window !== 'undefined' && window.fetch != null)
 	var fetch = window.fetch;  //NOSONAR - Intentional use of var to allow for global scope.
@@ -50,6 +61,15 @@ const { cassPromisify } = require("../promises/helpers");
  *  @module com.eduworks.ec
  */
 module.exports = class EcRemote {
+	/**
+	 *  The FormData implementation paired with the fetch implementation EcRemote uses.
+	 *  Always construct multi-part bodies destined for EcRemote.post* with this,
+	 *  not the platform global, or bodies will be serialized as text/plain.
+	 *
+	 *  @property FormData
+	 *  @static
+	 */
+	static FormData = httpFormData;
 	//See https://github.com/nodejs/node/issues/47130 -- This is a workaround for a bug that causes http 1.1 keep-alive from throwing an error.
 	static leTired() {
 		if (isNode)

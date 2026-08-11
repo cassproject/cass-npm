@@ -1,6 +1,7 @@
 
 const {cassPromisify} = require("../../../../../com/eduworks/ec/promises/helpers");
 const EcRemote = require("../../../../../com/eduworks/ec/remote/EcRemote");
+const FormData = EcRemote.FormData;
 const EbacCredentialCommit = require("../../../../../com/eduworks/schema/ebac/EbacCredentialCommit");
 const EbacCredentialRequest = require("../../../../../com/eduworks/schema/ebac/EbacCredentialRequest");
 const EcContact = require("../EcContact");
