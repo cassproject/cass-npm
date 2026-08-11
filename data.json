@@ -9586,7 +9586,7 @@
             "namespaces": {},
             "tag": "module",
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 11,
+            "line": 12,
             "description": "Competencies include skills, knowledge, abilities, traits, and combinations thereof that are needed to perform a task or job. In CASS, competencies are identified and located using a globally unique ID. Competencies can be further described using titles, descriptions, levels, indicators (coming soon), roll-up rules, and relationships to other competencies.",
             "author": "devlin.junker@eduworks.com",
             "is_constructor": 1,
@@ -10897,7 +10897,7 @@
             "module": "com.eduworks.ec",
             "namespace": "",
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 44,
+            "line": 55,
             "description": "Wrapper to handle all remote web service invocations.",
             "author": "devlin.junker@eduworks.com"
         },
@@ -11369,7 +11369,7 @@
             "module": "com.eduworks.ec",
             "namespace": "",
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 14,
+            "line": 15,
             "description": "Logs into and stores/retrieves credentials from a compatible remote server.\nPerforms anonymization of the user.\n<p>\nRequires initialization with server specific salts. Server specific salts\nprevent co-occurrence attacks, should credentials on one server be\ncompromised (intercepted in transit).\n<p>\nTransmits hashed username, hashed password, and encrypts credentials using\nthe hashed combination of the username and password. This prevents the system\nstoring the credentials from having any knowledge of the user.\n<p>\nPassword recovery is done by, when the password changes, creating a\ncryptographic pad (or perfect cipher) where one half is stored on the server,\nand the other half is stored with the user. Should the user lose this pad and\nforget their password, they are not able to recover or reset their password,\nand their data should be considered lost.",
             "author": "fritz.ray@eduworks.com"
         },
@@ -11444,7 +11444,7 @@
             "module": "com.eduworks.ec",
             "namespace": "",
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 20,
+            "line": 17,
             "description": "Repository object used to interact with the CASS Repository web services.\nShould be used for all CRUD and search operations",
             "author": "fritz.ray@eduworks.com"
         },
@@ -11647,7 +11647,7 @@
             "module": "org.cassproject",
             "namespace": "",
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 11,
+            "line": 12,
             "description": "Data wrapper to represent remotely hosted data. Includes necessary KBAC fields for\npermission controls, signing, identifying and locating the object.",
             "author": "fritz.ray@eduworks.com",
             "extends": "EcLinkedData"
@@ -29490,7 +29490,17 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 68,
+            "line": 64,
+            "description": "The FormData implementation paired with the fetch implementation EcRemote uses.\nAlways construct multi-part bodies destined for EcRemote.post* with this,\nnot the platform global, or bodies will be serialized as text/plain.",
+            "itemtype": "property",
+            "name": "FormData",
+            "static": 1,
+            "class": "EcRemote",
+            "module": "com.eduworks.ec"
+        },
+        {
+            "file": "src/com/eduworks/ec/remote/EcRemote.js",
+            "line": 88,
             "description": "Timeout for AJAX requests",
             "itemtype": "property",
             "name": "timeout",
@@ -29501,7 +29511,7 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 77,
+            "line": 97,
             "description": "POSTs a request to a remote endpoint. Composed of a server endpoint (root\nURL) and a service (service path). Sends form data as a multi-part mime\nrequest.",
             "params": [
                 {
@@ -29538,7 +29548,7 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 95,
+            "line": 115,
             "description": "POSTs a request to a remote endpoint. Composed of a server endpoint (root\nURL) and a service (service path). Sends form data as a multi-part mime\nrequest.",
             "params": [
                 {
@@ -29575,7 +29585,7 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 113,
+            "line": 133,
             "description": "POSTs a request to a remote endpoint. Composed of a server endpoint (root\nURL) and a service (service path). Sends form data as a multi-part mime\nrequest. Includes headers.",
             "params": [
                 {
@@ -29617,7 +29627,7 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 211,
+            "line": 231,
             "description": "GETs something from a remote endpoint. Composed of a server endpoint\n(root URL) and a service (service path).",
             "params": [
                 {
@@ -29649,7 +29659,7 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 227,
+            "line": 247,
             "description": "GETs something from a remote endpoint. Composed of a server endpoint\n(root URL) and a service (service path).",
             "params": [
                 {
@@ -29681,7 +29691,7 @@
         },
         {
             "file": "src/com/eduworks/ec/remote/EcRemote.js",
-            "line": 307,
+            "line": 327,
             "description": "DELETEs something at a remote endpoint. Composed of a server endpoint\n(root URL) and a service (service path).",
             "params": [
                 {
@@ -35803,7 +35813,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 54,
+            "line": 55,
             "description": "Returns true if the identity manager is global. Returns false if the identity manager is local to the server.",
             "return": {
                 "description": "true if the identity manager is global.",
@@ -35815,7 +35825,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 64,
+            "line": 65,
             "description": "Configure parameters of the remote login storage.",
             "params": [
                 {
@@ -35867,7 +35877,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 106,
+            "line": 107,
             "description": "Configures parameters of the remote server by accessing configuration details via webservice",
             "params": [
                 {
@@ -35889,7 +35899,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 182,
+            "line": 183,
             "description": "Wipes login data.",
             "memberof": "EcRemoteIdentityManager",
             "itemtype": "method",
@@ -35899,7 +35909,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 195,
+            "line": 196,
             "description": "Configure compatible remote identity management server.",
             "params": [
                 {
@@ -35916,7 +35926,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 206,
+            "line": 207,
             "description": "\"Log Into\" system, generating credentials. Does not actually remotely\naccess any machine.\n<p>\nPlease clear username and password fields after this function is called.",
             "params": [
                 {
@@ -35938,7 +35948,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 251,
+            "line": 252,
             "description": "Change password of user in memory. Does not automatically commit new credentials.\n<p>\nPlease clear username and password fields after this function is called.",
             "params": [
                 {
@@ -35969,7 +35979,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 315,
+            "line": 316,
             "description": "Fetch credentials from server, invoking events based on login success or\nfailure.\n<p>\nAutomatically populates EcIdentityManager.\n<p>\nRequires login().",
             "params": [
                 {
@@ -35991,7 +36001,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 432,
+            "line": 433,
             "description": "Commits credentials in EcIdentityManager to remote server.\n<p>\nWill trigger pad generation and fail if the pad has not been specified.",
             "params": [
                 {
@@ -36013,7 +36023,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 446,
+            "line": 447,
             "description": "Creates an account.\n<p>\nPlease note that the remote login server does not throw error messages if\nan account creation is blocked due to being a duplicate. This prevents\nlogin probing. This will always succeed (if the request is properly\nformed and makes it to the server).\n<p>\nWill trigger pad generation and fail if the pad has not been specified.",
             "params": [
                 {
@@ -36035,7 +36045,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 467,
+            "line": 468,
             "description": "Sends the identity managers credentials to the service specified",
             "params": [
                 {
@@ -36061,7 +36071,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js",
-            "line": 540,
+            "line": 541,
             "description": "Splices together passwords (in a fashion more like shuffling a deck of\ncards, not appending).",
             "params": [
                 {
@@ -37315,7 +37325,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 137,
+            "line": 134,
             "description": "Empties the in-memory cache and, if L2 caching is enabled, the\nIndexedDB backing store. Do not reassign cacheBacking to clear the\ncache -- the cache proxy permanently wraps the original object.",
             "memberof": "EcRepository",
             "itemtype": "method",
@@ -37326,7 +37336,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 282,
+            "line": 279,
             "description": "Gets a JSON-LD object from the place designated by the URI.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37354,7 +37364,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 617,
+            "line": 614,
             "description": "Escapes a search query",
             "params": [
                 {
@@ -37376,7 +37386,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 652,
+            "line": 649,
             "description": "Attempts to save a piece of data.\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37404,7 +37414,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 669,
+            "line": 666,
             "description": "Attempts to save a piece of data. If the @id of the data is not of this server, will register the data to the server.\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37432,7 +37442,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 686,
+            "line": 683,
             "description": "Attempts to save a piece of data. Does some checks before saving to\nensure the data is valid. This version does not send a console warning,\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37460,7 +37470,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 743,
+            "line": 740,
             "description": "Attempts to save a piece of data without signing it.\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37488,7 +37498,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 849,
+            "line": 846,
             "description": "Attempts to delete a piece of data.\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37516,7 +37526,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 867,
+            "line": 864,
             "description": "Attempts to delete a piece of data.\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37544,7 +37554,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 921,
+            "line": 918,
             "description": "Attempts to delete a piece of data.\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37572,7 +37582,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 986,
+            "line": 983,
             "description": "Attempts to save many pieces of data. Does some checks before saving to\nensure the data is valid. This version does not send a console warning,\n<p>\nUses a signature sheet informed by the owner field of the data.",
             "params": [
                 {
@@ -37600,7 +37610,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1094,
+            "line": 1091,
             "description": "Retrieves data from the server and caches it for use later during the\napplication. This should be called before the data is needed if possible,\nso loading displays can be faster.",
             "params": [
                 {
@@ -37622,7 +37632,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1232,
+            "line": 1229,
             "description": "Deletes multiple records from the server.",
             "params": [
                 {
@@ -37644,7 +37654,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1294,
+            "line": 1291,
             "description": "Returns an array of JSON-LD objects from the places designated by the given URIs.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37676,7 +37686,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1317,
+            "line": 1314,
             "description": "Search a repository for JSON-LD compatible data.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37708,7 +37718,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1342,
+            "line": 1339,
             "description": "Search a repository for JSON-LD compatible data.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37745,7 +37755,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1511,
+            "line": 1508,
             "description": "Searches known repository endpoints to set the server configuration for\nthis repositories instance",
             "memberof": "EcRepository",
             "itemtype": "method",
@@ -37755,7 +37765,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1627,
+            "line": 1624,
             "description": "Searches known repository endpoints to set the server configuration for\nthis repositories instance",
             "memberof": "EcRepository",
             "itemtype": "method",
@@ -37765,7 +37775,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1728,
+            "line": 1725,
             "description": "Handles the actual detection of repository endpoint /ping service",
             "params": [
                 {
@@ -37788,7 +37798,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1783,
+            "line": 1780,
             "description": "Handles the actual detection of repository endpoint /ping service",
             "params": [
                 {
@@ -37811,7 +37821,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1835,
+            "line": 1832,
             "description": "Lists all types visible to the current user in the repository\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37833,7 +37843,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1869,
+            "line": 1866,
             "description": "Backs up the skyrepo elasticsearch database to the server backup directory",
             "params": [
                 {
@@ -37860,7 +37870,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1886,
+            "line": 1883,
             "description": "Restores the skyrepo elasticsearch backup from the server backup directory",
             "params": [
                 {
@@ -37887,7 +37897,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1903,
+            "line": 1900,
             "description": "Wipes all data from the the skyrepo elasticsearch, can only be restored by using backup restore",
             "params": [
                 {
@@ -37914,7 +37924,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1920,
+            "line": 1917,
             "description": "Fetches the admin keys from the server to compare for check if current\nuser is an admin user",
             "params": [
                 {
@@ -38578,7 +38588,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 22,
+            "line": 23,
             "description": "Constructor for remote linked data object.",
             "params": [
                 {
@@ -38598,7 +38608,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 32,
+            "line": 33,
             "description": "PEM encoded public keys of the owner of the object. A repository, upon\nreceiving a write operation, will ensure either the data did not\npreviously exist, or that an owner has provided a signature authorizing\nthe replacement of the old data with the new data.",
             "itemtype": "property",
             "name": "owner",
@@ -38608,7 +38618,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 42,
+            "line": 43,
             "description": "Signatures of the object. The signing method is as follows: Remove the\nsignature field. Encode the object and its fields in ascii-sort order\nJSON-LD using a space-free, tab-free encoding. Sign the aforementioned\nstring.",
             "itemtype": "property",
             "name": "signature",
@@ -38618,7 +38628,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 52,
+            "line": 53,
             "description": "URL/URI used to retrieve, store and identify the object.",
             "itemtype": "property",
             "name": "id",
@@ -38628,7 +38638,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 64,
+            "line": 65,
             "description": "PEM encoded public keys of identities authorized to view the object. A\nrepository will ignore write operations from these identities, but will\nallow them to read the object.",
             "itemtype": "property",
             "name": "reader",
@@ -38638,7 +38648,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 73,
+            "line": 74,
             "description": "Removes the version information from an identifier.\nWarning: Will remove identifier if the identifier is composed solely of digits!!!",
             "params": [
                 {
@@ -38658,7 +38668,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 107,
+            "line": 108,
             "description": "Will generate an identifier using the server URL provided (usually from\nan EcRepository).",
             "params": [
                 {
@@ -38674,7 +38684,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 124,
+            "line": 125,
             "description": "Will generate an short (non-versioned) identifier using the server URL provided (usually from\nan EcRepository).",
             "params": [
                 {
@@ -38690,7 +38700,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 142,
+            "line": 143,
             "description": "Will generate an identifier using the server URL provided (usually from\nan EcRepository) and unique identifier.",
             "params": [
                 {
@@ -38711,7 +38721,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 160,
+            "line": 161,
             "description": "Will generate an identifier using the server URL provided (usually from\nan EcRepository) and unique identifier.",
             "params": [
                 {
@@ -38737,7 +38747,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 182,
+            "line": 183,
             "description": "Will generate an identifier using the server URL provided (usually from\nan EcRepository) and unique identifier.",
             "params": [
                 {
@@ -38758,7 +38768,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 200,
+            "line": 201,
             "description": "Determines if the object has an owner identified by pk.\nHomogenizes the PEM strings for comparison.\nHomogenization is necessary for comparing PKCS#1 and PKCS#8 or PKs with Certificates, etc.",
             "params": [
                 {
@@ -38778,7 +38788,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 217,
+            "line": 218,
             "description": "Determines if the object has a reader identified by pk.\nHomogenizes the PEM strings for comparison.\nHomogenization is necessary for comparing PKCS#1 and PKCS#8 or PKs with Certificates, etc.",
             "params": [
                 {
@@ -38798,7 +38808,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 234,
+            "line": 235,
             "description": "Determines if the PK matches an owner or if the object is public.\nHomogenizes the PEM strings for comparison.\nHomogenization is necessary for comparing PKCS#1 and PKCS#8 or PKs with Certificates, etc.",
             "params": [
                 {
@@ -38818,7 +38828,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 247,
+            "line": 248,
             "description": "Determines if the PK matches an owner or if the object is public.\nHomogenizes the PEM strings for comparison.\nHomogenization is necessary for comparing PKCS#1 and PKCS#8 or PKs with Certificates, etc.",
             "params": [
                 {
@@ -38838,7 +38848,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 264,
+            "line": 265,
             "description": "Sign this object using a private key.\nDoes not check for ownership, objects signed with keys absent from owner or reader may be removed.",
             "params": [
                 {
@@ -38854,7 +38864,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 286,
+            "line": 287,
             "description": "Verifies the object's signatures.",
             "return": {
                 "description": "true if all of the signatures could be verified, false if they could not",
@@ -38867,7 +38877,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 359,
+            "line": 360,
             "description": "Adds an owner to the object, if the owner does not exist.\nNote that this method invalidates all signatures.",
             "params": [
                 {
@@ -38883,7 +38893,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 374,
+            "line": 375,
             "description": "Removes an owner from the object, if the owner does exist.\nNote that this method invalidates all signatures.",
             "params": [
                 {
@@ -38899,7 +38909,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 388,
+            "line": 389,
             "description": "Adds a reader to the object, if the reader does not exist.\nNote that this method invalidates all signatures.",
             "params": [
                 {
@@ -38915,7 +38925,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 401,
+            "line": 402,
             "description": "Removes a reader from the object, if the reader does exist.\nNote that this method invalidates all signatures.",
             "params": [
                 {
@@ -38931,7 +38941,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 414,
+            "line": 415,
             "description": "Determines if the object is not retrievable from a repository should it be written.",
             "return": {
                 "description": "True if the object is NOT VALID for storage, false otherwise.",
@@ -38944,7 +38954,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 431,
+            "line": 432,
             "description": "Updates the ID timestamp of the object, for versioning purposes.",
             "itemtype": "method",
             "name": "updateTimestamp",
@@ -38953,7 +38963,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 443,
+            "line": 444,
             "description": "Returns the ID timestamp of the object, for versioning purposes.",
             "itemtype": "method",
             "name": "getTimestamp",
@@ -38962,7 +38972,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 451,
+            "line": 452,
             "description": "Returns the timestamp of the id, if any.",
             "itemtype": "method",
             "name": "getVersionFromUrl",
@@ -38972,7 +38982,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 466,
+            "line": 467,
             "description": "Returns true if the provided ID represents this object.\nUse this, as version information can make direct comparison difficult.",
             "params": [
                 {
@@ -38992,7 +39002,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 480,
+            "line": 481,
             "description": "Return the ID of this object without the version information.\nUsed to reference the latest version of an object.",
             "return": {
                 "description": "ID of the latest version of this object.",
@@ -39005,7 +39015,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 490,
+            "line": 491,
             "description": "Return the GUID portion of the short ID.",
             "return": {
                 "description": "Guid of the linked data object.",
@@ -39018,7 +39028,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 501,
+            "line": 502,
             "description": "Return the URL Base portion of the short ID.",
             "return": {
                 "description": "Server Base URL of the linked data object.",
@@ -39031,7 +39041,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 512,
+            "line": 513,
             "description": "Return a valid ElasticSearch search string that will retrieve all objects with this type.",
             "return": {
                 "description": "ElasticSearch compatible search string.",
@@ -39044,7 +39054,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 593,
+            "line": 607,
             "description": "Upgrades the object to the latest version, performing transforms and the like.",
             "itemtype": "method",
             "name": "upgrade",
@@ -39053,7 +39063,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 649,
+            "line": 663,
             "description": "Returns the name of the thing",
             "return": {
                 "description": "name of Thing",
@@ -39067,7 +39077,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 660,
+            "line": 674,
             "description": "Method to set Thing name",
             "params": [
                 {
@@ -39084,7 +39094,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 681,
+            "line": 695,
             "description": "Returns the description of the thing",
             "return": {
                 "description": "description of Thing",
@@ -39098,7 +39108,7 @@
         },
         {
             "file": "src/org/cassproject/schema/general/EcRemoteLinkedData.js",
-            "line": 701,
+            "line": 715,
             "description": "Method to set Thing description",
             "params": [
                 {
@@ -99636,51 +99646,51 @@
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:54"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:55"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:64"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:65"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:106"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:107"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:182"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:183"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:195"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:196"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:206"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:207"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:251"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:252"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:315"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:316"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:432"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:433"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:446"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:447"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:467"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:468"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:540"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:541"
         },
         {
             "message": "unknown tag: memberof",
@@ -99872,103 +99882,103 @@
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:137"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:134"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:282"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:279"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:617"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:614"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:652"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:649"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:669"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:666"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:686"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:683"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:743"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:740"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:849"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:846"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:867"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:864"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:921"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:918"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:986"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:983"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1094"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1091"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1232"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1229"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1294"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1291"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1317"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1314"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1342"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1339"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1511"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1508"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1627"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1624"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1728"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1725"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1783"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1780"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1835"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1832"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1869"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1866"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1886"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1883"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1903"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1900"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1920"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1917"
         },
         {
             "message": "unknown tag: memberof",
@@ -99996,19 +100006,19 @@
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:649"
+            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:663"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:660"
+            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:674"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:681"
+            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:695"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:701"
+            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:715"
         },
         {
             "message": "unknown tag: internal",
@@ -100772,7 +100782,7 @@
         },
         {
             "message": "Missing item type\nReturns true if the identity manager is global. Returns false if the identity manager is local to the server.",
-            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:54"
+            "line": " src/org/cassproject/ebac/identity/remote/EcRemoteIdentityManager.js:55"
         },
         {
             "message": "Missing item type\nCreated by fray on 5/9/17.",
@@ -100804,7 +100814,7 @@
         },
         {
             "message": "Missing item type\nConstructor for remote linked data object.",
-            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:22"
+            "line": " src/org/cassproject/schema/general/EcRemoteLinkedData.js:23"
         },
         {
             "message": "Missing item type\nConstructor, automatically sets @context and @type.",

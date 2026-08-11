@@ -1106,16 +1106,13 @@
 </div>
 
 <pre class="code prettyprint linenums">
-if (typeof process !== &#x27;undefined&#x27; &amp;&amp; process.version &amp;&amp; process.version.startsWith(&quot;v16&quot;)) {
-	console.log(&quot;Loading polyfill for FormData.&quot;);
-	FormData = eval(&quot;require(&#x27;undici&#x27;).FormData&quot;);
-}
 const EcObject = require(&quot;../../../../com/eduworks/ec/array/EcObject&quot;);
 const EcEncryptedValue = require(&quot;./EcEncryptedValue&quot;);
 const EcIdentityManager = require(&quot;../identity/EcIdentityManager&quot;);
 const EcRekeyRequest = require(&quot;../identity/EcRekeyRequest&quot;);
 const EcArray = require(&quot;../../../../com/eduworks/ec/array/EcArray&quot;);
 const EcRemote = require(&quot;../../../../com/eduworks/ec/remote/EcRemote&quot;);
+const FormData = EcRemote.FormData;
 const { cassPromisify, cassReturnAsPromise, cassReturnNullAsPromise } = require(&quot;../../../../com/eduworks/ec/promises/helpers&quot;);
 const EcRemoteLinkedData = require(&quot;../../schema/general/EcRemoteLinkedData&quot;);
 const EcCrypto = require(&quot;../../../../com/eduworks/ec/crypto/EcCrypto&quot;);

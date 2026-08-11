@@ -1114,6 +1114,7 @@ const EcPpkFacade = require(&quot;../../../../com/eduworks/ec/crypto/EcPpkFacade
 const EcRsaOaepAsyncWorker = require(&quot;../../../../com/eduworks/ec/crypto/EcRsaOaepAsyncWorker.js&quot;);
 const EcLinkedData = require(&quot;../../../json/ld/EcLinkedData.js&quot;);
 const Ebac = require(&quot;./Ebac.js&quot;);
+const FormData = require(&quot;../../../../com/eduworks/ec/remote/EcRemote.js&quot;).FormData;
 require(&quot;../../general/AuditLogger.js&quot;)
 
 /**
@@ -1647,6 +1648,19 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 				&#x27;&quot; AND \\*encryptedType:&quot;&#x27; +
 				types[i].substring(lastSlash + 1) +
 				&#x27;&quot;)&#x27;;
+		}
+		//Replace http with https in schema or visa versa and then do it again
+		for (let i = 0; i &lt; types.length; i++) {
+			if (result != &quot;&quot;) result += &quot; OR &quot;;
+			let lastSlash = types[i].lastIndexOf(&quot;/&quot;);
+			let context = types[i].substring(0, lastSlash + 1);
+			if (context.startsWith(&quot;http://&quot;)) {
+				let httpsContext = context.replace(&quot;http://&quot;, &quot;https://&quot;);
+				result += &#x27;(@context:&quot;&#x27; + httpsContext + &#x27;&quot; AND @type:&quot;&#x27; + types[i].substring(lastSlash + 1) + &#x27;&quot;)&#x27;;
+			} else if (context.startsWith(&quot;https://&quot;)) {
+				let httpContext = context.replace(&quot;https://&quot;, &quot;http://&quot;);
+				result += &#x27;(@context:&quot;&#x27; + httpContext + &#x27;&quot; AND @type:&quot;&#x27; + types[i].substring(lastSlash + 1) + &#x27;&quot;)&#x27;;
+			}
 		}
 		return &quot;(&quot; + result + &quot;)&quot;;
 	}

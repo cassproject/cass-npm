@@ -1105,6 +1105,7 @@
             
                   <div><a href="#static-public-properties">Static Public Properties</a></div>
                   <ul>
+                      <li><a href="#props_FormData">FormData</a></li>
                       <li><a href="#props_timeout">timeout</a></li>
                   </ul>
             
@@ -1143,7 +1144,7 @@
 
         <div id="main" class="yui3-u">
             <div class="content"><div class="title">
-    <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l44"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:44</code></a></span>
+    <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l55"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:55</code></a></span>
     <h1 class="class-name">EcRemote</h1>
 </div>
 
@@ -1274,6 +1275,21 @@
           </td>
           <td>
             <div class="property-name ">
+              <a href="#props_FormData">FormData</a>: Unknown
+            </div>
+            <div class="short-description">
+              <p>The FormData implementation paired with the fetch implementation EcRemote uses. Always construct multi-part bodies destined for EcRemote.post* with this, not the platform global, or bodies will be serialized as text/plain.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            public
+            static
+            
+          </td>
+          <td>
+            <div class="property-name ">
               <a href="#props_timeout">timeout</a>: Integer
             </div>
             <div class="short-description">
@@ -1295,8 +1311,26 @@
     <div id="properties public">
         <h2 id="static-public-properties">Static Public Properties</h2>
 <div class="property item">
+  <div id="props_FormData" class="title">
+    <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l64"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:64</code></a></span>
+    <h3 class="">
+      public
+      static
+      
+      FormData: Unknown
+    </h3>
+  </div>
+
+
+  <div class="property-description"><p>The FormData implementation paired with the fetch implementation EcRemote uses.
+Always construct multi-part bodies destined for EcRemote.post* with this,
+not the platform global, or bodies will be serialized as text/plain.</p>
+</div>
+
+</div>
+<div class="property item">
   <div id="props_timeout" class="title">
-    <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l68"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:68</code></a></span>
+    <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l88"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:88</code></a></span>
     <h3 class="">
       public
       static
@@ -1318,7 +1352,7 @@
         <h2 id="static-public-methods">Static Public Methods</h2>
 <div class="method item">
     <div id="method__delete" class="title">
-        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l307"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:307</code></a></span>
+        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l327"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:327</code></a></span>
         <h3 class="">
             public
             static
@@ -1412,7 +1446,7 @@ responds with an error (per jQuery ajax) or a non-200/300.</p>
 </div>
 <div class="method item">
     <div id="method_getExpectingObject" class="title">
-        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l211"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:211</code></a></span>
+        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l231"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:231</code></a></span>
         <h3 class="">
             public
             static
@@ -1506,7 +1540,7 @@ responds with an error (per jQuery ajax) or a non-200/300.</p>
 </div>
 <div class="method item">
     <div id="method_getExpectingString" class="title">
-        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l227"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:227</code></a></span>
+        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l247"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:247</code></a></span>
         <h3 class="">
             public
             static
@@ -1600,7 +1634,7 @@ responds with an error (per jQuery ajax) or a non-200/300.</p>
 </div>
 <div class="method item">
     <div id="method_postExpectingObject" class="title">
-        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l77"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:77</code></a></span>
+        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l97"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:97</code></a></span>
         <h3 class="">
             public
             static
@@ -1709,7 +1743,7 @@ responds with an error (per jQuery ajax) or a non-200/300.</p>
 </div>
 <div class="method item">
     <div id="method_postExpectingString" class="title">
-        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l95"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:95</code></a></span>
+        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l115"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:115</code></a></span>
         <h3 class="">
             public
             static
@@ -1818,7 +1852,7 @@ responds with an error (per jQuery ajax) or a non-200/300.</p>
 </div>
 <div class="method item">
     <div id="method_postWithHeadersExpectingString" class="title">
-        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l113"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:113</code></a></span>
+        <span class="source-link"><a href="../files/src_com_eduworks_ec_remote_EcRemote.js.html#l133"><code>src&#x2F;com&#x2F;eduworks&#x2F;ec&#x2F;remote&#x2F;EcRemote.js:133</code></a></span>
         <h3 class="">
             public
             static

@@ -1118,16 +1118,27 @@ if (typeof process === &#x27;object&#x27;) {
     }
   }
 }
+let httpFormData = typeof FormData !== &#x27;undefined&#x27; ? FormData : undefined;
 if (isNode)
-{	
-	let undici = eval(&quot;require(&#x27;undici&#x27;);&quot;);
+{
+	let undici = null;
+	try {
+		undici = eval(&quot;require(&#x27;undici&#x27;);&quot;);
+	} catch (ex) {
+		//undici is optional. Fall back to the platform&#x27;s fetch and FormData.
+	}
 	if (undici != null)
 	{
 		var {setGlobalDispatcher,Agent,fetch} = undici; //NOSONAR - Intentional use of var to allow for global scope.
+		//fetch and FormData must come from the same implementation. undici&#x27;s fetch
+		//does not recognize the platform&#x27;s FormData and serializes it as text/plain.
+		httpFormData = undici.FormData;
 		setGlobalDispatcher(new Agent({
 			allowH2: process.env.HTTP2 != null ? process.env.HTTP2.trim() == &#x27;true&#x27; : true
 		}))
 	}
+	else if (typeof globalThis.fetch === &#x27;function&#x27;)
+		var fetch = globalThis.fetch; //NOSONAR - Intentional use of var; the destructuring above hoists &#x60;fetch&#x60; to module scope, which would otherwise shadow the global with undefined.
 }
 if (typeof window !== &#x27;undefined&#x27; &amp;&amp; window.fetch != null)
 	var fetch = window.fetch;  //NOSONAR - Intentional use of var to allow for global scope.
@@ -1158,6 +1169,15 @@ const { cassPromisify } = require(&quot;../promises/helpers&quot;);
  *  @module com.eduworks.ec
  */
 module.exports = class EcRemote {
+	/**
+	 *  The FormData implementation paired with the fetch implementation EcRemote uses.
+	 *  Always construct multi-part bodies destined for EcRemote.post* with this,
+	 *  not the platform global, or bodies will be serialized as text/plain.
+	 *
+	 *  @property FormData
+	 *  @static
+	 */
+	static FormData = httpFormData;
 	//See https://github.com/nodejs/node/issues/47130 -- This is a workaround for a bug that causes http 1.1 keep-alive from throwing an error.
 	static leTired() {
 		if (isNode)
