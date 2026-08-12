@@ -2,6 +2,9 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.19
+* fix: Standardize HTTP client and FormData pairing
+
 ## 5.0.18
 * feat: Validate registry URLs in CTDL-ASN CSV imports
 

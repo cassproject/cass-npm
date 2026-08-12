@@ -1,6 +1,6 @@
 {
 	"name": "cassproject",
-	"version": "5.0.18",
+	"version": "5.0.19",
 	"description": "Competency and Skills Service",
 	"main": "index.js",
 	"scripts": {
@@ -184,12 +184,12 @@
 	},
 	"homepage": "https://github.com/cassproject/cass-npm#readme",
 	"devDependencies": {
-		"@cypress/webpack-preprocessor": "^7.1.1",
+		"@cypress/webpack-preprocessor": "^7.1.2",
 		"chai": "^4.5.0",
 		"concurrently": "^10.0.4",
 		"cypress": "15.19.0",
 		"cypress-fail-fast": "^8.1.0",
-		"eslint": "^10.8.0",
+		"eslint": "^10.8.1",
 		"fake-indexeddb": "^6.2.5",
 		"mocha": "^11.8.0",
 		"node-polyfill-webpack-plugin": "^4.1.0",
