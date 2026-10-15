@@ -186,7 +186,7 @@
 	"devDependencies": {
 		"@cypress/webpack-preprocessor": "^7.1.2",
 		"chai": "^4.5.0",
-		"concurrently": "^10.0.5",
+		"concurrently": "^10.0.6",
 		"cypress": "15.19.0",
 		"cypress-fail-fast": "^8.2.0",
 		"eslint": "^10.12.0",
