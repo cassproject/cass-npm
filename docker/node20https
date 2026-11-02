@@ -1,6 +1,8 @@
 FROM node:20
 WORKDIR code
 COPY package.json package.json
+# The Cypress binary is only used by the docker/cypress* images.
+ENV CYPRESS_INSTALL_BINARY=0
 RUN npm install undici@six
 
 COPY ca.crt ca.crt
