@@ -2,6 +2,12 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.21
+* fix: Tolerate out-of-graph competencies in assertion registration dedup
+* fix: Require an explicit true when verifying rekey signatures
+* chore: Upgrade node-forge to 1.4.2, including the browser worker copy
+* chore: Bump various dependencies and regenerate lock file
+
 ## 5.0.20
 * chore: Bump various dependencies and regenerate lock file
 
