@@ -2,6 +2,10 @@
 
 Please note some upgrade steps are at the bottom of this file.
 
+## 5.0.22
+* chore: Skip the Cypress binary download in Node test images
+* chore: Bump eslint, fake-indexeddb and webpack
+
 ## 5.0.21
 * fix: Tolerate out-of-graph competencies in assertion registration dedup
 * fix: Require an explicit true when verifying rekey signatures
