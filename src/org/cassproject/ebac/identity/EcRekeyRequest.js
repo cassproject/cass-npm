@@ -91,15 +91,16 @@ module.exports = class EcRekeyRequest extends EcRemoteLinkedData {
 	 */
 	async verify() {
 		if (!await super.verify()) return false;
+		//Compare to true: the browser worker resolves to an {error} object, not false, when a signature is malformed.
 		return (await EcRsaOaepAsyncWorker.verifySha256(
 			EcPk.fromPem(this.rekeyPk),
 			this.toSignableRekeyJson(),
 			this.rekeySignature
-		) || (await EcRsaOaepAsyncWorker.verify(
+		)) === true || (await EcRsaOaepAsyncWorker.verify(
 			EcPk.fromPem(this.rekeyPk),
 			this.toSignableRekeyJson(),
 			this.rekeySignature
-		)));
+		)) === true;
 	}
 	async addRekeyRequestToForwardingTable() {
 		if (!(await this.verify())) return;
