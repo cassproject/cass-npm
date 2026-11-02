@@ -189,15 +189,15 @@
 		"concurrently": "^10.0.6",
 		"cypress": "15.19.0",
 		"cypress-fail-fast": "^8.2.0",
-		"eslint": "^10.12.0",
-		"fake-indexeddb": "^6.2.5",
+		"eslint": "^10.14.0",
+		"fake-indexeddb": "^6.2.7",
 		"mocha": "^11.8.0",
 		"node-polyfill-webpack-plugin": "^4.1.0",
 		"nodemon": "^3.1.14",
 		"nyc": "^18.0.0",
 		"sinon": "^21.1.2",
 		"wait-on": "^9.5.1",
-		"webpack": "^5.111.1"
+		"webpack": "^5.112.2"
 	},
 	"packageManager": "npm@11.3.0+sha512.96eb611483f49c55f7fa74df61b588de9e213f80a256728e6798ddc67176c7b07e4a1cfc7de8922422cbce02543714367037536955221fa451b0c4fefaf20c66",
 	"allowScripts": {
