@@ -30,6 +30,7 @@ describe('SkyID Adapter', function() {
         ident.ppk = await EcPpk.generateKeyAsync(null, null);
         ident.displayName = name;
         im.addIdentity(ident);
+        assert.include(im.ids, ident);
         await rld.commit(null, null, im);
     }).timeout(30000);
 

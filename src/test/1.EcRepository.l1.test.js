@@ -202,6 +202,8 @@ describe("EcRepository (L1 Cache)", () => {
         rld.addOwner(newId1.ppk.toPk());
         rld.setName("Some Thing");
         rld.setDescription("Some Description");
+        assert.equal(rld.getName(), "Some Thing");
+        assert.isTrue(rld.hasOwner(newId1.ppk.toPk()));
     });
     it('save (ecrepository)', async () => {
         await changeNameAndSaveAndCheckRepo(rld);
@@ -264,6 +266,8 @@ describe("EcRepository (L1 Cache)", () => {
         rld.addOwner(newId1.ppk.toPk());
         rld.setName("Some Thing");
         rld.setDescription("Some Description");
+        assert.equal(rld.getName(), "Some Thing");
+        assert.isTrue(rld.hasOwner(newId1.ppk.toPk()));
     });
     it('save (multiput)', async () => {
         await changeNameAndSaveAndCheckMultiput(rld);
@@ -326,6 +330,8 @@ describe("EcRepository (L1 Cache)", () => {
         rld.addOwner(newId1.ppk.toPk());
         rld.setName("Some Thing");
         rld.setDescription("Some Description");
+        assert.equal(rld.getName(), "Some Thing");
+        assert.isTrue(rld.hasOwner(newId1.ppk.toPk()));
     });
     it('registered save (to)', async () => {
         await changeNameAndSaveAndCheck(rld);
@@ -378,6 +384,8 @@ describe("EcRepository (L1 Cache)", () => {
         rld.addOwner(newId1.ppk.toPk());
         rld.setName("Some Thing");
         rld.setDescription("Some Description");
+        assert.equal(rld.getName(), "Some Thing");
+        assert.isTrue(rld.hasOwner(newId1.ppk.toPk()));
     });
     it('registered save (multiput)', async () => {
         await changeNameAndSaveAndCheckMultiput(rld);
@@ -545,7 +553,7 @@ describe("EcRepository (L1 Cache)", () => {
         results2 = await EcRepository.get(rld6.shortId(), null, null, repo);
         assert.equal(results2, null);
     });
-    it('Turn off caching', async () => {
+    after(() => {
         EcRepository.caching = false;
         EcRepository.cachingL2 = false;
     });

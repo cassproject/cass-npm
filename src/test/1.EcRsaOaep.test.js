@@ -68,18 +68,8 @@ describe("EcRsaOaep", () => {
         assert.isTrue(elapsed < 1);
         assert.isTrue(randomString == decrypted);
     });
-    it('signing then verifying', () => {
-        console.log("Deprecated. See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main");
-        return;
-    });
-    it('signing then verifying (utf-8)', () => {
-        console.log("Deprecated. See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main");
-        return;
-    });
-    it('signing then verifying w/caching', () => {
-        console.log("Deprecated. See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main");
-        return;
-    });
+    // SHA-1 signing then verifying (plain, utf-8 and w/caching) is no longer tested here.
+    // See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main
     it('signing then verifying (sha256)', () => {
         let randomString = EcAes.newIv(256*4);
         let ppk = EcPpk.fromPem(

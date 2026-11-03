@@ -24,6 +24,9 @@ const EbacEncryptedValue = require("../com/eduworks/schema/ebac/EbacEncryptedVal
 global.EcRemoteLinkedData = require("../org/cassproject/schema/general/EcRemoteLinkedData.js");
 global.ce = {};
 global.ce.Agent = require("../org/credentialengine/Agent.js");
+// Normally registered by EarningsProfile.js when it is first loaded, which may already
+// have happened in an earlier test file.
+global.ce.AggregateDataProfile = require("../org/credentialengine/AggregateDataProfile.js");
 global.ce.AlignmentMap = require("../org/credentialengine/AlignmentMap.js");
 global.ce.Assessment = require("../org/credentialengine/Assessment.js");
 global.ce.Competency = require("../org/credentialengine/Competency.js");
@@ -1534,32 +1537,34 @@ describe("S3000L", () => {
     }
 });
 describe("EBAC", () => {
-    let e = new EbacCredential();
-    e.upgrade();
-    e.getTypes();
-    e = new EbacCredentialCommit();
-    e.upgrade();
-    e.getTypes();
-    e = new EbacCredentialRequest();
-    e.upgrade();
-    e.getTypes();
-    e = new EbacCredentials();
-    e.upgrade();
-    e.getTypes();
-    e = new EbacEncryptedSecret();
-    e.upgrade();
-    e.getTypes();
-    e.iv = e.id = e.secret = e.field = 'v';
-    e = EbacEncryptedSecret.fromEncryptableJson(JSON.parse(e.toEncryptableJson()));
-    assert.equal(e.iv, 'v');
-    assert.equal(e.id, 'v');
-    assert.equal(e.secret, 'v');
-    assert.equal(e.field, 'v');
-    e.iv = e.secret = 'v';
-    e = EbacEncryptedSecret.fromEncryptableJson(JSON.parse(e.toEncryptableJson()));
-    assert.equal(e.iv, 'v');
-    assert.equal(e.secret, 'v');
-    e = new EbacEncryptedValue();
-    e.upgrade();
-    e.getTypes();
+    it("upgrades and round-trips encrypted secrets", () => {
+        let e = new EbacCredential();
+        e.upgrade();
+        e.getTypes();
+        e = new EbacCredentialCommit();
+        e.upgrade();
+        e.getTypes();
+        e = new EbacCredentialRequest();
+        e.upgrade();
+        e.getTypes();
+        e = new EbacCredentials();
+        e.upgrade();
+        e.getTypes();
+        e = new EbacEncryptedSecret();
+        e.upgrade();
+        e.getTypes();
+        e.iv = e.id = e.secret = e.field = 'v';
+        e = EbacEncryptedSecret.fromEncryptableJson(JSON.parse(e.toEncryptableJson()));
+        assert.equal(e.iv, 'v');
+        assert.equal(e.id, 'v');
+        assert.equal(e.secret, 'v');
+        assert.equal(e.field, 'v');
+        e.iv = e.secret = 'v';
+        e = EbacEncryptedSecret.fromEncryptableJson(JSON.parse(e.toEncryptableJson()));
+        assert.equal(e.iv, 'v');
+        assert.equal(e.secret, 'v');
+        e = new EbacEncryptedValue();
+        e.upgrade();
+        e.getTypes();
+    });
 });
