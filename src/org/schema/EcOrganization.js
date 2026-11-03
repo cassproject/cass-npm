@@ -180,7 +180,7 @@ module.exports = class EcOrganization extends schema.Organization {
 				oldKey,
 				newKey
 			);
-			this.addOrgKey(newKey);
+			await this.addOrgKey(newKey);
 			let newKeys = await EcEncryptedValue.encryptValue(
 				this.ppkListToPemArrayString(await this.getOrgKeys()),
 				EcOrganization.ORG_PPK_SET_KEY,
@@ -281,7 +281,8 @@ module.exports = class EcOrganization extends schema.Organization {
 	upgrade(eim) {
 		super.upgrade();
 		this.movePersonMembersToEmployee();
-		this.moveKeyField(eim);
+		//upgrade() is synchronous; the key move finishes in the background as before.
+		void this.moveKeyField(eim);
 	}
 	/**
 	 *  Attempts to find and return the organization's fingerprint from the id.
