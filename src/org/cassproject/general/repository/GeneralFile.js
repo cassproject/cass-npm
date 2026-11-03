@@ -11,8 +11,8 @@ module.exports = class GeneralFile extends EcRemoteLinkedData {
 	constructor() {
 		super(General.context, GeneralFile.myType);
 	}
-	static TYPE_0_1 = "http://schema.eduworks.com/general/0.1/file";
-	static TYPE_0_2 = "http://schema.eduworks.com/general/0.2/file";
+	static TYPE_0_1 = "http://schema.eduworks.com/general/0.1/file"; // NOSONAR - JSON-LD identifier, never fetched
+	static TYPE_0_2 = "http://schema.eduworks.com/general/0.2/file"; // NOSONAR - JSON-LD identifier, never fetched
 	static myType = this.TYPE_0_2;
 	/**
 	 *  Optional checksum of the file, used to verify if the file has been

@@ -81,7 +81,8 @@ module.exports = class CSVExport extends Exporter {
 					if (fw.competency == null || fw.competency.length == 0)
 						failure("No Competencies in Framework");
 					for (let competencyUrl of fw.competency) {
-						EcRepository.get(
+						//Results arrive through the callbacks; the promise is not needed.
+						void EcRepository.get(
 							competencyUrl,
 							function (competency) {
 								CSVExport.frameworkCompetencies.push(
@@ -119,7 +120,7 @@ module.exports = class CSVExport extends Exporter {
 							}, repo, eim);
 					}
 					for (let relationUrl of fw.relation) {
-						EcRepository.get(
+						void EcRepository.get(
 							relationUrl,
 							function (relation) {
 								CSVExport.frameworkRelations.push(relation);

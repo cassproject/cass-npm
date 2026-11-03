@@ -29,7 +29,7 @@ https.get("https://credreg.net/ctdl/schema/encoding/json", (resp) => {
                 if (node["@id"] == "schema:Integer") continue;
                 if (node["@id"] == "schema:Float") continue;
                 if (node["@id"] == "schema:URL") continue;
-                fs.writeFileSync("src/org/credentialengine/" + node["@id"].split(":")[1] + ".js", codeGenerate(graph, node, "http://schema.eduworks.com/simpleCtdl"));
+                fs.writeFileSync("src/org/credentialengine/" + node["@id"].split(":")[1] + ".js", codeGenerate(graph, node, "http://schema.eduworks.com/simpleCtdl")); // NOSONAR - JSON-LD identifier, never fetched
             }
         }
         https.get("https://credreg.net/ctdlasn/schema/encoding/json", (resp) => {
@@ -55,7 +55,7 @@ https.get("https://credreg.net/ctdl/schema/encoding/json", (resp) => {
                         if (node["@id"] == "schema:Integer") continue;
                         if (node["@id"] == "schema:Float") continue;
                         if (node["@id"] == "schema:URL") continue;
-                        fs.writeFileSync("src/org/credentialengine/" + node["@id"].split(":")[1] + ".js", codeGenerate(graph, node, "http://schema.eduworks.com/simpleCtdl"));
+                        fs.writeFileSync("src/org/credentialengine/" + node["@id"].split(":")[1] + ".js", codeGenerate(graph, node, "http://schema.eduworks.com/simpleCtdl")); // NOSONAR - JSON-LD identifier, never fetched
                     }
                 }
             });

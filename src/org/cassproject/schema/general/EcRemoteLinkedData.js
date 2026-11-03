@@ -459,7 +459,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 		if (!id) return null;
 		let timestamp = id.substring(id.lastIndexOf("/") + 1);
 		if (timestamp.match("^[0-9]+$")) {
-			return parseInt(timestamp);
+			return Number.parseInt(timestamp);
 		} else {
 			return null;
 		}

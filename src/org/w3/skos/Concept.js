@@ -14,7 +14,7 @@ module.exports = class Concept extends EcRemoteLinkedData {
 		super("https://schema.cassproject.org/0.4/skos/", "Concept");
 	}
 
-	static TYPE_0_1 = "http://schema.cassproject.org/0.3/skos/Concept";
+	static TYPE_0_1 = "http://schema.cassproject.org/0.3/skos/Concept"; // NOSONAR - JSON-LD identifier, never fetched
 	static TYPE_0_2 = "https://schema.cassproject.org/0.3/skos/Concept";
 	static TYPE_0_3 = "https://schema.cassproject.org/0.4/skos/Concept";
 	static myType = this.TYPE_0_3;

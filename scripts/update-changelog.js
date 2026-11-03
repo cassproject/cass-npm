@@ -1,6 +1,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { formatLogLine } = require('./changelog-format');
 
 const packageJsonPath = path.join(__dirname, '..', 'package.json');
 const changelogPath = path.join(__dirname, '..', 'CHANGELOG.md');
@@ -20,7 +21,7 @@ const version = packageJson.version;
 
 let lastTag;
 try {
-    lastTag = execSync('git describe --tags --abbrev=0', { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim();
+    lastTag = execSync('git describe --tags --abbrev=0', { stdio: ['pipe', 'pipe', 'ignore'] }).toString().trim(); // NOSONAR - Developer script; runs the git on the developer's PATH
 } catch (e) {
     console.log('No tags found, starting from first commit.');
 }
@@ -37,15 +38,7 @@ try {
     process.exit(1);
 }
 
-const formattedLogs = logs.map(line => {
-    // Matches "hash (optional decorations) commit message"
-    const match = line.match(/^[a-f0-9]+\s+(.*)$/i);
-    if (!match) return null;
-    let msg = match[1];
-    // Remove git decorations like (HEAD -> ..., origin/...)
-    msg = msg.replace(/^\(.*\)\s+/, '');
-    return `* ${msg}`;
-}).filter(Boolean);
+const formattedLogs = logs.map(formatLogLine).filter(Boolean);
 
 if (formattedLogs.length === 0) {
     console.log('No new commits to add to changelog.');

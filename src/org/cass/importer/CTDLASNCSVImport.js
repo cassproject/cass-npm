@@ -369,7 +369,7 @@ module.exports = class CTDLASNCSVImport {
 							for (let i = val.length-1; i >=0; i--) {
 								if (!val[i].startsWith('http')) {
 									if (val[i] === "Deprecated" || val[i] === "Published" || val[i] === "Draft" ) {
-										val[i] = "http://credreg.net/ctdlasn/vocabs/publicationStatus/" + val[i];
+										val[i] = "http://credreg.net/ctdlasn/vocabs/publicationStatus/" + val[i]; // NOSONAR - JSON-LD identifier, never fetched
 									} else {
 										val.splice(i, 1);
 									}
@@ -610,7 +610,7 @@ module.exports = class CTDLASNCSVImport {
 							for (let i = val.length-1; i >=0; i--) {
 								if (!val[i].startsWith('http')) {
 									if (val[i] === "Deprecated" || val[i] === "Published" || val[i] === "Draft" ) {
-										val[i] = "http://credreg.net/ctdlasn/vocabs/publicationStatus/" + val[i];
+										val[i] = "http://credreg.net/ctdlasn/vocabs/publicationStatus/" + val[i]; // NOSONAR - JSON-LD identifier, never fetched
 									} else {
 										val.splice(i, 1);
 									}
@@ -1095,7 +1095,7 @@ module.exports = class CTDLASNCSVImport {
 							for (let i = val.length-1; i >=0; i--) {
 								if (!val[i].startsWith('http')) {
 									if (val[i] === "Deprecated" || val[i] === "Published" || val[i] === "Draft" ) {
-										val[i] = "http://credreg.net/ctdlasn/vocabs/publicationStatus/" + val[i];
+										val[i] = "http://credreg.net/ctdlasn/vocabs/publicationStatus/" + val[i]; // NOSONAR - JSON-LD identifier, never fetched
 									} else {
 										val.splice(i, 1);
 									}
@@ -1602,7 +1602,7 @@ module.exports = class CTDLASNCSVImport {
 			let timestamp = object.getTimestamp();
 			let date;
 			if (timestamp != null) {
-				date = new Date(parseInt(timestamp)).toISOString();
+				date = new Date(Number.parseInt(timestamp)).toISOString();
 			} else {
 				date = new Date().toISOString();
 			}

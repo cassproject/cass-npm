@@ -29,11 +29,6 @@ if (!String.prototype.endsWith) {
         return this.substring(this.length - end.length, this.length) == end;
     };
 }
-if (!String.prototype.trim) {
-    String.prototype.trim = function () {
-        return this.replace(/^\s+/, "").replace(/\s+$/, "");
-    };
-}
 if (!String.prototype.matches) {
     String.prototype.matches = function (regexp) {
         return this.match("^" + regexp + "$") != null;
@@ -127,65 +122,56 @@ let Short = Number;
 /* type conversion - approximative as Javascript only has integers and doubles */
 if (!Number.prototype.intValue) {
     Number.prototype.intValue = function () {
-        return parseInt(this);
+        return Number.parseInt(this);
     };
 }
 if (!Number.prototype.shortValue) {
     Number.prototype.shortValue = function () {
-        return parseInt(this);
+        return Number.parseInt(this);
     };
 }
 if (!Number.prototype.longValue) {
     Number.prototype.longValue = function () {
-        return parseInt(this);
+        return Number.parseInt(this);
     };
 }
 if (!Number.prototype.byteValue) {
     Number.prototype.byteValue = function () {
-        return parseInt(this);
+        return Number.parseInt(this);
     };
 }
 
 if (!Number.prototype.floatValue) {
     Number.prototype.floatValue = function () {
-        return parseFloat(this);
+        return Number.parseFloat(this);
     };
 }
 
 if (!Number.prototype.doubleValue) {
     Number.prototype.doubleValue = function () {
-        return parseFloat(this);
+        return Number.parseFloat(this);
     };
 }
 
-if (!Number.parseInt) {
-    Number.parseInt = parseInt;
-}
+// Number.parseInt, Number.parseFloat, Number.isNaN and String.prototype.trim are
+// built in to every engine this library runs on (ES2015+), so they need no polyfill.
 if (!Number.parseShort) {
-    Number.parseShort = parseInt;
+    Number.parseShort = Number.parseInt;
 }
 if (!Number.parseLong) {
-    Number.parseLong = parseInt;
+    Number.parseLong = Number.parseInt;
 }
 if (!Number.parseByte) {
-    Number.parseByte = parseInt;
+    Number.parseByte = Number.parseInt;
 }
 
 if (!Number.parseDouble) {
-    Number.parseDouble = parseFloat;
-}
-
-if (!Number.parseFloat) {
-    Number.parseFloat = parseFloat;
-}
-
-if (!Number.isNaN) {
-    Number.isNaN = isNaN;
+    Number.parseDouble = Number.parseFloat;
 }
 
 if (!Number.prototype.isNaN) {
     Number.prototype.isNaN = function () {
-        return isNaN(this);
+        return Number.isNaN(Number(this));
     };
 }
 if (!Number.prototype.equals) {

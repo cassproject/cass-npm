@@ -513,7 +513,7 @@ module.exports = class EcRepository {
 	};
 	static find(url, error, history, counter, success, failure, eim) {
 		if (
-			isNaN(counter) ||
+			Number.isNaN(Number(counter)) ||
 			counter == undefined ||
 			counter > this.repos.length ||
 			this.repos[counter] == null

@@ -9,7 +9,7 @@ module.exports = class VideoStory extends schema.VideoObject {
 	 */
 	constructor() {
 		super();
-		this.context = "http://schema.eduworks.com/angles/0.1/";
+		this.context = "http://schema.eduworks.com/angles/0.1/"; // NOSONAR - JSON-LD identifier, never fetched
 		this.type = "VideoStory";
 	}
 	/**

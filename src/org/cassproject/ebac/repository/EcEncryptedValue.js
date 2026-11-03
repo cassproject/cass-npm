@@ -584,7 +584,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 *  @memberOf EcEncryptedValue
 	 *  @method addReader
 	 */
-	addReader(newReader, eim) {
+	addReader(newReader, eim) { // NOSONAR - Re-encrypts asynchronously; the synchronous parent stays synchronous
 		super.addReader(newReader);
 		return this.decryptSecret(eim).then((decryptedSecret) => {
 			if (decryptedSecret == null) {
@@ -605,7 +605,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 *  @memberOf EcEncryptedValue
 	 *  @method removeReader
 	 */
-	removeReader(oldReader, eim) {
+	removeReader(oldReader, eim) { // NOSONAR - Re-encrypts asynchronously; the synchronous parent stays synchronous
 		return this.decryptSecret(eim).then((decryptedSecret) => {
 			if (this.reader != null) {
 				EcArray.setRemove(this.reader, oldReader.toPem());

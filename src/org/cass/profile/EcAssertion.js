@@ -19,20 +19,15 @@ module.exports = class EcAssertion extends Assertion {
 	async decrypt(eim) {
 		eim = eim || EcIdentityManager.default;
 		let a = new Assertion().copyFrom(this);
-		let subject = this.getSubject(eim);
-		let agent = this.getAgent(eim);
-		let assertionDate = this.getAssertionDate(eim);
-		let expirationDate = this.getExpirationDate(eim);
-		let evidences = this.getEvidences(eim);
-		let negative = this.getNegative(eim);
-		let decayFunction = this.getDecayFunction(eim);
-		subject = await subject;
-		agent = await agent;
-		assertionDate = await assertionDate;
-		expirationDate = await expirationDate;
-		evidences = await evidences;
-		negative = await negative;
-		decayFunction = await decayFunction;
+		const [subject, agent, assertionDate, expirationDate, evidences, negative, decayFunction] = await Promise.all([
+			this.getSubject(eim),
+			this.getAgent(eim),
+			this.getAssertionDate(eim),
+			this.getExpirationDate(eim),
+			this.getEvidences(eim),
+			this.getNegative(eim),
+			this.getDecayFunction(eim)
+		]);
 		if (subject)
 			a.setSubject(subject);
 		if (agent)
@@ -95,7 +90,7 @@ module.exports = class EcAssertion extends Assertion {
 	 *
 	 *  @param pk
 	 */
-	async setSubject(pk) {
+	async setSubject(pk) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		let owners = [];
 		let readers = null;
 		if (this.reader == null) 
@@ -188,7 +183,7 @@ module.exports = class EcAssertion extends Assertion {
 		if (decryptedString == null) return null;
 		return EcPk.fromPem(decryptedString);
 	}
-	async setAgent(pk) {
+	async setAgent(pk) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		this.agent = await EcEncryptedValue.encryptValue(
 			pk.toPem(),
 			this.id,
@@ -295,9 +290,9 @@ module.exports = class EcAssertion extends Assertion {
 				.catch((error) => null);
 		}
 		if (decryptedString == null) return null;
-		return parseInt(decryptedString);
+		return Number.parseInt(decryptedString);
 	}
-	async setAssertionDate(assertionDateMs) {
+	async setAssertionDate(assertionDateMs) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		this.assertionDate = await EcEncryptedValue.encryptValue(
 			assertionDateMs.toString(),
 			this.id,
@@ -331,7 +326,7 @@ module.exports = class EcAssertion extends Assertion {
 		let decrypted = function (decryptedString) {
 			if (decryptedString == null)
 				failure("Could not decrypt assertion date.");
-			else success(parseInt(decryptedString));
+			else success(Number.parseInt(decryptedString));
 		};
 		let codebook = Assertion.getCodebook(this);
 		if (codebook != null)
@@ -358,9 +353,9 @@ module.exports = class EcAssertion extends Assertion {
 				.catch((error) => null);
 		}
 		if (decryptedString == null) return null;
-		return parseInt(decryptedString);
+		return Number.parseInt(decryptedString);
 	}
-	async setExpirationDate(expirationDateMs) {
+	async setExpirationDate(expirationDateMs) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		this.expirationDate = await EcEncryptedValue.encryptValue(
 			expirationDateMs.toString(),
 			this.id,
@@ -394,7 +389,7 @@ module.exports = class EcAssertion extends Assertion {
 		let decrypted = function (decryptedString) {
 			if (decryptedString == null)
 				failure("Could not decrypt expiration date.");
-			else success(parseInt(decryptedString));
+			else success(Number.parseInt(decryptedString));
 		};
 		let codebook = Assertion.getCodebook(this);
 		if (codebook != null)
@@ -498,7 +493,7 @@ module.exports = class EcAssertion extends Assertion {
 		if (decryptedString == null) return null;
 		return decryptedString;
 	}
-	async setDecayFunction(decayFunctionText) {
+	async setDecayFunction(decayFunctionText) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		this.decayFunction = await EcEncryptedValue.encryptValue(
 			decayFunctionText.toString(),
 			this.id,
@@ -561,7 +556,7 @@ module.exports = class EcAssertion extends Assertion {
 		if (decryptedString != null) decryptedString.toLowerCase();
 		return "true" == decryptedString;
 	}
-	async setNegative(negativeB) {
+	async setNegative(negativeB) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		this.negative = await EcEncryptedValue.encryptValue(
 			negativeB.toString(),
 			this.id,
@@ -619,7 +614,7 @@ module.exports = class EcAssertion extends Assertion {
 	setConfidence(confidenceZeroToOne) {
 		this.confidence = confidenceZeroToOne;
 	}
-	async setEvidence(evidences) {
+	async setEvidence(evidences) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		let encryptedValues = [];
 		for (let i = 0; i < evidences.length; i++)
 			encryptedValues.push(
