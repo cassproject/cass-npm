@@ -1,6 +1,6 @@
 const chai = require('chai');
 const { execSync } = require('child_process');
-const { formatLogLine } = require('../../scripts/changelog-format.js');
+const { formatLogLine } = require('./changelog-format.js');
 
 const assert = chai.assert;
 

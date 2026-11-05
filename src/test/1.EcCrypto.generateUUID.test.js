@@ -15,7 +15,8 @@ function withFixedEntropy(k, fn) {
     const stubs = [sinon.stub(Math, 'random').returns(k / 16)];
     const fill = (array) => { array.fill(k); return array; };
     stubs.push(sinon.stub(globalThis.crypto, 'getRandomValues').callsFake(fill));
-    if (realCrypto.webcrypto !== globalThis.crypto)
+    // Bundled for the browser, the crypto module has no webcrypto.
+    if (realCrypto.webcrypto && realCrypto.webcrypto !== globalThis.crypto)
         stubs.push(sinon.stub(realCrypto.webcrypto, 'getRandomValues').callsFake(fill));
     try {
         return fn();
