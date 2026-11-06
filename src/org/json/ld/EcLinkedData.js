@@ -181,7 +181,7 @@ global.jsonld = require("jsonld");
 	 */
 	getFullType() {
 		if (this.context == null) return this.type;
-		if (this.type.indexOf("http") != -1) return this.type;
+		if (this.type.includes("http")) return this.type;
 		let computedType = this.context;
 		if (EcObject.isObject(this.context)) {
 			let typeParts = this.type.split(":");
@@ -266,7 +266,6 @@ global.jsonld = require("jsonld");
 		}
 	}
 	async recast(translationContext, targetContext, documentLoader) {
-		let me = this;
 		let json = JSON.parse(this.toJson());
 		if (targetContext == null) targetContext = json["@context"];
 		json["@context"] = translationContext;
@@ -286,15 +285,15 @@ global.jsonld = require("jsonld");
 		let o;
 		try {
 			o = await jsonld.compact(actual, finalTargetContext, docLoader);
-		} catch(s) {
-			if (s != null) {
-				global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcLinkedDataRecast", s);
+		} catch(error_) {
+			if (error_ != null) {
+				global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcLinkedDataRecast", error_);
 				return;
 			}
 		}
-		me.copyFrom(o);
-		me["@context"] = finalTargetContext;
-		return me;
+		this.copyFrom(o);
+		this["@context"] = finalTargetContext;
+		return this;
 	}
 	/**
 	 *  Encodes the object in a form where it is ready to be signed.
@@ -307,7 +306,7 @@ global.jsonld = require("jsonld");
 		let d = JSON.parse(this.toJson());
 		if (
 			this.type.indexOf("http://schema.eduworks.com/") == 0 && // NOSONAR - JSON-LD identifier, never fetched
-			this.type.indexOf("/0.1/") != -1
+			this.type.includes("/0.1/")
 		) {
 			delete d["signature"];
 			delete d["owner"];
@@ -377,10 +376,9 @@ global.jsonld = require("jsonld");
 		return a;
 	}
 	async compact(remoteContextUrl, success, failure) {
-		let me = this;
 		try {
 			let compacted = await jsonld.compact(this.toJson(),	remoteContextUrl);
-			me.copyFrom(compacted);
+			this.copyFrom(compacted);
 			success(this);
 		} catch(err) {
 			if (err != null) {
