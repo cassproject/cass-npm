@@ -4,7 +4,7 @@ const EcPpkFacade = require("../../../../com/eduworks/ec/crypto/EcPpkFacade");
 const EcRsaOaepAsyncWorker = require("../../../../com/eduworks/ec/crypto/EcRsaOaepAsyncWorker");
 const {cassReturnAsPromise, cassPromisify} = require("../../../../com/eduworks/ec/promises/helpers");
 const EbacSignature = require("../../../../com/eduworks/schema/ebac/EbacSignature");
-let realCrypto = require('crypto');
+let realCrypto = require('crypto'); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "crypto", but webpack rejects "node:" URIs.
 
 /**
  *  Manages identities and contacts, provides hooks to respond to identity and
@@ -20,8 +20,6 @@ let realCrypto = require('crypto');
  */
 module.exports = class EcIdentityManager {
 	static default = new this();
-	constructor() {
-	}
 	eimId = EcCrypto.generateUUID();
 	/**
 	 *  The current user's owned identities (keys+displayName)
@@ -97,17 +95,16 @@ module.exports = class EcIdentityManager {
 			return;
 		}
 		let c = JSON.parse(localStore);
-		for (let i = 0; i < c.length; i++) {
+		for (const o of c) {
 			let contact = new EcContact();
-			let o = c[i];
 			let props = o;
 			contact.displayName = props["displayName"];
 			contact.pk = EcPk.fromPem(props["pk"]);
 			contact.source = props["source"];
 			let cont = false;
-			for (let j = 0; j < this.contacts.length; j++) {
+			for (const existing of this.contacts) {
 				if (
-					this.contacts[j].pk.toPem() ==
+					existing.pk.toPem() ==
 					contact.pk.toPem()
 				) {
 					cont = true;
@@ -128,10 +125,9 @@ module.exports = class EcIdentityManager {
 	 */
 	saveContacts() {
 		let c = [];
-		for (let i = 0; i < this.contacts.length; i++) {
+		for (const contact of this.contacts) {
 			let o = {};
 			let props = o;
-			let contact = this.contacts[i];
 			props["displayName"] = contact.displayName;
 			props["pk"] = contact.pk.toPem();
 			props["source"] = contact.source;
@@ -153,17 +149,16 @@ module.exports = class EcIdentityManager {
 			return;
 		}
 		let c = JSON.parse(localStore);
-		for (let i = 0; i < c.length; i++) {
+		for (const o of c) {
 			let identity = new EcIdentity();
-			let o = c[i];
 			let props = o;
 			identity.displayName = props["displayName"];
 			identity.ppk = EcPpk.fromPem(props["ppk"]);
 			identity.source = props["source"];
 			let cont = false;
-			for (let j = 0; j < this.ids.length; j++) {
+			for (const existing of this.ids) {
 				if (
-					this.ids[j].ppk.toPem() == identity.ppk.toPem()
+					existing.ppk.toPem() == identity.ppk.toPem()
 				) {
 					cont = true;
 				}
@@ -183,10 +178,9 @@ module.exports = class EcIdentityManager {
 	 */
 	saveIdentities() {
 		let c = [];
-		for (let i = 0; i < this.ids.length; i++) {
+		for (const identity of this.ids) {
 			let o = {};
 			let props = o;
-			let identity = this.ids[i];
 			props["displayName"] = identity.displayName;
 			props["ppk"] = identity.ppk.toPem();
 			props["source"] = identity.source;
@@ -229,8 +223,8 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	addIdentity(identity) {
-		for (let i = 0; i < this.ids.length; i++) {
-			if (this.ids[i].equals(identity)) {
+		for (const id of this.ids) {
+			if (id.equals(identity)) {
 				return;
 			}
 		}
@@ -247,8 +241,8 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	addIdentityQuietly(identity) {
-		for (let i = 0; i < this.ids.length; i++) {
-			if (this.ids[i].equals(identity)) {
+		for (const id of this.ids) {
+			if (id.equals(identity)) {
 				return;
 			}
 		}
@@ -264,29 +258,29 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	addContact(contact) {
-		for (let i = 0; i < this.ids.length; i++) {
+		for (const id of this.ids) {
 			if (
-				this.ids[i].ppk
+				id.ppk
 					.toPk()
 					.toPem()
 					.equals(contact.pk.toPem())
 			) {
-				this.ids[i].displayName = contact.displayName;
-				this.identityChanged(this.ids[i]);
+				id.displayName = contact.displayName;
+				this.identityChanged(id);
 			}
 		}
-		for (let i = 0; i < this.contacts.length; i++) {
+		for (const existing of this.contacts) {
 			if (
-				this.contacts[i].pk
+				existing.pk
 					.toPem()
 					.equals(contact.pk.toPem())
 			) {
-				this.contacts[i].displayName = contact.displayName;
-				this.contactChanged(this.contacts[i]);
+				existing.displayName = contact.displayName;
+				this.contactChanged(existing);
 			}
 		}
-		for (let i = 0; i < this.contacts.length; i++) {
-			if (this.contacts[i].equals(contact)) {
+		for (const existing of this.contacts) {
+			if (existing.equals(contact)) {
 				return;
 			}
 		}
@@ -303,27 +297,27 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	addContactQuietly(contact) {
-		for (let i = 0; i < this.ids.length; i++) {
+		for (const id of this.ids) {
 			if (
-				this.ids[i].ppk
+				id.ppk
 					.toPk()
 					.toPem()
 					.equals(contact.pk.toPem())
 			) {
-				this.ids[i].displayName = contact.displayName;
+				id.displayName = contact.displayName;
 			}
 		}
-		for (let i = 0; i < this.contacts.length; i++) {
+		for (const existing of this.contacts) {
 			if (
-				this.contacts[i].pk
+				existing.pk
 					.toPem()
 					.equals(contact.pk.toPem())
 			) {
-				this.contacts[i].displayName = contact.displayName;
+				existing.displayName = contact.displayName;
 			}
 		}
-		for (let i = 0; i < this.contacts.length; i++) {
-			if (this.contacts[i].equals(contact)) {
+		for (const existing of this.contacts) {
+			if (existing.equals(contact)) {
 				return;
 			}
 		}
@@ -356,7 +350,7 @@ module.exports = class EcIdentityManager {
 		if (this.signatureSheetCaching) {
 			cache = this.signatureSheetCache[server];
 			if (cache != null) {
-				if (cache[0] > new Date().getTime() + duration) {
+				if (cache[0] > Date.now() + duration) {
 					return cassReturnAsPromise(cache[1], success, failure);
 				}
 			}
@@ -371,12 +365,12 @@ module.exports = class EcIdentityManager {
 			);
 		let p = Promise.all(promises);
 		p = p.then((signatureCandidates) => {
-			let signatures = signatureCandidates.filter(x=>x);
+			let signatures = signatureCandidates.filter(Boolean);
 			let cache = null;
 			let stringified = JSON.stringify(signatures);
 			if (this.signatureSheetCaching) {
 				cache = [];
-				cache[0] = new Date().getTime() + finalDuration;
+				cache[0] = Date.now() + finalDuration;
 				cache[1] = stringified;
 				this.signatureSheetCache[server] = cache;
 			}
@@ -401,7 +395,7 @@ module.exports = class EcIdentityManager {
 		if (this.signatureSheetCaching) {
 			cache = this.signatureSheetCache[server];
 			if (cache != null) {
-				if (cache[0] > new Date().getTime() + duration) {
+				if (cache[0] > Date.now() + duration) {
 					return cassReturnAsPromise(cache[1], success, failure);
 				}
 			}
@@ -413,12 +407,12 @@ module.exports = class EcIdentityManager {
 		);
 		let p = Promise.all(promises);
 		p = p.then((signatureCandidates) => {
-			let signatures = signatureCandidates.filter(x=>x);
+			let signatures = signatureCandidates.filter(Boolean);
 			let stringified = JSON.stringify(signatures);
 			if (this.signatureSheetCaching) {
 				let cache = null;
 				cache = [];
-				cache[0] = new Date().getTime() + finalDuration;
+				cache[0] = Date.now() + finalDuration;
 				cache[1] = stringified;
 				this.signatureSheetCache[server] = cache;
 			}
@@ -440,7 +434,7 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	createSignature(duration, server, ppk, algorithm) {
-		if (typeof process !== 'undefined' && process && process.env && process.env.FIPS == null && realCrypto.getFips && realCrypto.getFips() == 1)
+		if (typeof process !== 'undefined' && process?.env && process.env.FIPS == null && realCrypto.getFips?.() == 1)
 		{
 			algorithm = "SHA-256";
 		}
@@ -448,7 +442,7 @@ module.exports = class EcIdentityManager {
 			return null;
 		}
 		let s = new EbacSignature();
-		s.expiry = new Date().getTime() + duration;
+		s.expiry = Date.now() + duration;
 		s.server = server;
 		delete s.owner;
 		delete s.signature;
@@ -475,9 +469,9 @@ module.exports = class EcIdentityManager {
 	 */
 	getPpk(fromPem) {
 		let pem = fromPem.toPem();
-		for (let i = 0; i < this.ids.length; i++) {
-			if (pem == this.ids[i].ppk.toPk().toPem()) {
-				return this.ids[i].ppk;
+		for (const id of this.ids) {
+			if (pem == id.ppk.toPk().toPem()) {
+				return id.ppk;
 			}
 		}
 		return null;
@@ -492,9 +486,9 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	getContact(pk) {
-		for (let i = 0; i < this.contacts.length; i++) {
-			if (pk.equals(this.contacts[i].pk)) {
-				return this.contacts[i];
+		for (const contact of this.contacts) {
+			if (pk.equals(contact.pk)) {
+				return contact;
 			}
 		}
 		return null;
@@ -509,9 +503,9 @@ module.exports = class EcIdentityManager {
 	 *  @static
 	 */
 	getIdentity(pk) {
-		for (let i = 0; i < this.ids.length; i++) {
-			if (pk.equals(this.ids[i].ppk.toPk())) {
-				return this.ids[i];
+		for (const id of this.ids) {
+			if (pk.equals(id.ppk.toPk())) {
+				return id;
 			}
 		}
 		return null;
@@ -527,9 +521,9 @@ module.exports = class EcIdentityManager {
 	async sign(d) {
 		let promises = [];
 		if (d.owner != null) {
-			for (let i = 0; i < d.owner.length; i++) {
+			for (const owner of d.owner) {
 				let attempt = this.getPpk(
-					EcPk.fromPem(d.owner[i])
+					EcPk.fromPem(owner)
 				);
 				if (attempt != null) {
 					promises.push(d.signWith(attempt));
@@ -537,8 +531,8 @@ module.exports = class EcIdentityManager {
 			}
 		}
 		return Promise.all(promises).then((signatures) => {
-			d.signatureSha256 = signatures.filter(x=>x);
-			if (d.signatureSha256 != null && d.signatureSha256.length == 0) {
+			d.signatureSha256 = signatures.filter(Boolean);
+			if (d.signatureSha256?.length == 0) {
 				delete d["signatureSha256"];
 				delete d["signature"];
 			}
@@ -552,12 +546,12 @@ module.exports = class EcIdentityManager {
 				searchString += " OR ";
 			}
 			searchString +=
-				'\\*reader:"' +
+				String.raw`\*reader:"` +
 				this.ids[i].ppk.toPk().toPem() +
 				'"';
 			searchString += " OR ";
 			searchString +=
-				'\\*owner:"' +
+				String.raw`\*owner:"` +
 				this.ids[i].ppk.toPk().toPem() +
 				'"';
 		}
@@ -566,8 +560,8 @@ module.exports = class EcIdentityManager {
 	getMyPks() {
 		let pks = [];
 		if (this.ids == null) return pks;
-		for (let i = 0; i < this.ids.length; i++)
-			pks.push(this.ids[i].ppk.toPk());
+		for (const id of this.ids)
+			pks.push(id.ppk.toPk());
 		return pks;
 	}
 };
