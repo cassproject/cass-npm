@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.20
+              Version: 5.0.22
             </div>
             
         </div>
@@ -1117,7 +1117,7 @@ module.exports = class VideoStory extends schema.VideoObject {
 	 */
 	constructor() {
 		super();
-		this.context = &quot;http://schema.eduworks.com/angles/0.1/&quot;;
+		this.context = &quot;http://schema.eduworks.com/angles/0.1/&quot;; // NOSONAR - JSON-LD identifier, never fetched
 		this.type = &quot;VideoStory&quot;;
 	}
 	/**

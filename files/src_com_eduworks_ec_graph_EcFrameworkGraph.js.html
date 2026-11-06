@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.20
+              Version: 5.0.22
             </div>
             
         </div>
@@ -1319,9 +1319,9 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		if (negative) {
 			let msc = this.getMetaStateCompetency(competency);
 			for (let assertion of assertions) {
-				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc.positiveAssertion?.some(a =&gt; a.registration == assertion.registration))
+				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc?.positiveAssertion?.some(a =&gt; a.registration == assertion.registration))
 					continue;
-				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc.negativeAssertion?.some(a =&gt; a.registration == assertion.registration))
+				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc?.negativeAssertion?.some(a =&gt; a.registration == assertion.registration))
 					continue;
 				this.addToMetaStateArray(
 					msc,
@@ -1359,9 +1359,9 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		} else {
 			let msc = this.getMetaStateCompetency(competency);
 			for (let assertion of assertions) {
-				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc.positiveAssertion?.some(a =&gt; a.registration == assertion.registration))
+				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc?.positiveAssertion?.some(a =&gt; a.registration == assertion.registration))
 					continue;
-				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc.negativeAssertion?.some(a =&gt; a.registration == assertion.registration))
+				if (visited.length &gt; 1 &amp;&amp; assertion.registration &amp;&amp; msc?.negativeAssertion?.some(a =&gt; a.registration == assertion.registration))
 					continue;
 				this.addToMetaStateArray(
 					msc,

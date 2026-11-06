@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.20
+              Version: 5.0.22
             </div>
             
         </div>
@@ -1414,7 +1414,7 @@ global.jsonld = require(&quot;jsonld&quot;);
 	toSignableJson() {
 		let d = JSON.parse(this.toJson());
 		if (
-			this.type.indexOf(&quot;http://schema.eduworks.com/&quot;) == 0 &amp;&amp;
+			this.type.indexOf(&quot;http://schema.eduworks.com/&quot;) == 0 &amp;&amp; // NOSONAR - JSON-LD identifier, never fetched
 			this.type.indexOf(&quot;/0.1/&quot;) != -1
 		) {
 			delete d[&quot;signature&quot;];

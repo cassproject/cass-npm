@@ -2,7 +2,7 @@
     "project": {
         "name": "CaSS Library",
         "description": "CaSS Library API: A library of tools for working with the Competency and Skills System (CaSS).",
-        "version": "5.0.20",
+        "version": "5.0.22",
         "url": "http://devs.cassproject.org/",
         "logo": "http://eduworks.com/img/eduworks-ring-e.png"
     },
@@ -10722,7 +10722,7 @@
             "module": "com.eduworks.ec",
             "namespace": "",
             "file": "src/com/eduworks/ec/crypto/EcCrypto.js",
-            "line": 2,
+            "line": 3,
             "author": "Fritz"
         },
         "EcPk": {
@@ -27452,7 +27452,7 @@
         },
         {
             "file": "src/com/eduworks/ec/crypto/EcCrypto.js",
-            "line": 7,
+            "line": 8,
             "description": "Turn on (default off) caching of decrypted data.",
             "itemtype": "property",
             "name": "caching",
@@ -27462,7 +27462,7 @@
         },
         {
             "file": "src/com/eduworks/ec/crypto/EcCrypto.js",
-            "line": 19,
+            "line": 20,
             "description": "Calculate MD5 hash of a string.",
             "params": [
                 {
@@ -27483,7 +27483,7 @@
         },
         {
             "file": "src/com/eduworks/ec/crypto/EcCrypto.js",
-            "line": 43,
+            "line": 44,
             "description": "Calculate SHA-256 hash of a string.",
             "params": [
                 {
@@ -35800,7 +35800,7 @@
         },
         {
             "file": "src/org/cass/profile/EcAssertion.js",
-            "line": 91,
+            "line": 86,
             "description": "Sets the subject of an assertion. Makes a few assumptions: Owners of the\nobject should be able to see and change the encrypted value. Owners and\nreaders of the object should be persisted.",
             "params": [
                 {
@@ -78229,7 +78229,7 @@
         },
         {
             "file": "src/org/schema/EcOrganization.js",
-            "line": 286,
+            "line": 287,
             "description": "Attempts to find and return the organization's fingerprint from the id.",
             "return": {
                 "description": "",
@@ -78242,7 +78242,7 @@
         },
         {
             "file": "src/org/schema/EcOrganization.js",
-            "line": 295,
+            "line": 296,
             "description": "Attempts to find and return the organization's fingerprint from the id.",
             "return": {
                 "description": "",
@@ -100778,7 +100778,7 @@
         },
         {
             "message": "Missing item type\nSets the subject of an assertion. Makes a few assumptions: Owners of the\nobject should be able to see and change the encrypted value. Owners and\nreaders of the object should be persisted.",
-            "line": " src/org/cass/profile/EcAssertion.js:91"
+            "line": " src/org/cass/profile/EcAssertion.js:86"
         },
         {
             "message": "Missing item type\nReturns true if the identity manager is global. Returns false if the identity manager is local to the server.",

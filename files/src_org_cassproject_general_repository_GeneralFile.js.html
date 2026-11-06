@@ -1095,7 +1095,7 @@
             
             
             <div class="version-info">
-              Version: 5.0.20
+              Version: 5.0.22
             </div>
             
         </div>
@@ -1119,8 +1119,8 @@ module.exports = class GeneralFile extends EcRemoteLinkedData {
 	constructor() {
 		super(General.context, GeneralFile.myType);
 	}
-	static TYPE_0_1 = &quot;http://schema.eduworks.com/general/0.1/file&quot;;
-	static TYPE_0_2 = &quot;http://schema.eduworks.com/general/0.2/file&quot;;
+	static TYPE_0_1 = &quot;http://schema.eduworks.com/general/0.1/file&quot;; // NOSONAR - JSON-LD identifier, never fetched
+	static TYPE_0_2 = &quot;http://schema.eduworks.com/general/0.2/file&quot;; // NOSONAR - JSON-LD identifier, never fetched
 	static myType = this.TYPE_0_2;
 	/**
 	 *  Optional checksum of the file, used to verify if the file has been
