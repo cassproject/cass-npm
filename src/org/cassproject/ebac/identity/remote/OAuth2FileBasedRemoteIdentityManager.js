@@ -23,8 +23,7 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 					hello.init(o);
 					this.oauthEnabled = true;
 					initialized();
-				} catch (ex) {
-					// hello.js missing, a bad configuration or no initialized() hook: run without OAuth.
+				} catch (ex) { // NOSONAR - hello.js missing, a bad configuration or no initialized() hook: run without OAuth.
 					this.oauthEnabled = false;
 				}
 			},

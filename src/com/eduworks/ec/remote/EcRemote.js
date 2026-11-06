@@ -191,7 +191,7 @@ module.exports = class EcRemote {
 			
  			const contentType = response.headers.get("content-type");
 			let result = null;
-			if (contentType && contentType.includes("application/json")) {
+			if (contentType?.includes("application/json")) {
 				result = await response.json();
 			} else {
 				result = await response.text();
@@ -266,7 +266,7 @@ module.exports = class EcRemote {
 			
 			const contentType = response.headers.get("content-type");
 			let result = null;
-			if (contentType && contentType.includes("application/json")) {
+			if (contentType?.includes("application/json")) {
 				result = await response.json();
 			} else {
 				result = await response.text();
@@ -351,7 +351,7 @@ module.exports = class EcRemote {
 			}
 			const contentType = response.headers.get("content-type");
 			let result = null;
-			if (contentType && contentType.includes("application/json")) {
+			if (contentType?.includes("application/json")) {
 				result = await response.json();
 			} else {
 				result = await response.text();

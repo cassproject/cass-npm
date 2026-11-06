@@ -18,8 +18,7 @@ function setVersionIdentifier(f) {
 					},
 					"ceterms:identifierType": parts.length > 2 ? parts[2] : undefined
 				};
-			} catch (e) {
-				// A value that cannot be split (not a string) is dropped from the list.
+			} catch (e) { // NOSONAR - A value that cannot be split (not a string) is dropped from the list.
 				delete f["ceterms:versionIdentifier"][i];
 			}
 		}

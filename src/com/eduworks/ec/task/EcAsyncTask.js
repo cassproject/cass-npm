@@ -90,23 +90,23 @@ module.exports = class EcAsyncTask {
 		return ret;
 	}
 	invoke0 = function() {
-		let ret = this.job.call(this, () => this.setComplete());
+		let ret = this.job(() => this.setComplete());
 		return ret;
 	};
 	invoke1 = function(arg1) {
-		let ret = this.job.call(this, arg1, () => this.setComplete());
+		let ret = this.job(arg1, () => this.setComplete());
 		return ret;
 	};
 	invoke2 = function(arg1, arg2) {
-		let ret = this.job.call(this, arg1, arg2, () => this.setComplete());
+		let ret = this.job(arg1, arg2, () => this.setComplete());
 		return ret;
 	};
 	invoke3 = function(arg1, arg2, arg3) {
-		let ret = this.job.call(this, arg1, arg2, arg3, () => this.setComplete());
+		let ret = this.job(arg1, arg2, arg3, () => this.setComplete());
 		return ret;
 	};
 	invoke4 = function(arg1, arg2, arg3, arg4) {
-		let ret = this.job.call(this, arg1, arg2, arg3, arg4, () => this.setComplete());
+		let ret = this.job(arg1, arg2, arg3, arg4, () => this.setComplete());
 		return ret;
 	};
 };
