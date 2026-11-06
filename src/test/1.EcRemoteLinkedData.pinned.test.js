@@ -409,6 +409,8 @@ describe("EcRemoteLinkedData / EcLinkedData (pinned behaviour)", () => {
 					err = e;
 				}
 				expect(err).to.be.instanceOf(Error);
+				expect(err.constructor).to.equal(Error);
+				expect(err.toString()).to.equal("Error: " + msg);
 				expect(err.message).to.equal(msg);
 			});
 		}
