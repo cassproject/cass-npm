@@ -47,6 +47,14 @@ describe("EcAssertion setters (pinned behaviour)", () => {
 				expect(a.subject).to.deep.equal({ enc: "PEM", owners: ["so", "o1"], readers: [{ k: "r1" }, "sr", "PEM"] });
 				expect(a.subject.readers[0]).to.not.equal(a.reader[0]);
 			});
+			it(`${label}: copies a Proxy-wrapped reader array (as reactive UI state would hold)`, async () => {
+				stubEncrypt();
+				let a = mk();
+				a.reader = new Proxy(["r1"], {});
+				await run(a, pk("PEM"));
+				expect(a.subject.readers).to.deep.equal(["r1", "PEM"]);
+				expect(Array.isArray(a.subject.readers)).to.equal(true);
+			});
 			it(`${label}: works without owners or readers`, async () => {
 				stubEncrypt();
 				let a = mk();
