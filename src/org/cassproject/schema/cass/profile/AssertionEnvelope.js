@@ -88,7 +88,6 @@ module.exports = class AssertionEnvelope extends schema.CreativeWork {
 	 *  @method addAssertion
 	 */
 	async addAssertion(a, eim) {
-		let me = this;
 		let ac = new AssertionCodebook();
 		if (this.assertion == null) this.assertion = [];
 		this.assertion.push(a);
@@ -105,9 +104,8 @@ module.exports = class AssertionEnvelope extends schema.CreativeWork {
 			ac.decayFunction = await a.decayFunction.decryptSecret(eim);
 		if (a.negative != null) ac.negative = await a.negative.decryptSecret(eim);
 		if (a.evidence != null)
-			for (let i = 0; i < a.evidence.length; i++) {
+			for (let ecEncryptedValue of a.evidence) {
 				if (ac.evidence == null) ac.evidence = [];
-				let ecEncryptedValue = a.evidence[i];
 				ac.evidence.push(await ecEncryptedValue.decryptSecret(eim));
 			}
 	}
@@ -119,8 +117,8 @@ module.exports = class AssertionEnvelope extends schema.CreativeWork {
 	 */
 	validate() {
 		if (this.assertion != null)
-			for (let i = 0; i < this.assertion.length; i++)
-				if (this.assertion[i].invalid()) return false;
+			for (let assertion of this.assertion)
+				if (assertion.invalid()) return false;
 		return true;
 	}
 };

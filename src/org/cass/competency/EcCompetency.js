@@ -18,12 +18,11 @@ require("../../cassproject/general/AuditLogger.js");
 module.exports = class EcCompetency extends Competency {
 	constructor() {
 		super();
-		let me = this;
 		if (EcCompetency.template != null) {
 			let you = EcCompetency.template;
 			for (let key in you) {
 				if (typeof you[key] != "function")
-					me[key.replace("@", "")] = you[key];
+					this[key.replace("@", "")] = you[key];
 			}
 		}
 	}

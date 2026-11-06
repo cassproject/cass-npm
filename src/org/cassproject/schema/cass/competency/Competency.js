@@ -37,9 +37,8 @@ module.exports = class Competency extends schema.CreativeWork {
 				this.sameAs = this.url;
 				this.url = null;
 			}
-			let me = this;
-			if (me["@context"] == null && me["@schema"] != null)
-				me["@context"] = me["@schema"];
+			if (this["@context"] == null && this["@schema"] != null)
+				this["@context"] = this["@schema"];
 			this.setContextAndType(Cass.context_0_2, Competency.TYPE_0_2);
 		}
 		if (Competency.TYPE_0_2 == this.getFullType()) {
@@ -56,13 +55,13 @@ module.exports = class Competency extends schema.CreativeWork {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(Competency.TYPE_0_6);
-		a.push(Competency.TYPE_0_5);
-		a.push(Competency.TYPE_0_4);
-		a.push(Competency.TYPE_0_3);
-		a.push(Competency.TYPE_0_2);
-		a.push(Competency.TYPE_0_1);
-		return a;
+		return [
+			Competency.TYPE_0_6,
+			Competency.TYPE_0_5,
+			Competency.TYPE_0_4,
+			Competency.TYPE_0_3,
+			Competency.TYPE_0_2,
+			Competency.TYPE_0_1,
+		];
 	}
 };

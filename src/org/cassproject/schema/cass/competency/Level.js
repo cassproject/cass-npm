@@ -48,9 +48,8 @@ module.exports = class Level extends schema.CreativeWork {
 	upgrade() {
 		super.upgrade();
 		if (Level.TYPE_0_1 == (this.type)) {
-			let me = this;
-			if (me["@context"] == null && me["@schema"] != null)
-				me["@context"] = me["@schema"];
+			if (this["@context"] == null && this["@schema"] != null)
+				this["@context"] = this["@schema"];
 			this.setContextAndType(Cass.context_0_2, Level.TYPE_0_2);
 		}
 		if (Level.TYPE_0_2 == (this.getFullType())) {
@@ -67,13 +66,13 @@ module.exports = class Level extends schema.CreativeWork {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(Level.TYPE_0_6);
-		a.push(Level.TYPE_0_5);
-		a.push(Level.TYPE_0_4);
-		a.push(Level.TYPE_0_3);
-		a.push(Level.TYPE_0_2);
-		a.push(Level.TYPE_0_1);
-		return a;
+		return [
+			Level.TYPE_0_6,
+			Level.TYPE_0_5,
+			Level.TYPE_0_4,
+			Level.TYPE_0_3,
+			Level.TYPE_0_2,
+			Level.TYPE_0_1,
+		];
 	}
 };
