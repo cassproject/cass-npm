@@ -1,5 +1,5 @@
 const forge = require("node-forge");
-const realCrypto = require('crypto');
+const realCrypto = require('crypto'); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "crypto", but webpack rejects "node:" URIs.
 const base64 = require("base64-arraybuffer");
 
 /**

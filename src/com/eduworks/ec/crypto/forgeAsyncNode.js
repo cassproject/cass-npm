@@ -3,6 +3,14 @@ function isPromise(obj) {
   return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function'
 }
 
+function tryCatchFunc(callback, message) {
+  try {
+    return { res: callback(message) }
+  } catch (e) {
+    return { err: e }
+  }
+}
+
 function registerPromiseWorker(callback) {
   function postOutgoingMessage(e, messageId, error, result) {
     function postMessage(msg) {
@@ -26,14 +34,6 @@ function registerPromiseWorker(callback) {
       }])
     } else {
       postMessage([messageId, null, result])
-    }
-  }
-
-  function tryCatchFunc(callback, message) {
-    try {
-      return { res: callback(message) }
-    } catch (e) {
-      return { err: e }
     }
   }
 
