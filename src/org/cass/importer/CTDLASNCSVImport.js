@@ -19,10 +19,59 @@ function setVersionIdentifier(f) {
 					"ceterms:identifierType": parts.length > 2 ? parts[2] : undefined
 				};
 			} catch (e) {
+				// A value that cannot be split (not a string) is dropped from the list.
 				delete f["ceterms:versionIdentifier"][i];
 			}
 		}
 	}
+}
+
+const CTID_PATTERN = /^ce-[0-9a-fA-F-]+$/;
+
+function isCtidOrAllowedRegistryUrl(value, allowedOrigins) {
+	if (value === "" || CTID_PATTERN.test(value)) return true;
+	let origin = null;
+	try {
+		origin = new URL(value).origin;
+	} catch (e) {
+		// Not parseable as a URL; reported as an error by the caller.
+	}
+	return origin != null && allowedOrigins.includes(origin);
+}
+
+function registryUrlFieldErrors(raw, field, rowIndex, allowedOrigins) {
+	if (raw == null) return [];
+	const errors = [];
+	const values = Array.isArray(raw) ? raw : String(raw).split("|");
+	for (let value of values) {
+		value = String(value).trim();
+		if (!isCtidOrAllowedRegistryUrl(value, allowedOrigins)) {
+			errors.push(`Row ${rowIndex}: ${field} must be a CTID or a credential registry URL for this environment (got: ${value})`);
+		}
+	}
+	return errors;
+}
+
+function rowHasAnyProperty(row, props) {
+	for (const prop of props) {
+		if (row[prop]) return true;
+	}
+	return false;
+}
+
+// True when a row of the given type has one of the required properties, or any typed row has a child property.
+function hasHierarchyProperty(tabularData, type, rules) {
+	let hasRequiredProp = false;
+	let hasChildProp = false;
+	for (const row of tabularData) {
+		if (!row?.["@type"]) continue;
+		if (row["@type"] === type && rules.requiredProperties && rowHasAnyProperty(row, rules.requiredProperties))
+			hasRequiredProp = true;
+		if (rules.childProperties && rowHasAnyProperty(row, rules.childProperties))
+			hasChildProp = true;
+		if (hasRequiredProp && hasChildProp) break;
+	}
+	return hasRequiredProp || hasChildProp;
 }
 
 module.exports = class CTDLASNCSVImport {
@@ -74,7 +123,7 @@ module.exports = class CTDLASNCSVImport {
 									line: i
 								});
 							} else {
-								const originalAlreadyAdded = duplicates.find((duplicate) => duplicate.line === uniqueRows[existing].line);
+								const originalAlreadyAdded = duplicates.some((duplicate) => duplicate.line === uniqueRows[existing].line);
 								if (!originalAlreadyAdded) {
 									duplicates.push(uniqueRows[existing]);
 								}
@@ -91,20 +140,11 @@ module.exports = class CTDLASNCSVImport {
 					for (let i = 0; i < tabularData.length; i++) {
 						if (i == 0) continue;
 						let col = tabularData[i];
-						if (
-							col[typeCol] != null &&
-							col[typeCol].trim() == "ceasn:CompetencyFramework"
-						)
+						if (col[typeCol]?.trim() == "ceasn:CompetencyFramework")
 							frameworkCounter++;
-						else if (
-								col[typeCol] != null &&
-								col[typeCol].trim() == "ceterms:Collection"
-							)
-								collectionCounter++;
-						else if (
-							col[typeCol] != null &&
-							col[typeCol].trim() == "ceasn:Competency"
-						) {
+						else if (col[typeCol]?.trim() == "ceterms:Collection")
+							collectionCounter++;
+						else if (col[typeCol]?.trim() == "ceasn:Competency") {
 							competencyCounter++;
 							// if (colCompetencyText && !col[colCompetencyText].trim()) {
 							// 	this.error('CTDLASN Parse Error: Competency text is empty on line ' + (i+1));
@@ -178,7 +218,7 @@ module.exports = class CTDLASNCSVImport {
 					}
 				}
 
-				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassTerms"))));
+				const terms = structuredClone(await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassTerms"));
 				let frameworks = {};
 				let frameworkArray = [];
 				let frameworkRows = {};
@@ -187,7 +227,6 @@ module.exports = class CTDLASNCSVImport {
 				let relations = [];
 				let relationById = {};
 				let competencyCtids = {};
-				let rowsWithErrors = new Set(); // Track rows that have errors to avoid duplicate processing
 				for (let i = 0; i < tabularData.length; i++) {
 					if (!tabularData[i]) {
 						continue;
@@ -197,7 +236,7 @@ module.exports = class CTDLASNCSVImport {
 					if (!pretranslatedE) {
 						continue;
 					}
-					if (pretranslatedE["@type"] && pretranslatedE["@type"].toLowerCase() &&
+					if (pretranslatedE["@type"]?.toLowerCase() &&
 						(pretranslatedE["@type"].toLowerCase().startsWith('sample') || pretranslatedE["@type"].toLowerCase().startsWith('instruction'))
 					) {
 						continue;
@@ -210,7 +249,7 @@ module.exports = class CTDLASNCSVImport {
 					}
 					// Skip competency if ctid is specified
 					if (skip && Array.isArray(skip) && skip.length > 0) {
-						if (skip.find((element) => element.ctid ? element.ctid.includes(pretranslatedE["ceterms:ctid"]) : element === pretranslatedE["ceterms:ctid"])) {
+						if (skip.find((element) => element.ctid ? element.ctid.includes(pretranslatedE["ceterms:ctid"]) : element === pretranslatedE["ceterms:ctid"])) { // NOSONAR - some() would also match a falsy skip entry, find() does not
 							continue;
 						}
 					}
@@ -230,7 +269,6 @@ module.exports = class CTDLASNCSVImport {
 						rowHasError = true;
 					}
 					if (rowHasError) {
-						rowsWithErrors.add(i);
 						continue;
 					}
 					if (
@@ -238,7 +276,7 @@ module.exports = class CTDLASNCSVImport {
 						"ceasn:CompetencyFramework"
 					) {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 								pretranslatedE,
 								"ceasn:CompetencyFramework",
@@ -251,12 +289,11 @@ module.exports = class CTDLASNCSVImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"ceasn:CompetencyFramework",
@@ -265,7 +302,6 @@ module.exports = class CTDLASNCSVImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
@@ -281,7 +317,6 @@ module.exports = class CTDLASNCSVImport {
 							let existing = await EcRepository.get(translator.id);
 							if (existing && existing.type !== 'Framework') {
 								errors.push(`Row ${i + 2}: ${translator.id} already exists as a ${existing.type}`);
-								rowsWithErrors.add(i);
 								continue;
 							}
 						} catch (e) {
@@ -335,10 +370,7 @@ module.exports = class CTDLASNCSVImport {
 						}
 						if (ceo != null) f.addOwner(ceo.ppk.toPk());
 						if (
-							EcFramework.template != null &&
-							EcFramework.template[
-								"schema:dateCreated"
-							] != null
+							EcFramework.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -401,7 +433,7 @@ module.exports = class CTDLASNCSVImport {
 						pretranslatedE["@type"] == "ceasn:Competency"
 					) {
 					// Validate required properties (only if validation rules provided)
-					if (validationRules && validationRules.requiredProps) {
+					if (validationRules?.requiredProps) {
 						const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 							pretranslatedE,
 							"ceasn:Competency",
@@ -414,12 +446,11 @@ module.exports = class CTDLASNCSVImport {
 							} else {
 								errors.push(validationErrors);
 							}
-							rowsWithErrors.add(i);
 							continue;
 						}
 					}
 					// Validate registry URL fields (only if url rules provided)
-					if (validationRules && validationRules.urlRules) {
+					if (validationRules?.urlRules) {
 						const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 							pretranslatedE,
 							"ceasn:Competency",
@@ -428,7 +459,6 @@ module.exports = class CTDLASNCSVImport {
 						);
 						if (urlErrors) {
 							errors.push(...urlErrors);
-							rowsWithErrors.add(i);
 							continue;
 						}
 					}
@@ -469,7 +499,6 @@ module.exports = class CTDLASNCSVImport {
 						f.copyFrom(e);
 						if (e["id"] == null) {
 							errors.push(`Row ${i+2}: Competency is missing an id`);
-							rowsWithErrors.add(i);
 							continue;
 						}
 						if (e["ceasn:isPartOf"] != null) {
@@ -515,7 +544,6 @@ module.exports = class CTDLASNCSVImport {
 								errors.push(
 									`Row ${i+2}: Could not find framework:${e["type"]} (Possibly missing ceasn:isPartOf or ceasn:isChildOf)`
 								);
-								rowsWithErrors.add(i);
 								continue;
 							}
 							if (parent != null) {
@@ -535,7 +563,6 @@ module.exports = class CTDLASNCSVImport {
 										`Row ${i+2}: Object cannot trace to framework:` +
 											e["type"]
 									);
-									rowsWithErrors.add(i);
 									continue;
 								}
 							} else {
@@ -543,13 +570,11 @@ module.exports = class CTDLASNCSVImport {
 									`Row ${i+2}: Object has no framework:` +
 										e["type"]
 								);
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
 						if (
-							EcCompetency.template != null &&
-							EcCompetency.template["@owner"] != null
+							EcCompetency.template?.["@owner"] != null
 						) {
 							f["owner"] =
 								EcCompetency.template["@owner"];
@@ -576,10 +601,7 @@ module.exports = class CTDLASNCSVImport {
 						}
 						if (ceo != null) f.addOwner(ceo.ppk.toPk());
 						if (
-							EcCompetency.template != null &&
-							EcCompetency.template[
-								"schema:dateCreated"
-							] != null
+							EcCompetency.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -738,13 +760,11 @@ module.exports = class CTDLASNCSVImport {
 						pretranslatedE["@type"] == ""
 					) {
 						errors.push(`Row ${i+2}: Missing or empty @type`);
-						rowsWithErrors.add(i);
 						continue;
 					} else {
 						errors.push(
 							`Row ${i+2}: Found unknown type:` + pretranslatedE["@type"]
 						);
-						rowsWithErrors.add(i);
 						continue;
 					}
 				}
@@ -804,7 +824,7 @@ module.exports = class CTDLASNCSVImport {
 					}
 				}
 
-				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassTerms"))));
+				const terms = structuredClone(await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassTerms"));
 				let frameworks = {};
 				let frameworkArray = [];
 				let frameworkRows = {};
@@ -813,7 +833,6 @@ module.exports = class CTDLASNCSVImport {
 				let relations = [];
 				let relationById = {};
 				let competencyCtids = {};
-				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let i = 0; i < tabularData.length; i++) {
 					let pretranslatedE = tabularData[i];
 					// Skip extra lines if found in file
@@ -836,7 +855,6 @@ module.exports = class CTDLASNCSVImport {
 						rowHasError = true;
 					}
 					if (rowHasError) {
-						rowsWithErrors.add(i);
 						continue;
 					}
 					if (
@@ -852,7 +870,7 @@ module.exports = class CTDLASNCSVImport {
 					}
 					// Skip competency if ctid is specified
 					if (skip && Array.isArray(skip) && skip.length > 0) {
-						if (skip.find((element) => element.ctid ? element.ctid.includes(pretranslatedE["ceterms:ctid"]) : element === pretranslatedE["ceterms:ctid"])) {
+						if (skip.find((element) => element.ctid ? element.ctid.includes(pretranslatedE["ceterms:ctid"]) : element === pretranslatedE["ceterms:ctid"])) { // NOSONAR - some() would also match a falsy skip entry, find() does not
 							continue;
 						}
 					}
@@ -861,7 +879,7 @@ module.exports = class CTDLASNCSVImport {
 						"ceterms:Collection"
 					) {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 								pretranslatedE,
 								"ceterms:Collection",
@@ -874,12 +892,11 @@ module.exports = class CTDLASNCSVImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"ceterms:Collection",
@@ -888,7 +905,6 @@ module.exports = class CTDLASNCSVImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
@@ -935,10 +951,7 @@ module.exports = class CTDLASNCSVImport {
 						}
 						if (ceo != null) f.addOwner(ceo.ppk.toPk());
 						if (
-							EcFramework.template != null &&
-							EcFramework.template[
-								"schema:dateCreated"
-							] != null
+							EcFramework.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -964,7 +977,7 @@ module.exports = class CTDLASNCSVImport {
 						pretranslatedE["@type"] == "ceasn:Competency"
 					) {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVImport.validateRequiredProperties(
 								pretranslatedE,
 								"ceterms:Collection:Competency",
@@ -977,12 +990,11 @@ module.exports = class CTDLASNCSVImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"ceasn:Competency",
@@ -991,7 +1003,6 @@ module.exports = class CTDLASNCSVImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(i);
 								continue;
 							}
 						}
@@ -1019,7 +1030,6 @@ module.exports = class CTDLASNCSVImport {
 						f.copyFrom(e);
 						if (e["id"] == null) {
 							errors.push(`Row ${i+2}: Competency is missing an id`);
-							rowsWithErrors.add(i);
 							continue;
 						}
 						if (e["ceterms:isMemberOf"] != null) {
@@ -1034,16 +1044,14 @@ module.exports = class CTDLASNCSVImport {
 							}
 						}
 						if (
-							EcCompetency.template != null &&
-							EcCompetency.template["@owner"] != null
+							EcCompetency.template?.["@owner"] != null
 						) {
 							f["owner"] =
 								EcCompetency.template["@owner"];
 						}
 						if (e["owner"] == null) {
 							if (
-								frameworkRows[EcRemoteLinkedData.trimVersionFromUrl(e["ceterms:isMemberOf"][0])] &&
-								frameworkRows[EcRemoteLinkedData.trimVersionFromUrl(e["ceterms:isMemberOf"][0])]["owner"] != null
+								frameworkRows[EcRemoteLinkedData.trimVersionFromUrl(e["ceterms:isMemberOf"][0])]?.["owner"] != null
 							)
 								e["owner"] =
 									frameworkRows[EcRemoteLinkedData.trimVersionFromUrl(
@@ -1061,10 +1069,7 @@ module.exports = class CTDLASNCSVImport {
 						}
 						if (ceo != null) f.addOwner(ceo.ppk.toPk());
 						if (
-							EcCompetency.template != null &&
-							EcCompetency.template[
-								"schema:dateCreated"
-							] != null
+							EcCompetency.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -1215,13 +1220,11 @@ module.exports = class CTDLASNCSVImport {
 						pretranslatedE["@type"] == ""
 					) {
 						errors.push(`Row ${i+2}: Missing or empty @type`);
-						rowsWithErrors.add(i);
 						continue;
 					} else {
 						errors.push(
 							`Row ${i+2}: Found unknown type:` + pretranslatedE["@type"]
 						);
-						rowsWithErrors.add(i);
 						continue;
 					}
 				}
@@ -1250,16 +1253,14 @@ module.exports = class CTDLASNCSVImport {
 				} else if (type == "Concept") {
 					type = "ConceptScheme";
 				}
-			} else {
-				if (type == "Framework") {
-					type = "Competency";
-				} else if (type == "ConceptScheme") {
-					type = "Concept";
-				}
+			} else if (type == "Framework") {
+				type = "Competency";
+			} else if (type == "ConceptScheme") {
+				type = "Concept";
 			}
 		}
 		if (endpoint != null) {
-			if (endpoint.indexOf("ce-") != -1) {
+			if (endpoint.includes("ce-")) {
 				ctid = ctid.substring(3);
 			}
 			return endpoint + ctid;
@@ -1298,7 +1299,7 @@ module.exports = class CTDLASNCSVImport {
 				if (typeof thisKey == "string") {
 					if (translator[key].trim().length == 0) {
 						translator[key] = null;
-					} else if (thisKey.indexOf("|") != -1) {
+					} else if (thisKey.includes("|")) {
 						thisKey = thisKey.split("|");
 						translator[key] = thisKey;
 						for (let i = 0; i < thisKey.length; i++) {
@@ -1378,7 +1379,7 @@ module.exports = class CTDLASNCSVImport {
 		collectionFlag
 	) {
 		if (!EcArray.isArray(e[field])) {
-			let makeArray = Array(e[field]);
+			let makeArray = new Array(e[field]);
 			e[field] = makeArray;
 		}
 		for (let i = 0; i < e[field].length; i++) {
@@ -1522,25 +1523,9 @@ module.exports = class CTDLASNCSVImport {
 		const allowedOrigins = urlRules.allowedOrigins;
 		if (!fields || !allowedOrigins || allowedOrigins.length === 0) return null;
 
-		const ctidPattern = /^ce-[0-9a-fA-F-]+$/;
 		const errors = [];
 		for (const field of fields) {
-			const raw = obj[field];
-			if (raw == null) continue;
-			const values = Array.isArray(raw) ? raw : String(raw).split("|");
-			for (let value of values) {
-				value = String(value).trim();
-				if (value === "" || ctidPattern.test(value)) continue;
-				let origin = null;
-				try {
-					origin = new URL(value).origin;
-				} catch (e) {
-					// Not parseable as a URL; falls through to the error below.
-				}
-				if (origin == null || !allowedOrigins.includes(origin)) {
-					errors.push(`Row ${rowIndex}: ${field} must be a CTID or a credential registry URL for this environment (got: ${value})`);
-				}
-			}
+			errors.push(...registryUrlFieldErrors(obj[field], field, rowIndex, allowedOrigins));
 		}
 		return errors.length > 0 ? errors : null;
 	}
@@ -1553,40 +1538,11 @@ module.exports = class CTDLASNCSVImport {
 
 		// Check each type defined in hierarchy rules
 		for (const [type, rules] of Object.entries(hierarchyRules)) {
-			const hasType = tabularData.some(r => r && r["@type"] === type);
+			const hasType = tabularData.some(r => r?.["@type"] === type);
 			if (!hasType) continue;
 
-			let hasRequiredProp = false;
-			let hasChildProp = false;
-
-			for (const row of tabularData) {
-				if (!row || !row["@type"]) continue;
-
-				// Check if this row has any of the required properties
-				if (row["@type"] === type && rules.requiredProperties) {
-					for (const prop of rules.requiredProperties) {
-						if (row[prop]) {
-							hasRequiredProp = true;
-							break;
-						}
-					}
-				}
-
-				// Check if any row has child properties
-				if (rules.childProperties) {
-					for (const prop of rules.childProperties) {
-						if (row[prop]) {
-							hasChildProp = true;
-							break;
-						}
-					}
-				}
-
-				if (hasRequiredProp && hasChildProp) break;
-			}
-
 			// Validate that at least one of the hierarchy properties exists
-			if (!hasRequiredProp && !hasChildProp) {
+			if (!hasHierarchyProperty(tabularData, type, rules)) {
 				return rules.errorMessage || `CSV must contain hierarchy properties for ${type}`;
 			}
 		}
