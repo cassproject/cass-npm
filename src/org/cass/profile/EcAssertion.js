@@ -105,7 +105,7 @@ module.exports = class EcAssertion extends Assertion {
 		}
 		if (this.owner != null) owners = owners.concat(this.owner);
 		readers.push(pk.toPem());
-		this.subject = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+		this.subject = await EcEncryptedValue.encryptValue(
 			pk.toPem(),
 			this.id,
 			owners,
@@ -183,7 +183,7 @@ module.exports = class EcAssertion extends Assertion {
 		return EcPk.fromPem(decryptedString);
 	}
 	async setAgent(pk) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.agent = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+		this.agent = await EcEncryptedValue.encryptValue(
 			pk.toPem(),
 			this.id,
 			this.subject.owner,
@@ -291,7 +291,7 @@ module.exports = class EcAssertion extends Assertion {
 		return Number.parseInt(decryptedString);
 	}
 	async setAssertionDate(assertionDateMs) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.assertionDate = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+		this.assertionDate = await EcEncryptedValue.encryptValue(
 			assertionDateMs.toString(),
 			this.id,
 			this.subject.owner,
@@ -353,7 +353,7 @@ module.exports = class EcAssertion extends Assertion {
 		return Number.parseInt(decryptedString);
 	}
 	async setExpirationDate(expirationDateMs) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.expirationDate = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+		this.expirationDate = await EcEncryptedValue.encryptValue(
 			expirationDateMs.toString(),
 			this.id,
 			this.subject.owner,
@@ -490,7 +490,7 @@ module.exports = class EcAssertion extends Assertion {
 		return decryptedString;
 	}
 	async setDecayFunction(decayFunctionText) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.decayFunction = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+		this.decayFunction = await EcEncryptedValue.encryptValue(
 			decayFunctionText.toString(),
 			this.id,
 			this.subject.owner,
@@ -552,7 +552,7 @@ module.exports = class EcAssertion extends Assertion {
 		return "true" == decryptedString;
 	}
 	async setNegative(negativeB) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.negative = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+		this.negative = await EcEncryptedValue.encryptValue(
 			negativeB.toString(),
 			this.id,
 			this.subject.owner,
@@ -612,7 +612,7 @@ module.exports = class EcAssertion extends Assertion {
 		let encryptedValues = [];
 		for (let evidence of evidences)
 			encryptedValues.push(
-				await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+				await EcEncryptedValue.encryptValue(
 					evidence,
 					this.id,
 					this.subject.owner,

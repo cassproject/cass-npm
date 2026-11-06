@@ -267,7 +267,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 *  @param {String}   id ID of the value to encrypt
 	 *  @param {String[]} owners Owner keys to encrypt value with
 	 *  @param {String[]} readers Reader keys to encrypt value with
-	 *  @return {EcEncryptedValue} Encrypted value
+	 *  @return {Promise<EcEncryptedValue>} Encrypted value
 	 *  @memberOf EcEncryptedValue
 	 *  @method encryptValue
 	 *  @static
