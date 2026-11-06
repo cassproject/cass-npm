@@ -5,7 +5,7 @@ const jsonld = require("jsonld");
 let isNode = false;    
 if (typeof process === 'object') {
   if (typeof process.versions === 'object') {
-    if (typeof process.versions.node !== 'undefined') {
+    if (process.versions.node !== undefined) {
       isNode = true;
     }
   }
@@ -24,7 +24,7 @@ const customDocLoader = async (url, options) => {
 	// call the default documentLoader
 	let result = docLoader(url);
 	  result.then((x) => {
-		  if (x && x.document) {
+		  if (x?.document) {
 			  jsonldCache[url] = x.document;
 		  }
 	  })
@@ -49,6 +49,7 @@ function setVersionIdentifier(f) {
 					"ceterms:identifierType": parts.length > 2 ? parts[2] : undefined
 				};
 			} catch (e) {
+				// A value that cannot be split (not a string) is dropped from the list.
 				delete f["ceterms:versionIdentifier"][i];
 			}
 		}
@@ -153,11 +154,10 @@ module.exports = class CTDLASNCSVConceptImport {
 						errors.push(hierarchyError);
 					}
 				}
-				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
+				const terms = structuredClone(await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"));
 				let schemeArray = [];
 				let concepts = [];
 				let conceptCtids = {};
-				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
 					// Skip extra lines if found in file
@@ -180,7 +180,6 @@ module.exports = class CTDLASNCSVConceptImport {
 						rowHasError = true;
 					}
 					if (rowHasError) {
-						rowsWithErrors.add(each);
 						continue;
 					}
 					if (
@@ -190,7 +189,7 @@ module.exports = class CTDLASNCSVConceptImport {
 					}
 					if (pretranslatedE["@type"] == "skos:ConceptScheme") {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVConceptImport.validateRequiredProperties(
 								pretranslatedE,
 								"skos:ConceptScheme",
@@ -203,12 +202,11 @@ module.exports = class CTDLASNCSVConceptImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"skos:ConceptScheme",
@@ -217,7 +215,6 @@ module.exports = class CTDLASNCSVConceptImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
@@ -280,10 +277,7 @@ module.exports = class CTDLASNCSVConceptImport {
 							"schema:dateModified"
 						] = new Date().toISOString();
 						if (
-							EcConceptScheme.template != null &&
-							EcConceptScheme.template[
-								"schema:dateCreated"
-							] != null
+							EcConceptScheme.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -291,7 +285,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						schemeArray.push(f);
 					} else if (pretranslatedE["@type"] == "skos:Concept") {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVConceptImport.validateRequiredProperties(
 								pretranslatedE,
 								"skos:Concept",
@@ -304,12 +298,11 @@ module.exports = class CTDLASNCSVConceptImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"skos:Concept",
@@ -318,7 +311,6 @@ module.exports = class CTDLASNCSVConceptImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
@@ -351,12 +343,10 @@ module.exports = class CTDLASNCSVConceptImport {
 						f.copyFrom(e);
 						if (e["id"] == null) {
 							errors.push(`Row ${each + 2}: Concept is missing an id`);
-							rowsWithErrors.add(each);
 							continue;
 						}
 						if (
-							EcConcept.template != null &&
-							EcConcept.template["@owner"] != null
+							EcConcept.template?.["@owner"] != null
 						) {
 							f["owner"] =
 								EcConcept.template["@owner"];
@@ -372,10 +362,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						if (ceo != null) f.addOwner(ceo.ppk.toPk());
 						if (
-							EcConcept.template != null &&
-							EcConcept.template[
-								"schema:dateCreated"
-							] != null
+							EcConcept.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -430,12 +417,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						if (e["skos:topConceptOf"] != null) {
 							let scheme = e["skos:topConceptOf"];
-							for (
-								let i = 0;
-								i < schemeArray.length;
-								i++
-							) {
-								let schemeObj = schemeArray[i];
+							for (let schemeObj of schemeArray) {
 								if (scheme == schemeObj["id"]) {
 									if (
 										schemeObj[
@@ -460,12 +442,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						if (e["skos:inScheme"] != null) {
 							let scheme = e["skos:inScheme"];
 							console.log('scheme', scheme);
-							for (
-								let i = 0;
-								i < schemeArray.length;
-								i++
-							) {
-								let schemeObj = schemeArray[i];
+							for (let schemeObj of schemeArray) {
 								if (scheme == schemeObj["id"]) {
 									if (
 										schemeObj[
@@ -497,13 +474,11 @@ module.exports = class CTDLASNCSVConceptImport {
 						pretranslatedE["@type"] == ""
 					) {
 						errors.push(`Row ${each + 2}: Missing or empty @type`);
-						rowsWithErrors.add(each);
 						continue;
 					} else {
 						errors.push(
 							`Row ${each + 2}: Found unknown type: ` + pretranslatedE["@type"]
 						);
-						rowsWithErrors.add(each);
 						continue;
 					}
 				}
@@ -561,11 +536,10 @@ module.exports = class CTDLASNCSVConceptImport {
 						errors.push(hierarchyError);
 					}
 				}
-				const terms = JSON.parse(JSON.stringify((await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"))));
+				const terms = structuredClone(await EcRemote.getExpectingObject("https://schema.cassproject.org/0.4/jsonld1.1/ceasn2cassConceptsTerms"));
 				let schemeArray = [];
 				let concepts = [];
 				let conceptCtids = {};
-				let rowsWithErrors = new Set(); // Track rows that have errors
 				for (let each = 0; each < tabularData.length; each++) {
 					let pretranslatedE = tabularData[each];
 					// Skip extra lines if found in file
@@ -584,7 +558,6 @@ module.exports = class CTDLASNCSVConceptImport {
 						rowHasError = true;
 					}
 					if (rowHasError) {
-						rowsWithErrors.add(each);
 						continue;
 					}
 					if (
@@ -594,7 +567,7 @@ module.exports = class CTDLASNCSVConceptImport {
 					}
 					if (pretranslatedE["@type"] == "asn:ProgressionModel") {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVConceptImport.validateRequiredProperties(
 								pretranslatedE,
 								"asn:ProgressionModel",
@@ -607,12 +580,11 @@ module.exports = class CTDLASNCSVConceptImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"asn:ProgressionModel",
@@ -621,7 +593,6 @@ module.exports = class CTDLASNCSVConceptImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
@@ -680,10 +651,7 @@ module.exports = class CTDLASNCSVConceptImport {
 							"schema:dateModified"
 						] = new Date().toISOString();
 						if (
-							EcConceptScheme.template != null &&
-							EcConceptScheme.template[
-								"schema:dateCreated"
-							] != null
+							EcConceptScheme.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -691,7 +659,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						schemeArray.push(f);
 					} else if (pretranslatedE["@type"] == "asn:ProgressionLevel") {
 						// Validate required properties (only if validation rules provided)
-						if (validationRules && validationRules.requiredProps) {
+						if (validationRules?.requiredProps) {
 							const validationErrors = CTDLASNCSVConceptImport.validateRequiredProperties(
 								pretranslatedE,
 								"asn:ProgressionLevel",
@@ -704,12 +672,11 @@ module.exports = class CTDLASNCSVConceptImport {
 								} else {
 									errors.push(validationErrors);
 								}
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
 						// Validate registry URL fields (only if url rules provided)
-						if (validationRules && validationRules.urlRules) {
+						if (validationRules?.urlRules) {
 							const urlErrors = CTDLASNCSVImport.validateRegistryUrls(
 								pretranslatedE,
 								"asn:ProgressionLevel",
@@ -718,7 +685,6 @@ module.exports = class CTDLASNCSVConceptImport {
 							);
 							if (urlErrors) {
 								errors.push(...urlErrors);
-								rowsWithErrors.add(each);
 								continue;
 							}
 						}
@@ -751,12 +717,10 @@ module.exports = class CTDLASNCSVConceptImport {
 						f.copyFrom(e);
 						if (e["id"] == null) {
 							errors.push(`Row ${each + 2}: Concept is missing an id`);
-							rowsWithErrors.add(each);
 							continue;
 						}
 						if (
-							EcConcept.template != null &&
-							EcConcept.template["@owner"] != null
+							EcConcept.template?.["@owner"] != null
 						) {
 							f["owner"] =
 								EcConcept.template["@owner"];
@@ -772,10 +736,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						if (ceo != null) f.addOwner(ceo.ppk.toPk());
 						if (
-							EcConcept.template != null &&
-							EcConcept.template[
-								"schema:dateCreated"
-							] != null
+							EcConcept.template?.["schema:dateCreated"] != null
 						) {
 							CTDLASNCSVImport.setDateCreated(e, f);
 						}
@@ -795,12 +756,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						if (e["skos:topConceptOf"] != null) {
 							let scheme = e["skos:topConceptOf"];
-							for (
-								let i = 0;
-								i < schemeArray.length;
-								i++
-							) {
-								let schemeObj = schemeArray[i];
+							for (let schemeObj of schemeArray) {
 								if (scheme == schemeObj["id"]) {
 									if (
 										schemeObj[
@@ -824,12 +780,7 @@ module.exports = class CTDLASNCSVConceptImport {
 						}
 						if (e["skos:inScheme"] != null) {
 							let scheme = e["skos:inScheme"];
-							for (
-								let i = 0;
-								i < schemeArray.length;
-								i++
-							) {
-								let schemeObj = schemeArray[i];
+							for (let schemeObj of schemeArray) {
 								if (scheme == schemeObj["id"]) {
 									if (
 										schemeObj[
@@ -862,13 +813,11 @@ module.exports = class CTDLASNCSVConceptImport {
 						pretranslatedE["@type"] == ""
 					) {
 						errors.push(`Row ${each + 2}: Missing or empty @type`);
-						rowsWithErrors.add(each);
 						continue;
 					} else {
 						errors.push(
 							`Row ${each + 2}: Found unknown type: ` + pretranslatedE["@type"]
 						);
-						rowsWithErrors.add(each);
 						continue;
 					}
 				}
@@ -913,51 +862,7 @@ module.exports = class CTDLASNCSVConceptImport {
 	}
 
 	static validateConceptHierarchy(tabularData, hierarchyRules) {
-		// Use provided hierarchy rules or fall back to defaults
-		if (!hierarchyRules) {
-			return 'Hierarchy rules not defined.'
-		}
-
-		// Check each type defined in hierarchy rules
-		for (const [type, rules] of Object.entries(hierarchyRules)) {
-			const hasType = tabularData.some(r => r && r["@type"] === type);
-			if (!hasType) continue;
-
-			let hasRequiredProp = false;
-			let hasChildProp = false;
-
-			for (const row of tabularData) {
-				if (!row || !row["@type"]) continue;
-
-				// Check if this row has any of the required properties
-				if (row["@type"] === type && rules.requiredProperties) {
-					for (const prop of rules.requiredProperties) {
-						if (row[prop]) {
-							hasRequiredProp = true;
-							break;
-						}
-					}
-				}
-
-				// Check if any row has child properties
-				if (rules.childProperties) {
-					for (const prop of rules.childProperties) {
-						if (row[prop]) {
-							hasChildProp = true;
-							break;
-						}
-					}
-				}
-
-				if (hasRequiredProp && hasChildProp) break;
-			}
-
-			// Validate that at least one of the hierarchy properties exists
-			if (!hasRequiredProp && !hasChildProp) {
-				return rules.errorMessage || `CSV must contain hierarchy properties for ${type}`;
-			}
-		}
-
-		return null;
+		// Same rules as for frameworks.
+		return CTDLASNCSVImport.validateFrameworkHierarchy(tabularData, hierarchyRules);
 	}
 };
