@@ -96,7 +96,7 @@ module.exports = class EcAssertion extends Assertion {
 		if (this.reader == null) 
 			readers = [];
 		else 
-			readers = JSON.parse(JSON.stringify(this.reader));
+			readers = JSON.parse(JSON.stringify(this.reader)); // NOSONAR - structuredClone throws on Proxy-wrapped arrays (e.g. Vue reactive state); the JSON round trip does not.
 		if (this.subject != null) {
 			if (this.subject.owner != null) 
 				owners = owners.concat(this.subject.owner);
@@ -105,7 +105,7 @@ module.exports = class EcAssertion extends Assertion {
 		}
 		if (this.owner != null) owners = owners.concat(this.owner);
 		readers.push(pk.toPem());
-		this.subject = await EcEncryptedValue.encryptValue(
+		this.subject = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
 			pk.toPem(),
 			this.id,
 			owners,
@@ -114,13 +114,12 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	// @deprecated
 	setSubjectAsync(pk, success, failure) {
-		let me = this;
 		let owners = [];
 		let readers = null;
 		if (this.reader == null) 
 			readers = [];
 		else 
-			readers = JSON.parse(JSON.stringify(this.reader));
+			readers = JSON.parse(JSON.stringify(this.reader)); // NOSONAR - structuredClone throws on Proxy-wrapped arrays (e.g. Vue reactive state); the JSON round trip does not.
 		if (this.subject != null) {
 			if (this.subject.owner != null) 
 				owners = owners.concat(this.subject.owner);
@@ -134,8 +133,8 @@ module.exports = class EcAssertion extends Assertion {
 			this.id,
 			owners,
 			readers,
-			function (subject) {
-				me.subject = subject;
+			(subject) => {
+				this.subject = subject;
 				success();
 			},
 			failure
@@ -184,7 +183,7 @@ module.exports = class EcAssertion extends Assertion {
 		return EcPk.fromPem(decryptedString);
 	}
 	async setAgent(pk) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.agent = await EcEncryptedValue.encryptValue(
+		this.agent = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
 			pk.toPem(),
 			this.id,
 			this.subject.owner,
@@ -193,14 +192,13 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	// @deprecated
 	setAgentAsync(pk, success, failure) {
-		let me = this;
 		return EcEncryptedValue.encryptValueAsync(
 			pk.toPem(),
 			this.id,
 			this.subject.owner,
 			this.subject.reader,
-			function (agent) {
-				me.agent = agent;
+			(agent) => {
+				this.agent = agent;
 				success();
 			},
 			failure
@@ -293,7 +291,7 @@ module.exports = class EcAssertion extends Assertion {
 		return Number.parseInt(decryptedString);
 	}
 	async setAssertionDate(assertionDateMs) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.assertionDate = await EcEncryptedValue.encryptValue(
+		this.assertionDate = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
 			assertionDateMs.toString(),
 			this.id,
 			this.subject.owner,
@@ -302,14 +300,13 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	// @deprecated
 	setAssertionDateAsync(assertionDateMs, success, failure) {
-		let me = this;
 		return EcEncryptedValue.encryptValueAsync(
 			assertionDateMs.toString(),
 			this.id,
 			this.subject.owner,
 			this.subject.reader,
-			function (assertionDate) {
-				me.assertionDate = assertionDate;
+			(assertionDate) => {
+				this.assertionDate = assertionDate;
 				success();
 			},
 			failure
@@ -356,7 +353,7 @@ module.exports = class EcAssertion extends Assertion {
 		return Number.parseInt(decryptedString);
 	}
 	async setExpirationDate(expirationDateMs) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.expirationDate = await EcEncryptedValue.encryptValue(
+		this.expirationDate = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
 			expirationDateMs.toString(),
 			this.id,
 			this.subject.owner,
@@ -365,14 +362,13 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	// @deprecated
 	setExpirationDateAsync(expirationDateMs, success, failure) {
-		let me = this;
 		return EcEncryptedValue.encryptValueAsync(
 			expirationDateMs.toString(),
 			this.id,
 			this.subject.owner,
 			this.subject.reader,
-			function (expirationDate) {
-				me.expirationDate = expirationDate;
+			(expirationDate) => {
+				this.expirationDate = expirationDate;
 				success();
 			},
 			failure
@@ -494,7 +490,7 @@ module.exports = class EcAssertion extends Assertion {
 		return decryptedString;
 	}
 	async setDecayFunction(decayFunctionText) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.decayFunction = await EcEncryptedValue.encryptValue(
+		this.decayFunction = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
 			decayFunctionText.toString(),
 			this.id,
 			this.subject.owner,
@@ -503,14 +499,13 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	// @deprecated
 	setDecayFunctionAsync(decayFunctionText, success, failure) {
-		let me = this;
 		return EcEncryptedValue.encryptValueAsync(
 			decayFunctionText,
 			this.id,
 			this.subject.owner,
 			this.subject.reader,
-			function (decayFunction) {
-				me.decayFunction = decayFunction;
+			(decayFunction) => {
+				this.decayFunction = decayFunction;
 				success();
 			},
 			failure
@@ -557,7 +552,7 @@ module.exports = class EcAssertion extends Assertion {
 		return "true" == decryptedString;
 	}
 	async setNegative(negativeB) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
-		this.negative = await EcEncryptedValue.encryptValue(
+		this.negative = await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
 			negativeB.toString(),
 			this.id,
 			this.subject.owner,
@@ -566,14 +561,13 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	// @deprecated
 	setNegativeAsync(negativeB, success, failure) {
-		let me = this;
 		return EcEncryptedValue.encryptValueAsync(
 			negativeB.toString(),
 			this.id,
 			this.subject.owner,
 			this.subject.reader,
-			function (negative) {
-				me.negative = negative;
+			(negative) => {
+				this.negative = negative;
 				success();
 			},
 			failure
@@ -616,10 +610,10 @@ module.exports = class EcAssertion extends Assertion {
 	}
 	async setEvidence(evidences) { // NOSONAR - Encrypts asynchronously; making Assertion's setters async would turn their errors into rejections
 		let encryptedValues = [];
-		for (let i = 0; i < evidences.length; i++)
+		for (let evidence of evidences)
 			encryptedValues.push(
-				await EcEncryptedValue.encryptValue(
-					evidences[i],
+				await EcEncryptedValue.encryptValue( // NOSONAR - encryptValue returns a Promise; its JSDoc @return type is wrong.
+					evidence,
 					this.id,
 					this.subject.owner,
 					this.subject.reader
@@ -685,8 +679,8 @@ module.exports = class EcAssertion extends Assertion {
 			await this.decayFunction.addReader(newReader, eim);
 		}
 		if (this.evidence != null)
-			for (let i = 0; i < this.evidence.length; i++) {
-				await this.evidence[i].addReader(newReader, eim);
+			for (let evidence of this.evidence) {
+				await evidence.addReader(newReader, eim);
 			}
 		if (this.expirationDate != null) {
 			await this.expirationDate.addReader(newReader, eim);
@@ -710,8 +704,8 @@ module.exports = class EcAssertion extends Assertion {
 			await this.decayFunction.removeReader(newReader, eim);
 		}
 		if (this.evidence != null)
-			for (let i = 0; i < this.evidence.length; i++) {
-				await this.evidence[i].removeReader(newReader, eim);
+			for (let evidence of this.evidence) {
+				await evidence.removeReader(newReader, eim);
 			}
 		if (this.expirationDate != null) {
 			await this.expirationDate.removeReader(newReader, eim);

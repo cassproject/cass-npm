@@ -48,10 +48,10 @@ module.exports = class Concept extends EcRemoteLinkedData {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(Concept.TYPE_0_3);
-		a.push(Concept.TYPE_0_2);
-		a.push(Concept.TYPE_0_1);
-		return a;
+		return [
+			Concept.TYPE_0_3,
+			Concept.TYPE_0_2,
+			Concept.TYPE_0_1,
+		];
 	}
 };

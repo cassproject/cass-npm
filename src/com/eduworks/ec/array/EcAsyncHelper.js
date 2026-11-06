@@ -73,7 +73,7 @@ module.exports = class EcAsyncHelper {
 				array[i] = result;
 				me.counter--;
 				if (me.counter == 0) {
-					after([...array].filter(n=>n));
+					after([...array].filter(Boolean));
 				}
 			});
 		});

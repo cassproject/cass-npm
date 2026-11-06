@@ -52,14 +52,14 @@ module.exports = class EcQuestion extends schema.Question {
 			return EcQuestion.HAND_GRADED_ESSAY;
 		}
 		if (this.suggestedAnswer == null) {
-			if (this.text != null && this.text.indexOf("__") != -1) {
+			if (this.text != null && this.text.includes("__")) {
 				return EcQuestion.FILL_IN_THE_BLANK;
 			}
 			return EcQuestion.SHORT_ANSWER;
 		}
 		let l = this.suggestedAnswer.length;
 		if (l == 0) {
-			if (this.text != null && this.text.indexOf("__") != -1) {
+			if (this.text != null && this.text.includes("__")) {
 				return EcQuestion.FILL_IN_THE_BLANK;
 			}
 			return EcQuestion.SHORT_ANSWER;
@@ -75,7 +75,7 @@ module.exports = class EcQuestion extends schema.Question {
 	cementAnswerId(id) {
 		if (this.acceptedAnswer != null) {
 			if (!EcArray.isArray(this.acceptedAnswer)) {
-				throw new Error("Accepted Answer is not Array");
+				throw new TypeError("Accepted Answer is not Array");
 			}
 			let ary = this.acceptedAnswer;
 			for (let i = 0; i < ary.length; i++) {
@@ -89,7 +89,7 @@ module.exports = class EcQuestion extends schema.Question {
 		}
 		if (this.suggestedAnswer != null) {
 			if (!EcArray.isArray(this.suggestedAnswer)) {
-				throw new Error("Suggested Answer is not Array");
+				throw new TypeError("Suggested Answer is not Array");
 			}
 			let ary = this.suggestedAnswer;
 			for (let i = 0; i < ary.length; i++) {
@@ -119,7 +119,7 @@ module.exports = class EcQuestion extends schema.Question {
 			this["acceptedAnswer"] = [];
 		}
 		if (!EcArray.isArray(this.acceptedAnswer)) {
-			throw new Error("Accepted Answer is not Array");
+			throw new TypeError("Accepted Answer is not Array");
 		}
 		let ary = this.acceptedAnswer;
 		ary.push(answer.id);
@@ -129,7 +129,7 @@ module.exports = class EcQuestion extends schema.Question {
 			this["suggestedAnswer"] = [];
 		}
 		if (!EcArray.isArray(this.suggestedAnswer)) {
-			throw new Error("Suggested Answer is not Array");
+			throw new TypeError("Suggested Answer is not Array");
 		}
 		let ary = this.suggestedAnswer;
 		ary.push(answer.id);
@@ -139,7 +139,7 @@ module.exports = class EcQuestion extends schema.Question {
 			return;
 		}
 		if (!EcArray.isArray(this.suggestedAnswer)) {
-			throw new Error("Suggested Answer is not Array");
+			throw new TypeError("Suggested Answer is not Array");
 		}
 		let ary = this.suggestedAnswer;
 		for (let i = 0; i < ary.length; i++) {
@@ -156,7 +156,7 @@ module.exports = class EcQuestion extends schema.Question {
 			return;
 		}
 		if (!EcArray.isArray(this.acceptedAnswer)) {
-			throw new Error("Accepted Answer is not Array");
+			throw new TypeError("Accepted Answer is not Array");
 		}
 		let ary = this.acceptedAnswer;
 		for (let i = 0; i < ary.length; i++) {
