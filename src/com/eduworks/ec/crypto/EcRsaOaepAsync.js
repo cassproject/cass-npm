@@ -8,7 +8,7 @@ if (typeof crypto == 'undefined')
 		if (window.crypto != null)
 			crypto = window.crypto;
 	try {
-		let requireResult = require('crypto').webcrypto;
+		let requireResult = require('crypto').webcrypto; // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "crypto", but webpack rejects "node:" URIs.
 		if (requireResult != null)
 			crypto = requireResult;
 	} catch (err) {
@@ -190,16 +190,15 @@ module.exports = class EcRsaOaepAsync {
 					.then(function (key) {
 						EcAesCtrAsync.fipsOff();// OPENSSL3 signing with this method not allowed. See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main
 						ppk.signKey = key;
-						return crypto.subtle
-							.sign(
-								algorithm,
-								key,
-								EcCrypto.str2ab(forge.util.encodeUtf8(text))
-							)
-							.then(function (p1) {
-								//EcAesCtrAsync.fipsOff();// OPENSSL3 signing with this method not allowed. See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main
-								return base64.encode(p1);
-							});
+						return crypto.subtle.sign(
+							algorithm,
+							key,
+							EcCrypto.str2ab(forge.util.encodeUtf8(text))
+						);
+					})
+					.then(function (p1) {
+						//EcAesCtrAsync.fipsOff();// OPENSSL3 signing with this method not allowed. See https://github.com/Lomilar/node-fips-rsassa-pkcs1-15-sha1/tree/main
+						return base64.encode(p1);
 					}),
 				success,
 				failure
@@ -309,10 +308,11 @@ module.exports = class EcRsaOaepAsync {
 							key,
 							base64.decode(signature),
 							EcCrypto.str2ab(forge.util.encodeUtf8(text))
-						).then((result)=>{						
-							EcAesCtrAsync.fipsOff();
-							return result;
-						});
+						);
+					})
+					.then((result)=>{
+						EcAesCtrAsync.fipsOff();
+						return result;
 					}),
 				success,
 				failure
@@ -373,10 +373,11 @@ module.exports = class EcRsaOaepAsync {
 							key,
 							base64.decode(signature),
 							EcCrypto.str2ab(forge.util.encodeUtf8(text))
-						).then((result)=>{						
-							EcAesCtrAsync.fipsOff();
-							return result;
-						});
+						);
+					})
+					.then((result)=>{
+						EcAesCtrAsync.fipsOff();
+						return result;
 					}),
 				success,
 				failure

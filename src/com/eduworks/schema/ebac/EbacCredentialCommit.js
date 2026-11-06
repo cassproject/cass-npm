@@ -50,9 +50,8 @@ module.exports = class EbacCredentialCommit extends EcLinkedData {
 	upgrade() {
 		super.upgrade();
 		if (EbacCredentialCommit.TYPE_0_1 == (this.type)) {
-			let me = this;
-			if (me["@context"] == null && me["@schema"] != null)
-				me["@context"] = me["@schema"];
+			if (this["@context"] == null && this["@schema"] != null)
+				this["@context"] = this["@schema"];
 			this.setContextAndType(
 				Ebac.context_0_2,
 				EbacCredentialCommit.TYPE_0_2
@@ -72,11 +71,6 @@ module.exports = class EbacCredentialCommit extends EcLinkedData {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(EbacCredentialCommit.TYPE_0_4);
-		a.push(EbacCredentialCommit.TYPE_0_3);
-		a.push(EbacCredentialCommit.TYPE_0_2);
-		a.push(EbacCredentialCommit.TYPE_0_1);
-		return a;
+		return [EbacCredentialCommit.TYPE_0_4, EbacCredentialCommit.TYPE_0_3, EbacCredentialCommit.TYPE_0_2, EbacCredentialCommit.TYPE_0_1];
 	}
 };
