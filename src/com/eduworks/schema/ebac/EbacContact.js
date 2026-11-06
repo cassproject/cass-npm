@@ -60,9 +60,8 @@ module.exports = class EbacContact extends EcLinkedData {
 	upgrade() {
 		super.upgrade();
 		if (EbacContact.TYPE_0_1 == (this.type)) {
-			let me = this;
-			if (me["@context"] == null && me["@schema"] != null)
-				me["@context"] = me["@schema"];
+			if (this["@context"] == null && this["@schema"] != null)
+				this["@context"] = this["@schema"];
 			this.setContextAndType(Ebac.context_0_2, EbacContact.TYPE_0_2);
 		}
 		if (EbacContact.TYPE_0_2 == (this.getFullType())) {
@@ -73,11 +72,6 @@ module.exports = class EbacContact extends EcLinkedData {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(EbacContact.TYPE_0_4);
-		a.push(EbacContact.TYPE_0_3);
-		a.push(EbacContact.TYPE_0_2);
-		a.push(EbacContact.TYPE_0_1);
-		return a;
+		return [EbacContact.TYPE_0_4, EbacContact.TYPE_0_3, EbacContact.TYPE_0_2, EbacContact.TYPE_0_1];
 	}
 };
