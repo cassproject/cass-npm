@@ -446,8 +446,8 @@ describe("EcRepository (L1 Cache)", () => {
         let results2 = await EcRepository.get(rld.shortId(), null, null, repo);
         assert.equal(results2, null);
     });
-    it('multidelete', async () => {
-        if (process.env.TESTLEVEL == 15 || process.env.TESTLEVEL?.trim() == "15") return;
+    it('multidelete', async function () {
+        if (process.env.TESTLEVEL == 15 || process.env.TESTLEVEL?.trim() == "15") this.skip();
         rld = new schema.Thing();
         rld.generateId(repo.selectedServer);
         rld.addOwner(newId1.ppk.toPk());
