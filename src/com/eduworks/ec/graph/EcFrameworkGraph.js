@@ -198,6 +198,22 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		if (success != null)
 			success();
 	}
+	/**
+	 *  Adds assertions to the competency's meta state array named by key. When propagating (visited has more than
+	 *  one entry), assertions whose registration is already present in either meta state array are skipped.
+	 *  @private
+	 */
+	addAssertionsToMetaState(competency, assertions, visited, key) {
+		let msc = this.getMetaStateCompetency(competency);
+		let alreadyAsserted = (assertion) =>
+			msc?.positiveAssertion?.some(a => a.registration == assertion.registration) ||
+			msc?.negativeAssertion?.some(a => a.registration == assertion.registration);
+		for (let assertion of assertions) {
+			if (visited.length > 1 && assertion.registration && alreadyAsserted(assertion))
+				continue;
+			this.addToMetaStateArray(msc, key, assertion);
+		}
+	}
 	async processAssertionsBooleanPerAssertion(
 		assertions,
 		negative,
@@ -209,18 +225,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 		}
 		visited.push(competency);
 		if (negative) {
-			let msc = this.getMetaStateCompetency(competency);
-			for (let assertion of assertions) {
-				if (visited.length > 1 && assertion.registration && msc?.positiveAssertion?.some(a => a.registration == assertion.registration))
-					continue;
-				if (visited.length > 1 && assertion.registration && msc?.negativeAssertion?.some(a => a.registration == assertion.registration))
-					continue;
-				this.addToMetaStateArray(
-					msc,
-					"negativeAssertion",
-					assertion
-				);
-			}
+			this.addAssertionsToMetaState(competency, assertions, visited, "negativeAssertion");
 			await Promise.all(
 				this.getOutEdges(competency).map(async (alignment) =>
 					await this.getCompetency(alignment.target).then(async (t) =>
@@ -249,18 +254,7 @@ module.exports = class EcFrameworkGraph extends EcDirectedGraph {
 				)
 			);
 		} else {
-			let msc = this.getMetaStateCompetency(competency);
-			for (let assertion of assertions) {
-				if (visited.length > 1 && assertion.registration && msc?.positiveAssertion?.some(a => a.registration == assertion.registration))
-					continue;
-				if (visited.length > 1 && assertion.registration && msc?.negativeAssertion?.some(a => a.registration == assertion.registration))
-					continue;
-				this.addToMetaStateArray(
-					msc,
-					"positiveAssertion",
-					assertion
-				);
-			}
+			this.addAssertionsToMetaState(competency, assertions, visited, "positiveAssertion");
 			await Promise.all(
 				this.getInEdges(competency).map(async (alignment) =>
 					await this.getCompetency(alignment.source).then(async (t) =>

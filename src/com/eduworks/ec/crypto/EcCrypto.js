@@ -1,5 +1,5 @@
 let forge = require("node-forge");
-const realCrypto = require('crypto');
+const realCrypto = require('crypto'); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "crypto", but webpack rejects "node:" URIs.
 /**
  *  @author Fritz
  *  @class EcCrypto
@@ -72,7 +72,7 @@ module.exports = class EcCrypto {
 	}
 	static generateUUID()
 	{
-		var d = new Date().getTime(); //Timestamp
+		var d = Date.now(); //Timestamp
 		var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
 		var random = new Uint8Array(32);//One random byte per hex digit
 		(typeof crypto !== "undefined" && crypto.getRandomValues ? crypto : realCrypto.webcrypto).getRandomValues(random);

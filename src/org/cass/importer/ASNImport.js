@@ -258,10 +258,7 @@ module.exports = class ASNImport extends Importer {
 					];
 			comp.id = key;
 			if (comp.id == null) {
-				if (
-					repo == null ||
-					repo.selectedServer.indexOf(serverUrl) != -1
-				)
+				if (repo?.selectedServer.includes(serverUrl) ?? true)
 					comp.generateId(serverUrl);
 				else comp.generateShortId(serverUrl);
 			}
@@ -347,7 +344,7 @@ module.exports = class ASNImport extends Importer {
 				relation.relationType = "narrows";
 				relation.name = "";
 				relation.description = "";
-				if (repo == null || repo.selectedServer.indexOf(serverUrl) != -1)
+				if (repo?.selectedServer.includes(serverUrl) ?? true)
 					relation.generateId(serverUrl);
 				else 
 					relation.generateShortId(serverUrl);
@@ -424,7 +421,7 @@ module.exports = class ASNImport extends Importer {
 			ASNImport.importedFramework.description = ASNImport.jsonFramework["http://purl.org/dc/terms/description"]["0"]["value"];
 		ASNImport.importedFramework.id = ASNImport.frameworkUrl;
 		if (ASNImport.importedFramework.id == null) {
-			if (repo == null || repo.selectedServer.indexOf(serverUrl) != -1)
+			if (repo?.selectedServer.includes(serverUrl) ?? true)
 				ASNImport.importedFramework.generateId(serverUrl);
 			else 
 				ASNImport.importedFramework.generateShortId(serverUrl);

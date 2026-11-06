@@ -52,12 +52,12 @@ module.exports = class RollupRule extends schema.CreativeWork {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(RollupRule.TYPE_0_6);
-		a.push(RollupRule.TYPE_0_5);
-		a.push(RollupRule.TYPE_0_4);
-		a.push(RollupRule.TYPE_0_3);
-		a.push(RollupRule.TYPE_0_2);
-		return a;
+		return [
+			RollupRule.TYPE_0_6,
+			RollupRule.TYPE_0_5,
+			RollupRule.TYPE_0_4,
+			RollupRule.TYPE_0_3,
+			RollupRule.TYPE_0_2,
+		];
 	}
 };

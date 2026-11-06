@@ -6,9 +6,8 @@ module.exports = class EcAsyncTaskManager {
 		for (let i = 0; i < workerCount; i++) {
 			this.workerList.push(new EcAsyncTaskWorker());
 		}
-		let that = this;
-		setInterval(function() {
-			that.cleanupTasks();
+		setInterval(() => {
+			this.cleanupTasks();
 		}, this.taskCleanupInterval);
 	}
 
@@ -48,7 +47,7 @@ module.exports = class EcAsyncTaskManager {
 				let timeoutSec = task.getTimeout();
 				if (
 					task.getStart().getTime() <
-					new Date().getTime() - timeoutSec * 1000
+					Date.now() - timeoutSec * 1000
 				) {
 					task.setComplete();
 				}

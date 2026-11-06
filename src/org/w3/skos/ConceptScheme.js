@@ -41,10 +41,10 @@ module.exports = class ConceptScheme extends EcRemoteLinkedData {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(ConceptScheme.TYPE_0_3);
-		a.push(ConceptScheme.TYPE_0_2);
-		a.push(ConceptScheme.TYPE_0_1);
-		return a;
+		return [
+			ConceptScheme.TYPE_0_3,
+			ConceptScheme.TYPE_0_2,
+			ConceptScheme.TYPE_0_1,
+		];
 	}
 };

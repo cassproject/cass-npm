@@ -49,7 +49,7 @@ module.exports = class MedbiqImport extends Importer {
 			}
 		} else {
 			let newCompetency = new EcCompetency();
-			if (obj["lom"] != null && obj["lom"]["general"] != null) {
+			if (obj["lom"]?.["general"] != null) {
 				newCompetency.name = obj["lom"]["general"]["title"][
 					"string"
 				].toString();
@@ -135,9 +135,8 @@ module.exports = class MedbiqImport extends Importer {
 	) {
 		MedbiqImport.progressObject = null;
 		MedbiqImport.saved = 0;
-		for (let i = 0; i < MedbiqImport.medbiqXmlCompetencies.length; i++) {
-			let comp = MedbiqImport.medbiqXmlCompetencies[i];
-			if (repo == null || repo.selectedServer.indexOf(serverUrl) != -1)
+		for (let comp of MedbiqImport.medbiqXmlCompetencies) {
+			if (repo?.selectedServer.includes(serverUrl) ?? true)
 				comp.generateId(serverUrl);
 			else comp.generateShortId(serverUrl);
 			if (owner != null) comp.addOwner(owner.ppk.toPk());

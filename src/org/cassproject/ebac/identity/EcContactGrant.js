@@ -19,10 +19,10 @@ module.exports = class EcContactGrant extends EbacContactGrant {
 		if (!this.verify()) return false;
 		if (this.invalid()) return false;
 		let found = false;
-		for (let i = 0; i < eim.ids.length; i++) {
+		for (const id of eim.ids) {
 			if (
 				EcRsaOaep.verify(
-					eim.ids[i].ppk.toPk(),
+					id.ppk.toPk(),
 					this.responseToken,
 					this.responseSignature
 				)

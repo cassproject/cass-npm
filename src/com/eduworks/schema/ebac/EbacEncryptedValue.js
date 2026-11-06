@@ -65,11 +65,10 @@ module.exports = class EbacEncryptedValue extends EcRemoteLinkedData {
 	 */
 	iv = null;
 	copyFrom(that) {
-		let me = this;
-		for (let key in me) delete me[key];
+		for (let key in this) delete this[key];
 		let you = that;
 		for (let key in you) {
-			if (me[key] == null) me[key.replace("@", "")] = you[key];
+			if (this[key] == null) this[key.replace("@", "")] = you[key];
 		}
 		if (!this.isAny(this.getTypes()))
 			throw new Error("Incompatible type: " + this.getFullType());
@@ -77,9 +76,8 @@ module.exports = class EbacEncryptedValue extends EcRemoteLinkedData {
 	upgrade() {
 		super.upgrade();
 		if (EbacEncryptedValue.TYPE_0_1 == this.type) {
-			let me = this;
-			if (me["@context"] == null && me["@schema"] != null)
-				me["@context"] = me["@schema"];
+			if (this["@context"] == null && this["@schema"] != null)
+				this["@context"] = this["@schema"];
 			this.setContextAndType(
 				Ebac.context_0_2,
 				EbacEncryptedValue.TYPE_0_2
@@ -99,11 +97,6 @@ module.exports = class EbacEncryptedValue extends EcRemoteLinkedData {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(EbacEncryptedValue.TYPE_0_4);
-		a.push(EbacEncryptedValue.TYPE_0_3);
-		a.push(EbacEncryptedValue.TYPE_0_2);
-		a.push(EbacEncryptedValue.TYPE_0_1);
-		return a;
+		return [EbacEncryptedValue.TYPE_0_4, EbacEncryptedValue.TYPE_0_3, EbacEncryptedValue.TYPE_0_2, EbacEncryptedValue.TYPE_0_1];
 	}
 };

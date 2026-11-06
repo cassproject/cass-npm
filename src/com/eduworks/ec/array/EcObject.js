@@ -15,7 +15,7 @@ module.exports = class EcObject {
 	 *  @method isArray
 	 */
 	static isObject = function(o) {
-		if (toString.call(o) == "[object Array]") return false;
+		if (Object.prototype.toString.call(o) == "[object Array]") return false;
 		if (o == null) return false;
 		return typeof o == "object";
 	};
