@@ -503,6 +503,41 @@ describe('EcRepository (unit)', () => {
         });
     });
 
+    describe('multidelete', () => {
+        it('rejects without urls', async () => {
+            const r = new EcRepository();
+            assert.equal((await settle(r.multidelete(null, null, null, eim))).error.message, 'urls not defined.');
+        });
+        it('posts the short forms of the URLs, signed unless unsigned', async () => {
+            const post = sinon.stub(EcRemote, 'postExpectingObject').resolves('gone');
+            const sig = sinon.spy(eim, 'signatureSheet');
+            const r = new EcRepository();
+            r.selectedServer = SERVER;
+            const local = SERVER + 'data/schema.org.Thing/abc';
+            const foreign = 'https://other.example/things/one';
+            assert.equal(await r.multidelete([local, foreign, thing(SERVER + 'data/schema.org.Thing/obj/9')], null, null, eim), 'gone');
+            assert.equal(post.firstCall.args[1], 'sky/repo/multiDelete');
+            assert.deepEqual(JSON.parse(post.firstCall.args[2].get('data')), ['data/schema.org.Thing/abc', 'data//' + EcCrypto.md5(foreign), 'data/schema.org.Thing/obj']);
+            assert.equal(post.firstCall.args[2].get('signatureSheet'), '[]');
+            assert.isTrue(sig.calledOnce);
+            EcRepository.unsigned = true;
+            await r.multidelete([local], null, null, eim);
+            assert.isTrue(sig.calledOnce);
+            assert.isNull(post.secondCall.args[2].get('signatureSheet'));
+        });
+        it('drops every cached form of the URLs when caching', async () => {
+            sinon.stub(EcRemote, 'postExpectingObject').resolves('gone');
+            EcRepository.caching = true;
+            const r = new EcRepository();
+            r.selectedServer = SERVER;
+            const url = 'https://other.example/things/one';
+            const keys = [url, EcRemoteLinkedData.veryShortId(SERVER, 'one'), EcRemoteLinkedData.veryShortId(SERVER, EcCrypto.md5(url)), 'other'];
+            for (const k of keys) EcRepository.cache[k] = thing(k);
+            await r.multidelete([url], null, null, eim);
+            assert.deepEqual(Object.keys(EcRepository.cacheBacking), ['other']);
+        });
+    });
+
     describe('multiget', () => {
         it('precaches, then gets each URL and drops what is missing', async () => {
             const r = new EcRepository();
