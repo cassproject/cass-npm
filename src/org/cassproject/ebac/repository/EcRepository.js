@@ -27,6 +27,14 @@ const nullIfNotFound = (error) => {
 };
 
 /**
+ *  Looks each URL up in the cache, separately, and returns the values found.
+ */
+const cachedValues = async (urls) => {
+	const values = await Promise.all(urls.map(url => module.exports.cacheGet(url)));
+	return values.filter(Boolean);
+};
+
+/**
  *  Repository object used to interact with the CASS Repository web services.
  *  Should be used for all CRUD and search operations
  *
@@ -1169,7 +1177,7 @@ module.exports = class EcRepository {
 					}
 					EcRepository.cache[d.id] = d;
 				}
-				return cassPromisify(Promise.all(originals.map(url => EcRepository.cacheGet(url))).then(c => c.filter(Boolean)), success, failure);
+				return cassPromisify(cachedValues(originals), success, failure);
 			});
 		return cassPromisify(p, success, failure);
 	};

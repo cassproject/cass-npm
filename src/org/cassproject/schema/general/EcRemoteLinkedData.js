@@ -308,8 +308,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 								sig
 							);
 							global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, "EcRemoteLDVerify", verify);
-						} catch (ex) {
-							// A signature that cannot be checked counts as unverified; the next owner is tried.
+						} catch (ex) { // NOSONAR - A signature that cannot be checked counts as unverified; the next owner is tried.
 							verify = false;
 						}
 						if (verify == true) { // NOSONAR - The worker result is not guaranteed to be a boolean; == true also accepts 1.
@@ -338,8 +337,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 								sig
 							);
 							global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, "EcRemoteLDVer256", verify);
-						} catch (ex) {
-							// A signature that cannot be checked counts as unverified; the next owner is tried.
+						} catch (ex) { // NOSONAR - A signature that cannot be checked counts as unverified; the next owner is tried.
 							verify = false;
 						}
 						if (verify == true) { // NOSONAR - The worker result is not guaranteed to be a boolean; == true also accepts 1.

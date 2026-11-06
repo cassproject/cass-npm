@@ -52,14 +52,14 @@ module.exports = class EcQuestion extends schema.Question {
 			return EcQuestion.HAND_GRADED_ESSAY;
 		}
 		if (this.suggestedAnswer == null) {
-			if (this.text != null && this.text.includes("__")) {
+			if (this.text?.includes("__")) {
 				return EcQuestion.FILL_IN_THE_BLANK;
 			}
 			return EcQuestion.SHORT_ANSWER;
 		}
 		let l = this.suggestedAnswer.length;
 		if (l == 0) {
-			if (this.text != null && this.text.includes("__")) {
+			if (this.text?.includes("__")) {
 				return EcQuestion.FILL_IN_THE_BLANK;
 			}
 			return EcQuestion.SHORT_ANSWER;

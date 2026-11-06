@@ -419,6 +419,16 @@ describe('EcRepository (unit)', () => {
                 EcRemoteLinkedData.veryShortId(SERVER, 'one')
             ]);
         });
+        it('calls success twice for fetched objects, the second time with its own result', async () => {
+            const local = SERVER + 'data/schema.org.Thing/abc';
+            post.resolves([obj(local)]);
+            const success = sinon.stub();
+            success.onFirstCall().returns('first');
+            success.onSecondCall().returns('second');
+            assert.equal(await r.precache([local], success, null, eim), 'second');
+            assert.deepEqual(success.firstCall.args[0].map((x) => x.id), [local]);
+            assert.equal(success.secondCall.args[0], 'first');
+        });
         it('requests a trailing number as a version and caches the result only under its id', async () => {
             const foreign = 'https://other.example/things/1';
             post.resolves([obj(foreign)]);
