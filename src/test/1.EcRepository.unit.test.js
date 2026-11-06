@@ -479,6 +479,20 @@ describe('EcRepository (unit)', () => {
             ]);
             assert.deepEqual(out, []);
         });
+        it('retries only the ids that no returned object matches', async () => {
+            const a = SERVER + 'data/schema.org.Thing/a';
+            const b = SERVER + 'data/schema.org.Thing/b';
+            const other = 'https://other.example/x/9/5';
+            const pre = sinon.stub(r, 'precache');
+            pre.callThrough();
+            post.onCall(0).resolves([a, b, other]);
+            post.onCall(1).resolves([obj(a)]);
+            post.onCall(2).resolves([]);
+            const out = await r.precache([a], null, null, eim);
+            assert.deepEqual(out.map((x) => x.id), [a]);
+            // a was requested and found; b and the foreign id were neither, so both are retried.
+            assert.deepEqual(pre.getCall(2).args[0], [b, other]);
+        });
         it('posts unsigned when the repository is unsigned', async () => {
             EcRepository.unsigned = true;
             const sig = sinon.spy(eim, 'signatureSheet');
@@ -665,6 +679,25 @@ describe('EcRepository (unit)', () => {
             assert.equal(failure.callCount, 512);
             assert.isTrue(failure.alwaysCalledWith('Could not find service.'));
             clock.restore();
+        });
+        it('probes both protocols asynchronously from an http page', () => {
+            fakeWindow('http:');
+            const clock = sinon.useFakeTimers();
+            try {
+                const r = new EcRepository();
+                const guesses = [];
+                sinon.stub(r, 'autoDetectRepositoryActualAsync').callsFake((g) => guesses.push(g));
+                r.autoDetectRepositoryAsync(null, sinon.spy());
+                assert.equal(guesses.length, 64);
+                assert.deepEqual(guesses.slice(0, 2), ['http://cass.example:3000/app/api/', 'https://cass.example:3000/app/api/']);
+            } finally {
+                clock.restore();
+            }
+        });
+        it('falls back to both protocols without a location, then fails reading it', () => {
+            global.window = { location: null };
+            const r = new EcRepository();
+            assert.throws(() => r.autoDetectRepositoryAsync(null, sinon.spy()), TypeError);
         });
         it('stops the async fallbacks once something answers', () => {
             fakeWindow('https:');
