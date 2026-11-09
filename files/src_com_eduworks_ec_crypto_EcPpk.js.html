@@ -1205,8 +1205,8 @@ module.exports = class EcPpk {
 		if (this.defaultPem == null)
 			this.defaultPem = forge.pki
 				.privateKeyToPem(this.ppk)
-				.replace(/\r/g, &quot;&quot;)
-				.replace(/\n/g, &quot;&quot;);
+				.replaceAll(&quot;\r&quot;, &quot;&quot;)
+				.replaceAll(&quot;\n&quot;, &quot;&quot;);
 		return this.defaultPem;
 	}
 	/**
@@ -1219,8 +1219,8 @@ module.exports = class EcPpk {
 	toPkcs1Pem = function () {
 		return forge.pki
 			.privateKeyToPem(this.ppk)
-			.replace(/\r/g, &quot;&quot;)
-			.replace(/\n/g, &quot;&quot;);
+			.replaceAll(&quot;\r&quot;, &quot;&quot;)
+			.replaceAll(&quot;\n&quot;, &quot;&quot;);
 	};
 	/**
 	 *  Encodes the private key into a PEM encoded PrivateKeyInfo (PKCS#8) formatted RSA Public Key.
@@ -1236,8 +1236,8 @@ module.exports = class EcPpk {
 					forge.pki.privateKeyToAsn1(this.ppk)
 				)
 			)
-			.replace(/\r/g, &quot;&quot;)
-			.replace(/\n/g, &quot;&quot;);
+			.replaceAll(&quot;\r&quot;, &quot;&quot;)
+			.replaceAll(&quot;\n&quot;, &quot;&quot;);
 	};
 	toJwk() {
 		if (this.jwk == null) {
@@ -1248,7 +1248,7 @@ module.exports = class EcPpk {
 				}
 				const bytes = forge.util.hexToBytes(hex);
 				const b64 = forge.util.encode64(bytes);
-				return b64.replace(/\+/g, &#x27;-&#x27;).replace(/\//g, &#x27;_&#x27;).replace(/=/g, &#x27;&#x27;);
+				return b64.replaceAll(&#x27;+&#x27;, &#x27;-&#x27;).replaceAll(&#x27;/&#x27;, &#x27;_&#x27;).replaceAll(&#x27;=&#x27;, &#x27;&#x27;);
 			};
 			this.jwk = {
 				kty: &quot;RSA&quot;,

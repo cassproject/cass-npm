@@ -1123,6 +1123,26 @@ const EcLinkedData = require(&quot;../../../json/ld/EcLinkedData.js&quot;);
 require(&quot;../../general/AuditLogger.js&quot;)
 
 /**
+ *  Resolves to null for the errors that mean an object was not found; rethrows anything else.
+ *  An error without a toString (null, undefined) fails the second check with a TypeError.
+ */
+const nullIfNotFound = (error) =&gt; {
+	if (error?.toString !== undefined &amp;&amp; error.toString().includes(&quot;Could not locate object. May be due to EcRepository.alwaysTryUrl flag.&quot;))
+		return null;
+	if (error.toString().includes(&quot;Object not found or you did not supply sufficient permissions to access the object.&quot;))
+		return null;
+	throw error;
+};
+
+/**
+ *  Looks each URL up in the cache, separately, and returns the values found.
+ */
+const cachedValues = async (urls) =&gt; {
+	const values = await Promise.all(urls.map(url =&gt; module.exports.cacheGet(url)));
+	return values.filter(Boolean);
+};
+
+/**
  *  Repository object used to interact with the CASS Repository web services.
  *  Should be used for all CRUD and search operations
  *
@@ -1169,13 +1189,13 @@ module.exports = class EcRepository {
 	static cacheDB = null;
 	static cacheGet = async (prop, transaction, objectStore) =&gt; {
 		if (EcArray.isArray(prop)) {
-			if (EcRepository.cachingL2 == true &amp;&amp; EcRepository.cacheDB != null &amp;&amp; transaction == null)
+			if (EcRepository.cachingL2 &amp;&amp; EcRepository.cacheDB != null &amp;&amp; transaction == null)
 				transaction = EcRepository.cacheDB.transaction(EcRepository.LONGIDS, &quot;readonly&quot;);
-			if (EcRepository.cachingL2 == true &amp;&amp; transaction != null &amp;&amp; objectStore == null)
+			if (EcRepository.cachingL2 &amp;&amp; transaction != null &amp;&amp; objectStore == null)
 				objectStore = transaction.objectStore(EcRepository.LONGIDS);
 			return await Promise.all(prop.map(p =&gt; EcRepository.cacheGet(p, transaction, objectStore)));
 		}
-		if (EcRepository.cachingL2 == false)
+		if (!EcRepository.cachingL2)
 			return EcRepository.cache[prop];
 		if (EcRepository.cacheDB == null)
 			return EcRepository.cache[prop];
@@ -1206,7 +1226,7 @@ module.exports = class EcRepository {
 			return Reflect.get(...arguments);
 		},
 		set: function (target, prop, value) {
-			if (EcRepository.cachingL2 == false)
+			if (!EcRepository.cachingL2)
 				return Reflect.set(...arguments);
 			if (EcRepository.cacheDB == null)
 				return Reflect.set(...arguments);
@@ -1227,7 +1247,7 @@ module.exports = class EcRepository {
 			return Reflect.set(...arguments);
 		},
 		deleteProperty: function (target, prop) {
-			if (EcRepository.cachingL2 == false)
+			if (!EcRepository.cachingL2)
 				return Reflect.deleteProperty(...arguments);
 			if (EcRepository.cacheDB == null)
 				return Reflect.deleteProperty(...arguments);
@@ -1251,7 +1271,7 @@ module.exports = class EcRepository {
 	static clearCache = () =&gt; {
 		for (let prop of Object.keys(EcRepository.cacheBacking))
 			delete EcRepository.cacheBacking[prop];
-		if (EcRepository.cachingL2 == true &amp;&amp; EcRepository.cacheDB != null) {
+		if (EcRepository.cachingL2 &amp;&amp; EcRepository.cacheDB != null) {
 			const transaction = EcRepository.cacheDB.transaction(EcRepository.LONGIDS, &quot;readwrite&quot;);
 			transaction.objectStore(EcRepository.LONGIDS).clear();
 		}
@@ -1275,8 +1295,7 @@ module.exports = class EcRepository {
 	negotiateTimeOffset = function (success, failure, loginObjectCallback) {
 		let oldTimeout = EcRemote.timeout;
 		EcRemote.timeout = 500;
-		let me = this;
-		let successCheck = function (p1) {
+		let successCheck = (p1) =&gt; {
 			if (p1 != null) {
 				if (p1.ssoPublicKey != null) {
 					let identity = new EcIdentity();
@@ -1288,17 +1307,17 @@ module.exports = class EcRepository {
 					EcRepository.defaultPlugins = JSON.parse(p1[&quot;plugins&quot;]);
 				}
 				if (p1[&quot;postMaxSize&quot;]) {
-					me.postMaxSize = p1[&quot;postMaxSize&quot;];
+					this.postMaxSize = p1[&quot;postMaxSize&quot;];
 				}
 				if (p1[&quot;signatureSheetHashAlgorithm&quot;]) {
-					me.signatureSheetHashAlgorithm = p1[&quot;signatureSheetHashAlgorithm&quot;];
+					this.signatureSheetHashAlgorithm = p1[&quot;signatureSheetHashAlgorithm&quot;];
 				}
 				if (p1[&quot;ping&quot;] == &quot;pong&quot;) {
 					if (loginObjectCallback != null)
 						loginObjectCallback(p1);
 					if (p1[&quot;time&quot;] != null)
-						me.timeOffset = p1[&quot;time&quot;] - new Date().getTime();
-					return me.buildKeyForwardingTable(success, failure);
+						this.timeOffset = p1[&quot;time&quot;] - Date.now();
+					return this.buildKeyForwardingTable(success, failure);
 				}
 			}
 		};
@@ -1322,8 +1341,8 @@ module.exports = class EcRepository {
 				null,
 				params, eim
 			).then(async (rekeyRequests) =&gt; {
-				for (let i = 0; i &lt; rekeyRequests.length; i++) {
-					await rekeyRequests[i].addRekeyRequestToForwardingTable();
+				for (let rekeyRequest of rekeyRequests) {
+					await rekeyRequest.addRekeyRequestToForwardingTable();
 				}
 				global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, &quot;EcRepoBuildKeyForwTable&quot;, EcObject.keys(EcRemoteLinkedData.forwardingTable).length + &quot; records now in forwarding table.&quot;);
 			}),
@@ -1369,14 +1388,11 @@ module.exports = class EcRepository {
 		p = p.then((data) =&gt; {
 			return data.map(d =&gt; { let rld = new EcRemoteLinkedData(); rld.copyFrom(d); return rld; });
 		}).catch((error) =&gt; {
-			if (
-				error != null &amp;&amp;
-				error.toString != undefined
-			) {
-				if (error.toString().indexOf(&quot;Could not locate object. May be due to EcRepository.alwaysTryUrl flag.&quot;) != -1) {
+			if (error?.toString != undefined) {
+				if (error.toString().includes(&quot;Could not locate object. May be due to EcRepository.alwaysTryUrl flag.&quot;)) {
 					return null;
 				}
-				if (error.toString().indexOf(&quot;Object not found or you did not supply sufficient permissions to access the object.&quot;) != -1) {
+				if (error.toString().includes(&quot;Object not found or you did not supply sufficient permissions to access the object.&quot;)) {
 					return null;
 				}
 			}
@@ -1402,7 +1418,7 @@ module.exports = class EcRepository {
 		if (url == null) {
 			throw new Error(&quot;URL is null. Cannot EcRepository.get&quot;);
 		}
-		if (url.toLowerCase().indexOf(&quot;http&quot;) != 0) {
+		if (!url.toLowerCase().startsWith(&quot;http&quot;)) {
 			throw new Error(&quot;URL does not begin with http. Cannot EcRepository.get &quot; + url);
 		}
 
@@ -1455,20 +1471,7 @@ module.exports = class EcRepository {
 					0,
 					success,
 					failure, eim
-				).catch((error) =&gt; {
-					if (
-						error !== undefined &amp;&amp;
-						error != null &amp;&amp;
-						error.toString !== undefined
-					)
-						if (error.toString().indexOf(&quot;Could not locate object. May be due to EcRepository.alwaysTryUrl flag.&quot;) != -1) {
-							return null;
-						}
-					if (error.toString().indexOf(&quot;Object not found or you did not supply sufficient permissions to access the object.&quot;) != -1) {
-						return null;
-					}
-					throw error;
-				});
+				).catch(nullIfNotFound);
 			}
 		}
 		if (EcRepository.caching) {
@@ -1519,36 +1522,11 @@ module.exports = class EcRepository {
 					0,
 					success,
 					failure, eim
-				).catch((error) =&gt; {
-					if (
-						error !== undefined &amp;&amp;
-						error != null &amp;&amp;
-						error.toString !== undefined
-					)
-						if (error.toString().indexOf(&quot;Could not locate object. May be due to EcRepository.alwaysTryUrl flag.&quot;) != -1) {
-							return null;
-						}
-					if (error.toString().indexOf(&quot;Object not found or you did not supply sufficient permissions to access the object.&quot;) != -1) {
-						return null;
-					}
-					throw error;
-				});
-			} else {
-				if (this.caching) this.cache[url] = null;
-				return cassReturnAsPromise(null, success, failure, error).catch((error) =&gt; {
-					if (
-						error !== undefined &amp;&amp;
-						error != null &amp;&amp;
-						error.toString !== undefined
-					)
-						if (error.toString().indexOf(&quot;Could not locate object. May be due to EcRepository.alwaysTryUrl flag.&quot;) != -1)
-							return null;
-					if (error.toString().indexOf(&quot;Object not found or you did not supply sufficient permissions to access the object.&quot;) != -1)
-						return null;
-					throw error;
-				});
+				);
 			}
-		}).finally(
+			if (this.caching) this.cache[url] = null;
+			return cassReturnAsPromise(null, success, failure, error);
+		}).catch(nullIfNotFound).finally(
 			(result) =&gt; {
 				delete EcRepository.fetching[originalUrl + eim.eimId];
 				return result;
@@ -1559,9 +1537,9 @@ module.exports = class EcRepository {
 	}
 	static setOffset = function (url) {
 		let offset = 0;
-		for (let i = 0; i &lt; this.repos.length; i++) {
-			if (url.indexOf(this.repos[i].selectedServer) != -1) {
-				offset = this.repos[i].timeOffset;
+		for (let repo of this.repos) {
+			if (url.includes(repo.selectedServer)) {
+				offset = repo.timeOffset;
 			}
 		}
 		return offset;
@@ -1612,8 +1590,8 @@ module.exports = class EcRepository {
 		if (this.alwaysTryUrl) return true;
 		if (this.repos.length == 0) return true;
 		let validUrlFound = false;
-		for (let i = 0; i &lt; this.repos.length; i++) {
-			if (this.repos[i].selectedServer == null) continue;
+		for (let repo of this.repos) {
+			if (repo.selectedServer == null) continue;
 			validUrlFound = true;
 		}
 		if (!validUrlFound) return true;
@@ -1641,7 +1619,7 @@ module.exports = class EcRepository {
 				failure, eim
 			);
 		}
-		if (history[repo.selectedServer] == true) {
+		if (history[repo.selectedServer]) {
 			return this.find(
 				url,
 				error,
@@ -1665,38 +1643,22 @@ module.exports = class EcRepository {
 						failure, eim
 					);
 				else {
-					let done = false;
-					for (let i = 0; i &lt; strings.length; i++) {
+					for (let found of strings) {
 						if (
-							strings[i].id == url ||
-							strings[i].shortId() == url
+							found.id == url ||
+							found.shortId() == url
 						) {
-							if (done)
-								log(
-									&quot;Searching for exact ID:&quot; +
-									url +
-									&quot;, found more than one@:&quot; +
-									repo.selectedServer
-								);
-							done = true;
 							delete EcRepository.fetching[url];
 							if (EcRepository.caching) {
-								EcRepository.cache[url] = strings[i];
+								EcRepository.cache[url] = found;
 							}
 							return cassReturnAsPromise(
-								strings[i],
+								found,
 								success,
 								failure
 							);
 						}
 					}
-					if (done)
-						return cassReturnAsPromise(
-							null,
-							success,
-							failure,
-							error
-						);
 					return this.find(
 						url,
 						error,
@@ -1707,10 +1669,10 @@ module.exports = class EcRepository {
 					);
 				}
 			})
-			.catch((s) =&gt; {
+			.catch((error_) =&gt; {
 				return this.find(
 					url,
-					s,
+					error_,
 					history,
 					counter + 1,
 					success,
@@ -1730,28 +1692,28 @@ module.exports = class EcRepository {
 	 */
 	static escapeSearch = function (query) {
 		let s = null;
-		s = query.split(&quot;\\&quot;).join(&quot;\\\\&quot;);
-		s = s.split(&quot;-&quot;).join(&quot;\\-&quot;);
-		s = s.split(&quot;=&quot;).join(&quot;\\=&quot;);
-		s = s.split(&quot;&amp;&amp;&quot;).join(&quot;\\&amp;&amp;&quot;);
-		s = s.split(&quot;||&quot;).join(&quot;\\||&quot;);
-		s = s.split(&quot;&lt;&quot;).join(&quot;\\&lt;&quot;);
-		s = s.split(&quot;&gt;&quot;).join(&quot;\\&gt;&quot;);
-		s = s.split(&quot;|&quot;).join(&quot;\\|&quot;);
-		s = s.split(&quot;(&quot;).join(&quot;\\(&quot;);
-		s = s.split(&quot;)&quot;).join(&quot;\\)&quot;);
-		s = s.split(&quot;{&quot;).join(&quot;\\{&quot;);
-		s = s.split(&quot;}&quot;).join(&quot;\\}&quot;);
-		s = s.split(&quot;[&quot;).join(&quot;\\[&quot;);
-		s = s.split(&quot;]&quot;).join(&quot;\\]&quot;);
-		s = s.split(&quot;^&quot;).join(&quot;\\^&quot;);
-		s = s.split(&#x27;&quot;&#x27;).join(&#x27;\\&quot;&#x27;);
-		s = s.split(&quot;~&quot;).join(&quot;\\~&quot;);
-		s = s.split(&quot;*&quot;).join(&quot;\\*&quot;);
-		s = s.split(&quot;?&quot;).join(&quot;\\?&quot;);
-		s = s.split(&quot;:&quot;).join(&quot;\\:&quot;);
-		s = s.split(&quot;/&quot;).join(&quot;\\/&quot;);
-		s = s.split(&quot;+&quot;).join(&quot;\\+&quot;);
+		s = query.replaceAll(&quot;\\&quot;, String.raw&#x60;\\&#x60;);
+		s = s.replaceAll(&quot;-&quot;, String.raw&#x60;\-&#x60;);
+		s = s.replaceAll(&quot;=&quot;, String.raw&#x60;\=&#x60;);
+		s = s.replaceAll(&quot;&amp;&amp;&quot;, String.raw&#x60;\&amp;&amp;&#x60;);
+		s = s.replaceAll(&quot;||&quot;, String.raw&#x60;\||&#x60;);
+		s = s.replaceAll(&quot;&lt;&quot;, String.raw&#x60;\&lt;&#x60;);
+		s = s.replaceAll(&quot;&gt;&quot;, String.raw&#x60;\&gt;&#x60;);
+		s = s.replaceAll(&quot;|&quot;, String.raw&#x60;\|&#x60;);
+		s = s.replaceAll(&quot;(&quot;, String.raw&#x60;\(&#x60;);
+		s = s.replaceAll(&quot;)&quot;, String.raw&#x60;\)&#x60;);
+		s = s.replaceAll(&quot;{&quot;, String.raw&#x60;\{&#x60;);
+		s = s.replaceAll(&quot;}&quot;, String.raw&#x60;\}&#x60;);
+		s = s.replaceAll(&quot;[&quot;, String.raw&#x60;\[&#x60;);
+		s = s.replaceAll(&quot;]&quot;, String.raw&#x60;\]&#x60;);
+		s = s.replaceAll(&quot;^&quot;, String.raw&#x60;\^&#x60;);
+		s = s.replaceAll(&#x27;&quot;&#x27;, String.raw&#x60;\&quot;&#x60;);
+		s = s.replaceAll(&quot;~&quot;, String.raw&#x60;\~&#x60;);
+		s = s.replaceAll(&quot;*&quot;, String.raw&#x60;\*&#x60;);
+		s = s.replaceAll(&quot;?&quot;, String.raw&#x60;\?&#x60;);
+		s = s.replaceAll(&quot;:&quot;, String.raw&#x60;\:&#x60;);
+		s = s.replaceAll(&quot;/&quot;, String.raw&#x60;\/&#x60;);
+		s = s.replaceAll(&quot;+&quot;, String.raw&#x60;\+&#x60;);
 		return s;
 	};
 	/**
@@ -1808,10 +1770,10 @@ module.exports = class EcRepository {
 			let msg = &quot;Cannot save data. It is missing a vital component.&quot;;
 			throw msg;
 		}
-		if (data.reader != null &amp;&amp; data.reader.length == 0) {
+		if (data.reader?.length == 0) {
 			delete data[&quot;reader&quot;];
 		}
-		if (data.owner != null &amp;&amp; data.owner.length == 0) {
+		if (data.owner?.length == 0) {
 			delete data[&quot;owner&quot;];
 		}
 		if (eim === undefined || eim == null)
@@ -1885,15 +1847,15 @@ module.exports = class EcRepository {
 		}
 		if (data.invalid()) {
 			if (failure != null) failure(&quot;Data is malformed.&quot;);
-			else throw &quot;Data is malformed.&quot;;
+			else throw &quot;Data is malformed.&quot;; // NOSONAR - Callers may catch and compare this string; an Error would change what they get.
 		}
 		// Update timestamp if it is an object that originated on a CaSS instance.
 		if (
 			this.alwaysTryUrl ||
 			repo == null ||
 			this.shouldTryUrl(data.id) ||
-			data.id.indexOf(&quot;/api/data/&quot;) != -1 ||
-			repo != null &amp;&amp; data.id.indexOf(repo.selectedServer.replace(/https?/, &quot;&quot;)) != -1
+			data.id.includes(&quot;/api/data/&quot;) ||
+			repo != null &amp;&amp; data.id.includes(repo.selectedServer.replace(/https?/, &quot;&quot;))
 		)
 			data.updateTimestamp();
 
@@ -1912,7 +1874,7 @@ module.exports = class EcRepository {
 			fd.append(&quot;signatureSheet&quot;, signatureSheet);
 			if (!this.alwaysTryUrl) {
 				if (repo != null) {
-					if (data.id.indexOf(repo.selectedServer) != -1) {
+					if (data.id.includes(repo.selectedServer)) {
 						return EcRemote.postExpectingString(
 							data.id,
 							&quot;&quot;,
@@ -1923,7 +1885,7 @@ module.exports = class EcRepository {
 					}
 					if (
 						!this.shouldTryUrl(data.id) ||
-						data.id.indexOf(repo.selectedServer) == -1
+						!data.id.includes(repo.selectedServer)
 					) {
 						return EcRemote.postExpectingString(
 							EcRemote.urlAppend(
@@ -2060,7 +2022,7 @@ module.exports = class EcRepository {
 		let targetUrl;
 		if (
 			EcRepository.shouldTryUrl(data.id) ||
-			data.id.indexOf(this.selectedServerProxy != null ? this.selectedServerProxy : this.selectedServer) != -1
+			data.id.includes(this.selectedServerProxy ?? this.selectedServer)
 		)
 			targetUrl = EcRemote.urlAppend(
 				this.selectedServer,
@@ -2109,17 +2071,17 @@ module.exports = class EcRepository {
 		for (let d of data) {
 			if (d.invalid())
 				throw new Error(&quot;Cannot save data. It is missing a vital component.&quot;);
-			if (d.reader != null &amp;&amp; d.reader.length == 0) {
+			if (d.reader?.length == 0) {
 				delete d[&quot;reader&quot;];
 			}
-			if (d.owner != null &amp;&amp; d.owner.length == 0) {
+			if (d.owner?.length == 0) {
 				delete d[&quot;owner&quot;];
 			}
 			if (
 				EcRepository.alwaysTryUrl ||
 				EcRepository.shouldTryUrl(d.id) ||
-				d.id.indexOf(&quot;/api/data/&quot;) != -1 ||
-				d.id.indexOf(this.selectedServer.replace(/https?/, &quot;&quot;)) != -1
+				d.id.includes(&quot;/api/data/&quot;) ||
+				d.id.includes(this.selectedServer.replace(/https?/, &quot;&quot;))
 			)
 				d.updateTimestamp();
 			if (EcRepository.caching) {
@@ -2208,7 +2170,6 @@ module.exports = class EcRepository {
 	 *  @method precache
 	 */
 	precache = async function (urls, success, failure, eim, skipIds, versionedUrls) {
-		let me = this;
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
 		if (urls == null) {
@@ -2216,7 +2177,7 @@ module.exports = class EcRepository {
 		}
 		urls = [...urls];
 		let originals = [...urls];
-		if (EcRepository.caching == true) {
+		if (EcRepository.caching) {
 			for (let i = 0; i &lt; urls.length; i++)
 				if (await EcRepository.cacheGet(urls[i]) !== undefined)
 					urls.splice(i--, 1);
@@ -2235,17 +2196,13 @@ module.exports = class EcRepository {
 				return &quot;data//&quot; + EcCrypto.md5(EcRemoteLinkedData.trimVersionFromUrl(url)) + (version != null ? (&quot;/&quot; + version) : &quot;&quot;);
 			}
 		);
-		if (EcRepository.caching == true) {
+		if (EcRepository.caching) {
 			for (let i = 0; i &lt; urls.length; i++)
 				if (await EcRepository.cacheGet(urls[i]) !== undefined)
 					urls.splice(i--, 1);
 		}
 		if (urls.length == 0) {
-			return cassPromisify(new Promise((resolve, reject) =&gt; {
-				resolve(
-					EcRepository.cacheGet(originals).then(c =&gt; c.filter(x =&gt; x))
-				)
-			}), success, failure);
+			return cassPromisify(EcRepository.cacheGet(originals).then(c =&gt; c.filter(Boolean)), success, failure);
 		}
 
 		let fd = new FormData();
@@ -2253,15 +2210,13 @@ module.exports = class EcRepository {
 		if (EcRepository.cachingL2 &amp;&amp; !skipIds) {
 			fd.append(&quot;ids&quot;, &quot;true&quot;);
 		}
-		let p = new Promise((resolve, reject) =&gt; resolve());
+		let p = Promise.resolve();
 		if (!EcRepository.unsigned)
-			p = p.then(() =&gt; {
-				return eim.signatureSheet(
-					300000 + this.timeOffset,
-					this.selectedServer, null, null, this.signatureSheetHashAlgorithm
-				).then((signatureSheet) =&gt; {
-					fd.append(&quot;signatureSheet&quot;, signatureSheet);
-				});
+			p = p.then(() =&gt; eim.signatureSheet(
+				300000 + this.timeOffset,
+				this.selectedServer, null, null, this.signatureSheetHashAlgorithm
+			)).then((signatureSheet) =&gt; {
+				fd.append(&quot;signatureSheet&quot;, signatureSheet);
 			});
 		p = p
 			.then(() =&gt; {
@@ -2295,16 +2250,16 @@ module.exports = class EcRepository {
 							EcRepository.cacheBacking[cached.id] = cached;
 						}
 					}
-					let objResults = await me.precache.call(me, results, null, null, eim, true, versionedUrls);
+					let objResults = await this.precache(results, null, null, eim, true, versionedUrls);
 					if (objResults.length == results.length)
 						return objResults;
 					//Second attempt, in case the indexed object URL doesn&#x27;t match the permanent URL.
 					let missingUris = results
-						.filter(r =&gt; originals.indexOf(r) == -1) //Filter out URLs that were originally longIds.
-						.filter(r =&gt; !objResults.some(rr =&gt; r.indexOf(rr.shortId()) != -1)) //Filter out URLs that were found in the first pass.
+						.filter(r =&gt; !originals.includes(r)) //Filter out URLs that were originally longIds.
+						.filter(r =&gt; !objResults.some(rr =&gt; r.includes(rr.shortId()))) //Filter out URLs that were found in the first pass.
 						.map(u =&gt; EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
 					if (missingUris.length &gt; 0)
-						objResults.push(...await me.precache.call(me, missingUris, null, null, eim, true));
+						objResults.push(...await this.precache(missingUris, null, null, eim, true));
 					return cassPromisify(objResults, success, failure);
 				}
 				for (let i = 0; i &lt; results.length; i++) {
@@ -2330,7 +2285,7 @@ module.exports = class EcRepository {
 					}
 					EcRepository.cache[d.id] = d;
 				}
-				return cassPromisify(new Promise((resolve, reject) =&gt; { resolve(Promise.all(originals.map(url =&gt; EcRepository.cacheGet(url))).then(c =&gt; c.filter(x =&gt; x))) }), success, failure);
+				return cassPromisify(cachedValues(originals), success, failure);
 			});
 		return cassPromisify(p, success, failure);
 	};
@@ -2378,15 +2333,13 @@ module.exports = class EcRepository {
 		);
 		let fd = new FormData();
 		fd.append(&quot;data&quot;, JSON.stringify(urls));
-		let p = new Promise((resolve, reject) =&gt; resolve());
+		let p = Promise.resolve();
 		if (!EcRepository.unsigned)
-			p = p.then(() =&gt; {
-				return (eim || EcIdentityManager.default).signatureSheet(
-					300000 + this.timeOffset,
-					this.selectedServer, null, null, this.signatureSheetHashAlgorithm
-				).then((signatureSheet) =&gt; {
-					fd.append(&quot;signatureSheet&quot;, signatureSheet);
-				});
+			p = p.then(() =&gt; (eim || EcIdentityManager.default).signatureSheet(
+				300000 + this.timeOffset,
+				this.selectedServer, null, null, this.signatureSheetHashAlgorithm
+			)).then((signatureSheet) =&gt; {
+				fd.append(&quot;signatureSheet&quot;, signatureSheet);
 			});
 		p = p.then(() =&gt; EcRemote.postExpectingObject(
 			this.selectedServer,
@@ -2412,11 +2365,9 @@ module.exports = class EcRepository {
 	 *  @method multiget
 	 */
 	multiget = function (urls, success, failure, eim) {
-		let p = this.precache(urls, null, null, eim).then(() =&gt;
-			Promise.all(
-				urls.map((url) =&gt; EcRepository.get(url, null, null, this, eim))
-			).then((things) =&gt; things.filter((r) =&gt; r))
-		);
+		let p = this.precache(urls, null, null, eim)
+			.then(() =&gt; Promise.all(urls.map((url) =&gt; EcRepository.get(url, null, null, this, eim))))
+			.then((things) =&gt; things.filter(Boolean));
 		return cassPromisify(p, success, failure);
 	};
 	/**
@@ -2469,7 +2420,6 @@ module.exports = class EcRepository {
 		failure,
 		eim
 	) {
-		let me = this;
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
 		let query = originalQuery;
@@ -2505,67 +2455,62 @@ module.exports = class EcRepository {
 		if (params != null) {
 			fd.append(&quot;searchParams&quot;, JSON.stringify(params));
 		}
-		let p = new Promise((resolve, reject) =&gt; {
-			resolve();
-		});
-		if (EcRepository.unsigned == true || paramObj[&quot;unsigned&quot;] == true) {
+		let p = Promise.resolve();
+		// paramObj comes from the caller and may hold a non-boolean such as 1, so keep the loose comparison.
+		if (EcRepository.unsigned || paramObj[&quot;unsigned&quot;] == true) { // NOSONAR - See above.
 			p = p.then(() =&gt; fd.append(&quot;signatureSheet&quot;, []));
 		} else {
-			p = p.then(() =&gt;
-				eim.signatureSheet(
-					300000 + this.timeOffset,
-					this.selectedServer, null, null, this.signatureSheetHashAlgorithm
-				).then((signatureSheet) =&gt; {
-					fd.append(&quot;signatureSheet&quot;, signatureSheet);
-				})
-			);
-		}
-		p = p.then(() =&gt; {
-			return EcRemote.postExpectingObject(
-				this.selectedServer,
-				&quot;sky/repo/search&quot;,
-				fd
-			).then(async (results) =&gt; {
-				if (results == null) {
-					throw &quot;Error in search. See HTTP request for more details.&quot;;
-				}
-				//If we got an array of strings, multiget it.
-				if (results.length &gt; 0 &amp;&amp; typeof (results[0]) == &#x27;string&#x27;) {
-					let objResults = await me.precache.call(me, results, null, null, eim, true);
-					if (eachSuccess) {
-						for (let each of objResults) {
-							eachSuccess(each);
-						}
-					}
-					if (objResults.length == results.length)
-						return objResults;
-					//Second attempt, in case the indexed object URL doesn&#x27;t match the permanent URL.
-					let missingUris = results
-						.filter(r =&gt; !objResults.some(rr =&gt; r.indexOf(rr.shortId()) != -1))
-						.map(u =&gt; EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
-					if (missingUris.length &gt; 0)
-						objResults.push(...await me.precache.call(me, missingUris, null, null, eim, true));
-					return objResults;
-				} else {
-					results = results
-						.map((result) =&gt; {
-							let d = new EcRemoteLinkedData(null, null);
-							d.copyFrom(result);
-							if (EcRepository.caching) {
-								EcRepository.cache[d.shortId()] = EcRepository.cache[d.id] = EcRepository.cache[EcRemoteLinkedData.veryShortId(this.selectedServer, d.getGuid())] = d;
-							}
-							if (eachSuccess != null) {
-								eachSuccess(d);
-							}
-							return d;
-						})
-						.filter((n) =&gt; n);
-					if (EcRepository.cachingSearch) {
-						EcRepository.cache[cacheKey] = results;
-					}
-					return results;
-				}
+			p = p.then(() =&gt; eim.signatureSheet(
+				300000 + this.timeOffset,
+				this.selectedServer, null, null, this.signatureSheetHashAlgorithm
+			)).then((signatureSheet) =&gt; {
+				fd.append(&quot;signatureSheet&quot;, signatureSheet);
 			});
+		}
+		p = p.then(() =&gt; EcRemote.postExpectingObject(
+			this.selectedServer,
+			&quot;sky/repo/search&quot;,
+			fd
+		)).then(async (results) =&gt; {
+			if (results == null) {
+				throw &quot;Error in search. See HTTP request for more details.&quot;; // NOSONAR - Callers may catch and compare this string; an Error would change what they get.
+			}
+			//If we got an array of strings, multiget it.
+			if (results.length &gt; 0 &amp;&amp; typeof (results[0]) == &#x27;string&#x27;) {
+				let objResults = await this.precache(results, null, null, eim, true);
+				if (eachSuccess) {
+					for (let each of objResults) {
+						eachSuccess(each);
+					}
+				}
+				if (objResults.length == results.length)
+					return objResults;
+				//Second attempt, in case the indexed object URL doesn&#x27;t match the permanent URL.
+				let missingUris = results
+					.filter(r =&gt; !objResults.some(rr =&gt; r.includes(rr.shortId())))
+					.map(u =&gt; EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
+				if (missingUris.length &gt; 0)
+					objResults.push(...await this.precache(missingUris, null, null, eim, true));
+				return objResults;
+			} else {
+				results = results
+					.map((result) =&gt; {
+						let d = new EcRemoteLinkedData(null, null);
+						d.copyFrom(result);
+						if (EcRepository.caching) {
+							EcRepository.cache[d.shortId()] = EcRepository.cache[d.id] = EcRepository.cache[EcRemoteLinkedData.veryShortId(this.selectedServer, d.getGuid())] = d;
+						}
+						if (eachSuccess != null) {
+							eachSuccess(d);
+						}
+						return d;
+					})
+					.filter(Boolean);
+				if (EcRepository.cachingSearch) {
+					EcRepository.cache[cacheKey] = results;
+				}
+				return results;
+			}
 		});
 		return cassPromisify(p, success, failure);
 	};
@@ -2606,7 +2551,7 @@ module.exports = class EcRepository {
 						query += &quot; OR &quot;;
 					}
 					let id = eim.ids[i];
-					query += &#x27;\\*owner:&quot;&#x27; + id.ppk.toPk().toPem() + &#x27;&quot;&#x27;;
+					query += String.raw&#x60;\*owner:&quot;&#x60; + id.ppk.toPk().toPem() + &#x27;&quot;&#x27;;
 				}
 				query += &quot;)&quot;;
 			}
@@ -2634,14 +2579,12 @@ module.exports = class EcRepository {
 			if (window != null) {
 				if (window.location != null) {
 					if (window.location.protocol == &quot;http:&quot;) {
-						protocols.push(&quot;http:&quot;);
-						protocols.push(&quot;https:&quot;);
+						protocols.push(&quot;http:&quot;, &quot;https:&quot;);
 					}
 				}
 			}
 		if (protocols.length == 0) {
-			protocols.push(&quot;https:&quot;);
-			protocols.push(&quot;http:&quot;);
+			protocols.push(&quot;https:&quot;, &quot;http:&quot;);
 		}
 		let hostnames = [];
 		let servicePrefixes = [];
@@ -2676,46 +2619,41 @@ module.exports = class EcRepository {
 			&quot;/api/&quot;
 		);
 		EcArray.removeDuplicates(servicePrefixes);
-		let me = this;
-		me.autoDetectFound = false;
-		for (let j = 0; j &lt; hostnames.length; j++) {
-			for (let k = 0; k &lt; servicePrefixes.length; k++) {
-				for (let i = 0; i &lt; protocols.length; i++) {
+		this.autoDetectFound = false;
+		for (let hostname of hostnames) {
+			for (let servicePrefix of servicePrefixes) {
+				for (let protocol of protocols) {
 					this.autoDetectRepositoryActualAsync(
-						protocols[i] +
+						protocol +
 						&quot;//&quot; +
-						hostnames[j] +
-						servicePrefixes[k].replace(/\/\//g, &quot;/&quot;),
+						hostname +
+						servicePrefix.replaceAll(&quot;//&quot;, &quot;/&quot;),
 						success,
 						failure
 					);
-					setTimeout(function () {
-						if (me.autoDetectFound == false) {
-							let servicePrefixes = [];
-							servicePrefixes.push(
+					setTimeout(() =&gt; {
+						if (!this.autoDetectFound) {
+							let customPrefixes = [];
+							customPrefixes.push(
 								&quot;/&quot; +
 								window.location.pathname.split(&quot;/&quot;)[1] +
 								&quot;/api/custom/&quot;,
 								&quot;/api/custom/&quot;
 							);
-							EcArray.removeDuplicates(servicePrefixes);
-							for (let j = 0; j &lt; hostnames.length; j++) {
-								for (
-									let k = 0;
-									k &lt; servicePrefixes.length;
-									k++
-								) {
-									for (let i = 0; i &lt; protocols.length; i++) {
-										me.autoDetectRepositoryActualAsync(
-											protocols[i] +
+							EcArray.removeDuplicates(customPrefixes);
+							for (let customHostname of hostnames) {
+								for (let customPrefix of customPrefixes) {
+									for (let customProtocol of protocols) {
+										this.autoDetectRepositoryActualAsync(
+											customProtocol +
 											&quot;//&quot; +
-											hostnames[j] +
-											servicePrefixes[k].replace(/\/\//g, &quot;/&quot;),
+											customHostname +
+											customPrefix.replaceAll(&quot;//&quot;, &quot;/&quot;),
 											success,
 											failure
 										);
-										setTimeout(function () {
-											if (me.autoDetectFound == false)
+										setTimeout(() =&gt; {
+											if (!this.autoDetectFound)
 												failure(
 													&quot;Could not find service.&quot;
 												);
@@ -2751,21 +2689,18 @@ module.exports = class EcRepository {
 			if (window != null) {
 				if (window.location != null) {
 					if (window.location.protocol == &quot;http:&quot;) {
-						protocols.push(&quot;http:&quot;);
-						protocols.push(&quot;https:&quot;);
+						protocols.push(&quot;http:&quot;, &quot;https:&quot;);
 					}
 				}
 			}
 		if (protocols.length == 0) {
-			protocols.push(&quot;https:&quot;);
-			protocols.push(&quot;http:&quot;);
+			protocols.push(&quot;https:&quot;, &quot;http:&quot;);
 		}
 		let hostnames = [];
 		let servicePrefixes = [];
 		if (
 			this.selectedServer != null &amp;&amp;
-			window != null &amp;&amp;
-			window.document != null
+			window?.document != null
 		) {
 			let e = window.document.createElement(&quot;a&quot;);
 			if (e != null) {
@@ -2773,7 +2708,7 @@ module.exports = class EcRepository {
 				hostnames.push(e[&quot;host&quot;]);
 				servicePrefixes.push(e[&quot;pathname&quot;]);
 			}
-		} else if (window != null &amp;&amp; window.location != null) {
+		} else if (window?.location != null) {
 			if (window.location.host != null) {
 				hostnames.push(
 					window.location.host,
@@ -2795,9 +2730,7 @@ module.exports = class EcRepository {
 			if (window != null) {
 				if (window.location != null) {
 					servicePrefixes.push(
-						&quot;/&quot; + window.location.pathname.split(&quot;/&quot;)[1] + &quot;/api/&quot;
-					);
-					servicePrefixes.push(
+						&quot;/&quot; + window.location.pathname.split(&quot;/&quot;)[1] + &quot;/api/&quot;,
 						&quot;/&quot; +
 						window.location.pathname.split(&quot;/&quot;)[1] +
 						&quot;/api/custom/&quot;
@@ -2807,19 +2740,16 @@ module.exports = class EcRepository {
 		if (hostnames.length == 0) {
 			hostnames.push(&quot;localhost&quot;, &quot;localhost:8080&quot;);
 		}
-		servicePrefixes.push(&quot;/&quot;);
-		servicePrefixes.push(&quot;/service/&quot;);
-		servicePrefixes.push(&quot;/api/&quot;);
-		servicePrefixes.push(&quot;/api/custom/&quot;);
-		for (let j = 0; j &lt; hostnames.length; j++) {
-			for (let k = 0; k &lt; servicePrefixes.length; k++) {
-				for (let i = 0; i &lt; protocols.length; i++) {
+		servicePrefixes.push(&quot;/&quot;, &quot;/service/&quot;, &quot;/api/&quot;, &quot;/api/custom/&quot;);
+		for (let hostname of hostnames) {
+			for (let servicePrefix of servicePrefixes) {
+				for (let protocol of protocols) {
 					if (
 						this.autoDetectRepositoryActual(
-							protocols[i] +
+							protocol +
 							&quot;//&quot; +
-							hostnames[j] +
-							servicePrefixes[k].replace(/\/\//g, &quot;/&quot;)
+							hostname +
+							servicePrefix.replaceAll(&quot;//&quot;, &quot;/&quot;)
 						)
 					) {
 						EcRemote.async = true;
@@ -2840,28 +2770,27 @@ module.exports = class EcRepository {
 	 *  @private
 	 */
 	autoDetectRepositoryActualAsync = function (guess, success, failure) {
-		let me = this;
-		let successCheck = function (p1) {
+		let successCheck = (p1) =&gt; {
 			if (p1 != null) {
 				if (p1[&quot;ping&quot;] == &quot;pong&quot;) {
 					if (p1[&quot;time&quot;] != null)
-						me.timeOffset = p1[&quot;time&quot;] - new Date().getTime();
-					if (me.autoDetectFound == false) {
-						me.selectedServer = guess;
-						me.autoDetectFound = true;
+						this.timeOffset = p1[&quot;time&quot;] - Date.now();
+					if (!this.autoDetectFound) {
+						this.selectedServer = guess;
+						this.autoDetectFound = true;
 						success();
 					}
 				}
 			}
 		};
-		let failureCheck = function (p1) {
+		let failureCheck = (p1) =&gt; {
 			if (p1 != null) {
-				if (!(p1 == &quot;&quot;)) {
+				if (p1 != &quot;&quot;) {
 					try {
-						if (p1.indexOf(&quot;pong&quot;) != -1) {
-							if (me.autoDetectFound == false) {
-								me.selectedServer = guess;
-								me.autoDetectFound = true;
+						if (p1.includes(&quot;pong&quot;)) {
+							if (!this.autoDetectFound) {
+								this.selectedServer = guess;
+								this.autoDetectFound = true;
 								success();
 							}
 						}
@@ -2897,24 +2826,23 @@ module.exports = class EcRepository {
 	autoDetectRepositoryActual = function (guess) {
 		let oldTimeout = EcRemote.timeout;
 		EcRemote.timeout = 500;
-		let me = this;
-		let successCheck = function (p1) {
+		let successCheck = (p1) =&gt; {
 			if (p1 != null) {
 				if (p1[&quot;ping&quot;] == &quot;pong&quot;) {
 					if (p1[&quot;time&quot;] != null)
-						me.timeOffset = p1[&quot;time&quot;] - new Date().getTime();
-					me.selectedServer = guess;
-					me.autoDetectFound = true;
+						this.timeOffset = p1[&quot;time&quot;] - Date.now();
+					this.selectedServer = guess;
+					this.autoDetectFound = true;
 				}
 			}
 		};
-		let failureCheck = function (p1) {
+		let failureCheck = (p1) =&gt; {
 			if (p1 != null) {
 				if (p1 != &quot;&quot;) {
 					try {
-						if (p1.indexOf(&quot;pong&quot;) != -1) {
-							me.selectedServer = guess;
-							me.autoDetectFound = true;
+						if (p1.includes(&quot;pong&quot;)) {
+							this.selectedServer = guess;
+							this.autoDetectFound = true;
 						}
 					} catch (ex) {
 						// eat quietly
@@ -3041,15 +2969,14 @@ module.exports = class EcRepository {
 		} else {
 			service = &quot;/sky/admin&quot;;
 		}
-		let me = this;
 		return EcRemote.getExpectingObject(
 			this.selectedServer,
 			service,
-			function (p1) {
+			(p1) =&gt; {
 				let ary = p1;
-				me.adminKeys = [];
-				for (let i = 0; i &lt; ary.length; i++) {
-					me.adminKeys.push(ary[i]);
+				this.adminKeys = [];
+				for (let key of ary) {
+					this.adminKeys.push(key);
 				}
 				if (success != null)
 					success(ary);
@@ -3114,8 +3041,8 @@ module.exports = class EcRepository {
 		if (query == null || query == &quot;&quot;) query = queryAdd;
 		else query = &quot;(&quot; + query + &quot;) AND &quot; + queryAdd;
 		return cassPromisify(
-			repo.searchWithParams(query, paramObj, null, null, null, eim).then((p1s) =&gt; {
-				return Promise.all(
+			repo.searchWithParams(query, paramObj, null, null, null, eim)
+				.then((p1s) =&gt; Promise.all(
 					p1s.map(
 						async (p1) =&gt; {
 							try {
@@ -3126,10 +3053,10 @@ module.exports = class EcRepository {
 							}
 						}
 					)
-				).then((results) =&gt;
-					results.filter(x =&gt; x).map((result) =&gt; factory().copyFrom(result))
-				);
-			}),
+				))
+				.then((results) =&gt;
+					results.filter(Boolean).map((result) =&gt; factory().copyFrom(result))
+				),
 			success,
 			failure
 		);

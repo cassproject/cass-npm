@@ -1223,16 +1223,10 @@ module.exports = class Assertion extends schema.CreativeWork {
 	 *  @param pk
 	 */
 	setSubject(pk) {
-		let owners = [];
 		let readers = this.reader;
 		if (readers == null) readers = [];
-		if (this.subject != null) {
-			if (this.subject.owner != null) 
-				owners = owners.concat(this.subject.owner);
-			if (this.subject.reader != null)
-				readers = readers.concat(this.subject.reader);
-		}
-		if (this.owner != null) owners = owners.concat(this.owner);
+		if (this.subject?.reader != null)
+			readers = readers.concat(this.subject.reader);
 		readers.push(pk.toPem());
 		this.subject = pk.toPem();
 	}
@@ -1254,10 +1248,10 @@ module.exports = class Assertion extends schema.CreativeWork {
 		if (this.subject == null) return &quot;Nobody&quot;;
 		let subjectPk = this.getSubject();
 		let identity = eim.getIdentity(subjectPk);
-		if (identity != null &amp;&amp; identity.displayName != null)
+		if (identity?.displayName != null)
 			return identity.displayName + &quot; (You)&quot;;
 		let contact = eim.getContact(subjectPk);
-		if (contact == null || contact.displayName == null)
+		if (contact?.displayName == null)
 			return &quot;Unknown Subject&quot;;
 		return contact.displayName;
 	}
@@ -1270,12 +1264,12 @@ module.exports = class Assertion extends schema.CreativeWork {
 		}
 		this.getSubjectAsync(function(subjectPk) {
 			let identity = eim.getIdentity(subjectPk);
-			if (identity != null &amp;&amp; identity.displayName != null) {
+			if (identity?.displayName != null) {
 				success(identity.displayName + &quot; (You)&quot;);
 				return;
 			}
 			let contact = eim.getContact(subjectPk);
-			if (contact == null || contact.displayName == null) {
+			if (contact?.displayName == null) {
 				success(&quot;Unknown Subject&quot;);
 				return;
 			}
@@ -1288,10 +1282,10 @@ module.exports = class Assertion extends schema.CreativeWork {
 		if (this.agent == null) return &quot;Nobody&quot;;
 		let agentPk = this.getAgent();
 		let identity = eim.getIdentity(agentPk);
-		if (identity != null &amp;&amp; identity.displayName != null)
+		if (identity?.displayName != null)
 			return identity.displayName + &quot; (You)&quot;;
 		let contact = eim.getContact(agentPk);
-		if (contact == null || contact.displayName == null)
+		if (contact?.displayName == null)
 			return &quot;Unknown Agent&quot;;
 		return contact.displayName;
 	}
@@ -1304,12 +1298,12 @@ module.exports = class Assertion extends schema.CreativeWork {
 		}
 		this.getAgentAsync(function(subjectPk) {
 			let identity = eim.getIdentity(subjectPk);
-			if (identity != null &amp;&amp; identity.displayName != null) {
+			if (identity?.displayName != null) {
 				success(identity.displayName + &quot; (You)&quot;);
 				return;
 			}
 			let contact = eim.getContact(subjectPk);
-			if (contact == null || contact.displayName == null) {
+			if (contact?.displayName == null) {
 				success(&quot;Unknown Agent&quot;);
 				return;
 			}
@@ -1377,9 +1371,8 @@ module.exports = class Assertion extends schema.CreativeWork {
 	upgrade() {
 		super.upgrade();
 		if (Assertion.TYPE_0_1 == (this.type)) {
-			let me = this;
-			if (me[&quot;@context&quot;] == null &amp;&amp; me[&quot;@schema&quot;] != null)
-				me[&quot;@context&quot;] = me[&quot;@schema&quot;];
+			if (this[&quot;@context&quot;] == null &amp;&amp; this[&quot;@schema&quot;] != null)
+				this[&quot;@context&quot;] = this[&quot;@schema&quot;];
 			this.setContextAndType(Cass.context_0_2, Assertion.TYPE_0_2);
 		}
 		if (Assertion.TYPE_0_2 == (this.getFullType())) {
@@ -1406,14 +1399,14 @@ module.exports = class Assertion extends schema.CreativeWork {
 			}
 	}
 	getTypes() {
-		let a = [];
-		a.push(Assertion.TYPE_0_6);
-		a.push(Assertion.TYPE_0_5);
-		a.push(Assertion.TYPE_0_4);
-		a.push(Assertion.TYPE_0_3);
-		a.push(Assertion.TYPE_0_2);
-		a.push(Assertion.TYPE_0_1);
-		return a;
+		return [
+			Assertion.TYPE_0_6,
+			Assertion.TYPE_0_5,
+			Assertion.TYPE_0_4,
+			Assertion.TYPE_0_3,
+			Assertion.TYPE_0_2,
+			Assertion.TYPE_0_1,
+		];
 	}
 	static getCodebook(assertion) {
 		if (Assertion.codebooks == null) Assertion.codebooks = {};

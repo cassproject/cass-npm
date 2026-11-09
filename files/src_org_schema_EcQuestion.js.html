@@ -1160,14 +1160,14 @@ module.exports = class EcQuestion extends schema.Question {
 			return EcQuestion.HAND_GRADED_ESSAY;
 		}
 		if (this.suggestedAnswer == null) {
-			if (this.text != null &amp;&amp; this.text.indexOf(&quot;__&quot;) != -1) {
+			if (this.text?.includes(&quot;__&quot;)) {
 				return EcQuestion.FILL_IN_THE_BLANK;
 			}
 			return EcQuestion.SHORT_ANSWER;
 		}
 		let l = this.suggestedAnswer.length;
 		if (l == 0) {
-			if (this.text != null &amp;&amp; this.text.indexOf(&quot;__&quot;) != -1) {
+			if (this.text?.includes(&quot;__&quot;)) {
 				return EcQuestion.FILL_IN_THE_BLANK;
 			}
 			return EcQuestion.SHORT_ANSWER;
@@ -1183,7 +1183,7 @@ module.exports = class EcQuestion extends schema.Question {
 	cementAnswerId(id) {
 		if (this.acceptedAnswer != null) {
 			if (!EcArray.isArray(this.acceptedAnswer)) {
-				throw new Error(&quot;Accepted Answer is not Array&quot;);
+				throw new Error(&quot;Accepted Answer is not Array&quot;); // NOSONAR - A TypeError would change the name and toString() callers see.
 			}
 			let ary = this.acceptedAnswer;
 			for (let i = 0; i &lt; ary.length; i++) {
@@ -1197,7 +1197,7 @@ module.exports = class EcQuestion extends schema.Question {
 		}
 		if (this.suggestedAnswer != null) {
 			if (!EcArray.isArray(this.suggestedAnswer)) {
-				throw new Error(&quot;Suggested Answer is not Array&quot;);
+				throw new Error(&quot;Suggested Answer is not Array&quot;); // NOSONAR - A TypeError would change the name and toString() callers see.
 			}
 			let ary = this.suggestedAnswer;
 			for (let i = 0; i &lt; ary.length; i++) {
@@ -1227,7 +1227,7 @@ module.exports = class EcQuestion extends schema.Question {
 			this[&quot;acceptedAnswer&quot;] = [];
 		}
 		if (!EcArray.isArray(this.acceptedAnswer)) {
-			throw new Error(&quot;Accepted Answer is not Array&quot;);
+			throw new Error(&quot;Accepted Answer is not Array&quot;); // NOSONAR - A TypeError would change the name and toString() callers see.
 		}
 		let ary = this.acceptedAnswer;
 		ary.push(answer.id);
@@ -1237,7 +1237,7 @@ module.exports = class EcQuestion extends schema.Question {
 			this[&quot;suggestedAnswer&quot;] = [];
 		}
 		if (!EcArray.isArray(this.suggestedAnswer)) {
-			throw new Error(&quot;Suggested Answer is not Array&quot;);
+			throw new Error(&quot;Suggested Answer is not Array&quot;); // NOSONAR - A TypeError would change the name and toString() callers see.
 		}
 		let ary = this.suggestedAnswer;
 		ary.push(answer.id);
@@ -1247,7 +1247,7 @@ module.exports = class EcQuestion extends schema.Question {
 			return;
 		}
 		if (!EcArray.isArray(this.suggestedAnswer)) {
-			throw new Error(&quot;Suggested Answer is not Array&quot;);
+			throw new Error(&quot;Suggested Answer is not Array&quot;); // NOSONAR - A TypeError would change the name and toString() callers see.
 		}
 		let ary = this.suggestedAnswer;
 		for (let i = 0; i &lt; ary.length; i++) {
@@ -1264,7 +1264,7 @@ module.exports = class EcQuestion extends schema.Question {
 			return;
 		}
 		if (!EcArray.isArray(this.acceptedAnswer)) {
-			throw new Error(&quot;Accepted Answer is not Array&quot;);
+			throw new Error(&quot;Accepted Answer is not Array&quot;); // NOSONAR - A TypeError would change the name and toString() callers see.
 		}
 		let ary = this.acceptedAnswer;
 		for (let i = 0; i &lt; ary.length; i++) {

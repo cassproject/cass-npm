@@ -1194,53 +1194,52 @@ module.exports = class CfdFramework extends EcFramework {
 		CfdFramework.toRemove[this.shortId()] = remove;
 		if (CfdFramework.removed == null) CfdFramework.removed = {};
 		CfdFramework.removed[this.shortId()] = 0;
-		let that = this;
-		let onAllRemove = function () {
-			EcRepository.DELETE(that, success, failure, repo, eim);
+		let onAllRemove = () =&gt; {
+			EcRepository.DELETE(this, success, failure, repo, eim);
 		};
 		if (remove == 0) onAllRemove();
 		if (this.competency != null &amp;&amp; this.competency.length &gt; 0) {
 			for (let comp of this.competency) {
 				CfdCompetency.get(
 					comp,
-					function (comp) {
+					(comp) =&gt; {
 						comp._delete(
-							function (p1) {
-								CfdFramework.removed[that.shortId()] =
-									CfdFramework.removed[that.shortId()] + 1;
+							(p1) =&gt; {
+								CfdFramework.removed[this.shortId()] =
+									CfdFramework.removed[this.shortId()] + 1;
 								if (
-									CfdFramework.removed[that.shortId()] ==
-									CfdFramework.toRemove[that.shortId()]
+									CfdFramework.removed[this.shortId()] ==
+									CfdFramework.toRemove[this.shortId()]
 								)
 									onAllRemove();
 							},
-							function (err) {
+							(err) =&gt; {
 								let error =
 									&quot;Error deleting competency (&quot; +
 									comp.id +
 									&quot;): &quot; +
 									err;
 								failure(error);
-								CfdFramework.removed[that.shortId()] =
-									CfdFramework.removed[that.shortId()] + 1;
+								CfdFramework.removed[this.shortId()] =
+									CfdFramework.removed[this.shortId()] + 1;
 								if (
-									CfdFramework.removed[that.shortId()] ==
-									CfdFramework.toRemove[that.shortId()]
+									CfdFramework.removed[this.shortId()] ==
+									CfdFramework.toRemove[this.shortId()]
 								)
 									onAllRemove();
 							},
 							repo, eim
 						);
 					},
-					function (err) {
+					(err) =&gt; {
 						let error =
 							&quot;Error retrieving competency to delete: &quot; + err;
 						failure(error);
-						CfdFramework.removed[that.shortId()] =
-							CfdFramework.removed[that.shortId()] + 1;
+						CfdFramework.removed[this.shortId()] =
+							CfdFramework.removed[this.shortId()] + 1;
 						if (
-							CfdFramework.removed[that.shortId()] ==
-							CfdFramework.toRemove[that.shortId()]
+							CfdFramework.removed[this.shortId()] ==
+							CfdFramework.toRemove[this.shortId()]
 						)
 							onAllRemove();
 					}, repo, eim
@@ -1251,43 +1250,43 @@ module.exports = class CfdFramework extends EcFramework {
 			for (let rel of this.relation) {
 				EcAlignment.get(
 					rel,
-					function (rel) {
+					(rel) =&gt; {
 						rel._delete(
-							function (p1) {
-								CfdFramework.removed[that.shortId()] =
-									CfdFramework.removed[that.shortId()] + 1;
+							(p1) =&gt; {
+								CfdFramework.removed[this.shortId()] =
+									CfdFramework.removed[this.shortId()] + 1;
 								if (
-									CfdFramework.removed[that.shortId()] ==
-									CfdFramework.toRemove[that.shortId()]
+									CfdFramework.removed[this.shortId()] ==
+									CfdFramework.toRemove[this.shortId()]
 								)
 									onAllRemove();
 							},
-							function (err) {
+							(err) =&gt; {
 								let error =
 									&quot;Error deleting relation (&quot; +
 									rel.id +
 									&quot;): &quot; +
 									err;
 								failure(error);
-								CfdFramework.removed[that.shortId()] =
-									CfdFramework.removed[that.shortId()] + 1;
+								CfdFramework.removed[this.shortId()] =
+									CfdFramework.removed[this.shortId()] + 1;
 								if (
-									CfdFramework.removed[that.shortId()] ==
-									CfdFramework.toRemove[that.shortId()]
+									CfdFramework.removed[this.shortId()] ==
+									CfdFramework.toRemove[this.shortId()]
 								)
 									onAllRemove();
 							}, repo, eim
 						);
 					},
-					function (err) {
+					(err) =&gt; {
 						let error =
 							&quot;Error retrieving relationship to delete: &quot; + err;
 						failure(error);
-						CfdFramework.removed[that.shortId()] =
-							CfdFramework.removed[that.shortId()] + 1;
+						CfdFramework.removed[this.shortId()] =
+							CfdFramework.removed[this.shortId()] + 1;
 						if (
-							CfdFramework.removed[that.shortId()] ==
-							CfdFramework.toRemove[that.shortId()]
+							CfdFramework.removed[this.shortId()] ==
+							CfdFramework.toRemove[this.shortId()]
 						)
 							onAllRemove();
 					}
@@ -1295,8 +1294,8 @@ module.exports = class CfdFramework extends EcFramework {
 			}
 		}
 		if (
-			CfdFramework.removed[that.shortId()] ==
-			CfdFramework.toRemove[that.shortId()]
+			CfdFramework.removed[this.shortId()] ==
+			CfdFramework.toRemove[this.shortId()]
 		)
 			onAllRemove();
 	};

@@ -1107,7 +1107,7 @@
 
 <pre class="code prettyprint linenums">
 const forge = require(&quot;node-forge&quot;);
-const realCrypto = require(&#x27;crypto&#x27;);
+const realCrypto = require(&#x27;crypto&#x27;); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill &quot;crypto&quot;, but webpack rejects &quot;node:&quot; URIs.
 const base64 = require(&quot;base64-arraybuffer&quot;);
 
 /**

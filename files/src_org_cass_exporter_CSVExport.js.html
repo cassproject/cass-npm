@@ -1311,17 +1311,15 @@ module.exports = class CSVExport extends Exporter {
 							for (let prop3 in props2[prop2]) {
 								display += props2[prop2][prop3] + &quot;|&quot;;
 							}
+						} else if (prop === &#x27;ceterms:versionIdentifier&#x27;) {
+							if (props2[prop2][&#x27;ceterms:identifierValueCode&#x27;])
+								display += props2[prop2][&#x27;ceterms:identifierValueCode&#x27;] + &quot;~&quot;;
+							if (props2[prop2][&#x27;ceterms:identifierTypeName&#x27;])
+								display += Object.values(props2[prop2][&#x27;ceterms:identifierTypeName&#x27;])[0] + &quot;~&quot;;
+							if (props2[prop2][&#x27;ceterms:identifierType&#x27;])
+								display += props2[prop2][&#x27;ceterms:identifierType&#x27;] + &quot;|&quot;;
 						} else {
-							if (prop === &#x27;ceterms:versionIdentifier&#x27;) {
-								if (props2[prop2][&#x27;ceterms:identifierValueCode&#x27;])
-									display += props2[prop2][&#x27;ceterms:identifierValueCode&#x27;] + &quot;~&quot;;
-								if (props2[prop2][&#x27;ceterms:identifierTypeName&#x27;])
-									display += Object.values(props2[prop2][&#x27;ceterms:identifierTypeName&#x27;])[0] + &quot;~&quot;;
-								if (props2[prop2][&#x27;ceterms:identifierType&#x27;])
-									display += props2[prop2][&#x27;ceterms:identifierType&#x27;] + &quot;|&quot;;
-							} else {
-								display += props2[prop2] + &quot;|&quot;;
-							}
+							display += props2[prop2] + &quot;|&quot;;
 						}
 					}
 					display = display.substring(0, display.length - 1);
@@ -1351,7 +1349,7 @@ module.exports = class CSVExport extends Exporter {
 			}
 		}
 		buildExport(objects, piped) {
-			for (let object of objects.filter(x=&gt;x)) {
+			for (let object of objects.filter(Boolean)) {
 				this.addCSVRow(object, piped);
 			}
 		}

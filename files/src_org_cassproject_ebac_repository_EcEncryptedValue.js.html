@@ -1123,6 +1123,32 @@ const base64 = require(&quot;base64-arraybuffer&quot;);
 const EcRemoteLinkedData = require(&quot;../../schema/general/EcRemoteLinkedData&quot;);
 require(&quot;../../general/AuditLogger.js&quot;)
 
+function encryptSecretFor(pk, secret) {
+	let eSecret = new EbacEncryptedSecret();
+	eSecret.secret = secret;
+	return EcRsaOaepAsyncWorker.encrypt(
+		EcPk.fromPem(pk),
+		eSecret.toEncryptableJson()
+	);
+}
+
+// The secret already encrypted for pk under this reuse entry (encrypting it on first use),
+// or null when there is no usable entry. A stale or mismatched entry is dropped.
+function reusedEncryptedSecret(reuseMap, key, pk, secret) {
+	let reuse = reuseMap[key];
+	if (reuse == null) return null;
+	if (!(reuse.expires &gt; Date.now() &amp;&amp; reuse.secret == secret)) {
+		delete reuseMap[key];
+		return null;
+	}
+	if (reuse.encryptedSecret?.[pk] == null) {
+		if (reuse.encryptedSecret == null)
+			reuse.encryptedSecret = {};
+		reuse.encryptedSecret[pk] = encryptSecretFor(pk, secret);
+	}
+	return reuse.encryptedSecret[pk];
+}
+
 /**
  *  Represents an encrypted piece of data. Provides helper functions for
  *  encryption/decryption of JSON-LD objects, and provides some searchability of
@@ -1195,7 +1221,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 */
 	getEncryptedFullType() {
 		if (this.encryptedContext == null) return this.encryptedType;
-		if (this.encryptedType.indexOf(&quot;http&quot;) != -1) return this.encryptedType;
+		if (this.encryptedType.includes(&quot;http&quot;)) return this.encryptedType;
 		let computedType = this.encryptedContext;
 		if (EcObject.isObject(this.encryptedContext)) {
 			let typeParts = this.encryptedType.split(&quot;:&quot;);
@@ -1215,7 +1241,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		return this.getEncryptedFullType()
 			.replace(&quot;http://&quot;, &quot;&quot;)
 			.replace(&quot;https://&quot;, &quot;&quot;)
-			.replace(/\//g, &quot;.&quot;);
+			.replaceAll(&quot;/&quot;, &quot;.&quot;);
 	}
 	static getIvSecret(length, owners, readers) {
 		if (EcEncryptedValue.secretReuse) {
@@ -1349,7 +1375,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 	 *  @param {String}   id ID of the value to encrypt
 	 *  @param {String[]} owners Owner keys to encrypt value with
 	 *  @param {String[]} readers Reader keys to encrypt value with
-	 *  @return {EcEncryptedValue} Encrypted value
+	 *  @return {Promise&lt;EcEncryptedValue&gt;} Encrypted value
 	 *  @memberOf EcEncryptedValue
 	 *  @method encryptValue
 	 *  @static
@@ -1422,32 +1448,15 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 					if (EcEncryptedValue.secretReuse) {
 						if (owners == null) owners = [];
 						if (readers == null) readers = [];
-						let reuse = EcEncryptedValue.secretReuseMap[[...owners, ...readers].join(&quot;,&quot;)];
-						if (reuse != null) {
-							if (reuse.expires &gt; Date.now() &amp;&amp; reuse.secret == newSecret) {
-								if (reuse.encryptedSecret?.[pk] == null) {
-									let eSecret = new EbacEncryptedSecret();
-									eSecret.secret = newSecret;
-									if (reuse.encryptedSecret == null)
-										reuse.encryptedSecret = {};
-									reuse.encryptedSecret[pk] = EcRsaOaepAsyncWorker.encrypt(
-										EcPk.fromPem(pk),
-										eSecret.toEncryptableJson()
-									);
-								}
-								return reuse.encryptedSecret[pk];
-							} else {
-								delete EcEncryptedValue.secretReuseMap[[...owners, ...readers].join(&quot;,&quot;)];
-							}
-						}
+						let reused = reusedEncryptedSecret(
+							EcEncryptedValue.secretReuseMap,
+							[...owners, ...readers].join(&quot;,&quot;),
+							pk,
+							newSecret
+						);
+						if (reused != null) return reused;
 					}
-
-					let eSecret = new EbacEncryptedSecret();
-					eSecret.secret = newSecret;
-					return EcRsaOaepAsyncWorker.encrypt(
-						EcPk.fromPem(pk),
-						eSecret.toEncryptableJson()
-					);
+					return encryptSecretFor(pk, newSecret);
 				};
 				if (owners != null)
 					promises = promises.concat(
@@ -1457,11 +1466,10 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 					promises = promises.concat(
 						readers.map((pk) =&gt; insertSecret(pk, iv, secret))
 					);
-				let p = Promise.all(promises).then((secrets) =&gt; {
-					v.secret = secrets;
-					return v;
-				});
-				return p;
+				return Promise.all(promises);
+			}).then((secrets) =&gt; {
+				v.secret = secrets;
+				return v;
 			}),
 			success,
 			failure
@@ -1682,7 +1690,7 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		let typeSplit = type.split(&quot;/&quot;);
 		return (
 			this.encryptedType == type ||
-			this.encryptedType == typeSplit[typeSplit.length - 1]
+			this.encryptedType == typeSplit.at(-1)
 		);
 	}
 	/**
@@ -1696,15 +1704,15 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 		super.addReader(newReader);
 		return this.decryptSecret(eim).then((decryptedSecret) =&gt; {
 			if (decryptedSecret == null) {
-				throw &quot;Cannot add a Reader if you don&#x27;t know the secret&quot;;
+				throw &quot;Cannot add a Reader if you don&#x27;t know the secret&quot;; // NOSONAR - Callers may catch and compare this string; an Error would change what they get.
 			}
 			return EcRsaOaepAsyncWorker.encrypt(
 				newReader,
 				decryptedSecret.toEncryptableJson()
-			).then((encryptedSecret) =&gt;
-				EcArray.setAdd(this.secret, encryptedSecret)
 			);
-		});
+		}).then((encryptedSecret) =&gt;
+			EcArray.setAdd(this.secret, encryptedSecret)
+		);
 	}
 	/**
 	 *  Removes a reader from the object, if the reader does exist.
@@ -1738,10 +1746,9 @@ module.exports = class EcEncryptedValue extends EbacEncryptedValue {
 						)
 					)
 				);
-			let p = Promise.all(promises).then((secrets) =&gt; {
-				this.secret = secrets;
-			});
-			return p;
+			return Promise.all(promises);
+		}).then((secrets) =&gt; {
+			this.secret = secrets;
 		});
 	}
 };

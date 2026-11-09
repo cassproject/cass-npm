@@ -1122,22 +1122,21 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 	 */
 	constructor() {
 		super();
-		let me = this;
 		EcRemote.getExpectingObject(
 			&quot;&quot;,
 			&quot;hello.json&quot;,
-			function(o) {
+			(o) =&gt; {
 				try {
-					me.configuration = JSON.parse(JSON.stringify(o));
+					this.configuration = structuredClone(o);
 					hello.init(o);
-					me.oauthEnabled = true;
+					this.oauthEnabled = true;
 					initialized();
-				} catch (ex) {
-					me.oauthEnabled = false;
+				} catch (ex) { // NOSONAR - hello.js missing, a bad configuration or no initialized() hook: run without OAuth.
+					this.oauthEnabled = false;
 				}
 			},
-			function(s) {
-				me.oauthEnabled = false;
+			(s) =&gt; {
+				this.oauthEnabled = false;
 			}
 		);
 	}
@@ -1202,36 +1201,34 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 		let o = {};
 		o[&quot;scope&quot;] = this.configuration[this.server + &quot;Scope&quot;];
 		o[&quot;display&quot;] = &quot;page&quot;;
-		let me = this;
-		hello.on(&quot;auth.login&quot;, function(o) {
-			me.oauthLoginResponse = o;
-			me.network = me.oauthLoginResponse[&quot;network&quot;];
+		hello.on(&quot;auth.login&quot;, (o) =&gt; {
+			this.oauthLoginResponse = o;
+			this.network = this.oauthLoginResponse[&quot;network&quot;];
 			hello
-				.api(me.network + &quot;/me/folders&quot;, &quot;get&quot;, {})
-				.then(function(folderResponse) {
+				.api(this.network + &quot;/me/folders&quot;, &quot;get&quot;, {})
+				.then((folderResponse) =&gt; {
 					let folders = folderResponse[&quot;data&quot;];
 					let foundIdentities = false;
 					let foundContacts = false;
-					for (let i = 0; i &lt; folders.length; i++) {
-						let d = folders[i];
+					for (const d of folders) {
 						let name = d[&quot;name&quot;];
 						let id = d[&quot;id&quot;];
 						if (name == &quot;CASS Identities&quot;) {
 							foundIdentities = true;
-							me.hookIdentityManagerIdentities(id);
-							me.readIdentityFiles(id, success, failure);
+							this.hookIdentityManagerIdentities(id);
+							this.readIdentityFiles(id, success, failure);
 						}
 						if (name == &quot;CASS Contacts&quot;) {
 							foundContacts = true;
-							me.hookIdentityManagerContacts(id);
-							me.readContactFiles(id, success, failure);
+							this.hookIdentityManagerContacts(id);
+							this.readContactFiles(id, success, failure);
 						}
 					}
 					if (!foundIdentities) {
-						me.createIdentityFolder(success);
+						this.createIdentityFolder(success);
 					}
 					if (!foundContacts) {
-						me.createContactFolder();
+						this.createContactFolder();
 					}
 				})
 				.fail(failure);
@@ -1239,31 +1236,28 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 		hello.login(this.server, o).fail(failure);
 	}
 	createContactFolder() {
-		let me = this;
 		let o = {};
 		o[&quot;name&quot;] = &quot;CASS Contacts&quot;;
-		hello.api(me.network + &quot;/me/folders&quot;, &quot;post&quot;, o).then(function(r) {
-			me.hookIdentityManagerContacts(r[&quot;id&quot;]);
+		hello.api(this.network + &quot;/me/folders&quot;, &quot;post&quot;, o).then((r) =&gt; {
+			this.hookIdentityManagerContacts(r[&quot;id&quot;]);
 		});
 	}
 	createIdentityFolder(success) {
-		let me = this;
 		let o = {};
 		o[&quot;name&quot;] = &quot;CASS Identities&quot;;
-		hello.api(me.network + &quot;/me/folders&quot;, &quot;post&quot;, o).then(function(r) {
-			me.hookIdentityManagerIdentities(r[&quot;id&quot;]);
+		hello.api(this.network + &quot;/me/folders&quot;, &quot;post&quot;, o).then((r) =&gt; {
+			this.hookIdentityManagerIdentities(r[&quot;id&quot;]);
 			success(r);
 		});
 	}
 	writeIdentityFiles(folderId, success, eim) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		let me = this;
 		let helper = new EcAsyncHelper();
 		helper.each(
 			eim.ids,
-			function(identity, callback0) {
-				me.writeIdentityFile(folderId, identity, callback0);
+			(identity, callback0) =&gt; {
+				this.writeIdentityFile(folderId, identity, callback0);
 			},
 			function(strings) {
 				success(strings);
@@ -1297,8 +1291,8 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 	writeContactFiles(folderId, eim) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		for (let i = 0; i &lt; eim.contacts.length; i++) {
-			this.writeContactFile(folderId, eim.contacts[i]);
+		for (const contact of eim.contacts) {
+			this.writeContactFile(folderId, contact);
 		}
 	}
 	writeContactFile(folderId, contact) {
@@ -1325,27 +1319,26 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 			});
 	}
 	readIdentityFiles(folderId, success, failure, eim) {
-		let me = this;
 		let o = {};
 		o[&quot;parent&quot;] = folderId;
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
 		hello
 			.api(this.network + &quot;/me/files&quot;, &quot;get&quot;, o)
-			.then(function(folderResponse) {
+			.then((folderResponse) =&gt; {
 				let files = folderResponse[&quot;data&quot;];
 				let h = new EcAsyncHelper();
 				h.each(
 					files,
-					function(d, callback0) {
-						let name = d[&quot;name&quot;].replace(&quot;\\.pem&quot;, &quot;&quot;);
+					(d, callback0) =&gt; {
+						let name = d[&quot;name&quot;].replace(String.raw&#x60;\.pem&#x60;, &quot;&quot;);
 						let id = d[&quot;id&quot;];
 						let directLink = d[&quot;downloadUrl&quot;];
 						EcRemote.getExpectingString(
 							&quot;&quot;,
 							directLink +
 								&quot;&amp;access_token=&quot; +
-								hello.getAuthResponse(me.network)[
+								hello.getAuthResponse(this.network)[
 									&quot;access_token&quot;
 								],
 							function(s) {
@@ -1367,27 +1360,26 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 			});
 	}
 	readContactFiles(folderId, success, failure, eim) {
-		let me = this;
 		let o = {};
 		o[&quot;parent&quot;] = folderId;
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
 		hello
 			.api(this.network + &quot;/me/files&quot;, &quot;get&quot;, o)
-			.then(function(folderResponse) {
+			.then((folderResponse) =&gt; {
 				let files = folderResponse[&quot;data&quot;];
 				let h = new EcAsyncHelper();
 				h.each(
 					files,
-					function(d, callback0) {
-						let name = d[&quot;name&quot;].replace(&quot;\\.pem&quot;, &quot;&quot;);
+					(d, callback0) =&gt; {
+						let name = d[&quot;name&quot;].replace(String.raw&#x60;\.pem&#x60;, &quot;&quot;);
 						let id = d[&quot;id&quot;];
 						let directLink = d[&quot;downloadUrl&quot;];
 						EcRemote.getExpectingString(
 							&quot;&quot;,
 							directLink +
 								&quot;&amp;access_token=&quot; +
-								hello.getAuthResponse(me.network)[
+								hello.getAuthResponse(this.network)[
 									&quot;access_token&quot;
 								],
 							function(s) {
@@ -1411,17 +1403,15 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 	hookIdentityManagerIdentities(folderId, eim) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		let me = this;
-		eim.onIdentityChanged = function(identity) {
-			me.writeIdentityFile(folderId, identity, null);
+		eim.onIdentityChanged = (identity) =&gt; {
+			this.writeIdentityFile(folderId, identity, null);
 		};
 	}
 	hookIdentityManagerContacts(folderId, eim) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
-		let me = this;
-		eim.onContactChanged = function(contact) {
-			me.writeContactFile(folderId, contact);
+		eim.onContactChanged = (contact) =&gt; {
+			this.writeContactFile(folderId, contact);
 		};
 	}
 	/**
@@ -1433,23 +1423,21 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 	 *  @method commit
 	 */
 	commit(success, failure) {
-		let me = this;
 		let apio = {};
 		apio[&quot;network&quot;] = this.network;
 		if (hello.getAuthResponse(this.server))
 			hello
-				.api(me.network + &quot;/me/folders&quot;, &quot;get&quot;, apio)
-				.then(function(folderResponse) {
+				.api(this.network + &quot;/me/folders&quot;, &quot;get&quot;, apio)
+				.then((folderResponse) =&gt; {
 					let folders = folderResponse[&quot;data&quot;];
-					for (let i = 0; i &lt; folders.length; i++) {
-						let d = folders[i];
+					for (const d of folders) {
 						let name = d[&quot;name&quot;];
 						let id = d[&quot;id&quot;];
 						if (name == &quot;CASS Identities&quot;) {
-							me.writeIdentityFiles(id, success);
+							this.writeIdentityFiles(id, success);
 						}
 						if (name == &quot;CASS Contacts&quot;) {
-							me.writeContactFiles(id);
+							this.writeContactFiles(id);
 						}
 					}
 				})
@@ -1459,36 +1447,34 @@ module.exports = class OAuth2FileBasedRemoteIdentityManager extends
 	create(success, failure) {
 		let o = {};
 		o[&quot;scope&quot;] = this.configuration[this.server + &quot;Scope&quot;];
-		let me = this;
-		hello.on(&quot;auth.login&quot;, function(o) {
-			me.oauthLoginResponse = o;
-			me.network = me.oauthLoginResponse[&quot;network&quot;];
+		hello.on(&quot;auth.login&quot;, (o) =&gt; {
+			this.oauthLoginResponse = o;
+			this.network = this.oauthLoginResponse[&quot;network&quot;];
 			hello
-				.api(me.network + &quot;/me/folders&quot;, &quot;get&quot;, {})
-				.then(function(folderResponse) {
+				.api(this.network + &quot;/me/folders&quot;, &quot;get&quot;, {})
+				.then((folderResponse) =&gt; {
 					let folders = folderResponse[&quot;data&quot;];
 					let foundIdentities = false;
 					let foundContacts = false;
-					for (let i = 0; i &lt; folders.length; i++) {
-						let d = folders[i];
+					for (const d of folders) {
 						let name = d[&quot;name&quot;];
 						let id = d[&quot;id&quot;];
 						if (name == &quot;CASS Identities&quot;) {
 							foundIdentities = true;
-							me.hookIdentityManagerIdentities(id);
-							me.readIdentityFiles(id, success, failure);
+							this.hookIdentityManagerIdentities(id);
+							this.readIdentityFiles(id, success, failure);
 						}
 						if (name == &quot;CASS Contacts&quot;) {
 							foundContacts = true;
-							me.hookIdentityManagerContacts(id);
-							me.readContactFiles(id, success, failure);
+							this.hookIdentityManagerContacts(id);
+							this.readContactFiles(id, success, failure);
 						}
 					}
 					if (!foundIdentities) {
-						me.createIdentityFolder(success);
+						this.createIdentityFolder(success);
 					}
 					if (!foundContacts) {
-						me.createContactFolder();
+						this.createContactFolder();
 					}
 				})
 				.fail(failure);

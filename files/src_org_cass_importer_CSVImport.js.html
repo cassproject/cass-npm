@@ -1177,7 +1177,7 @@ module.exports = class CSVImport {
 		if (
 			oldId == null ||
 			oldId == &quot;&quot; ||
-			oldId.toLowerCase().indexOf(&quot;http&quot;) == -1
+			!oldId.toLowerCase().includes(&quot;http&quot;)
 		)
 			newObject.assignId(selectedServer, oldId);
 		else {
@@ -1290,7 +1290,7 @@ module.exports = class CSVImport {
 							serverUrl,
 							repo
 						);
-					} else if (repo == null || repo.selectedServer.indexOf(serverUrl) != -1)
+					} else if (repo?.selectedServer.includes(serverUrl) ?? true)
 						competency.generateId(serverUrl);
 					else 
 						competency.generateShortId(serverUrl);
@@ -1334,7 +1334,7 @@ module.exports = class CSVImport {
 							name == null ||
 							name.trim() == &quot;&quot; ||
 							name.startsWith(&quot;@&quot;) ||
-							name.indexOf(&quot;.&quot;) != -1 ||
+							name.includes(&quot;.&quot;) ||
 							tabularData[i][idx].trim() == &quot;&quot; ||
 							idx == nameIndex ||
 							idx == descriptionIndex ||
@@ -1492,10 +1492,7 @@ module.exports = class CSVImport {
 					else alignment.target = CSVImport.importCsvLookup[destKey];
 					alignment.relationType = relationTypeKey;
 					if (owner != null) alignment.addOwner(owner.ppk.toPk());
-					if (
-						repo == null ||
-						repo.selectedServer.indexOf(serverUrl) != -1
-					)
+					if (repo?.selectedServer.includes(serverUrl) ?? true)
 						alignment.generateId(serverUrl);
 					else alignment.generateShortId(serverUrl);
 					relations.push(alignment);
@@ -1597,7 +1594,7 @@ module.exports = class CSVImport {
 			if (
 				props[prop] == null ||
 				props[prop] == undefined ||
-				Object.toString.call(props[prop]).indexOf(&quot;String&quot;) == -1
+				!Object.toString.call(props[prop]).includes(&quot;String&quot;)
 			) {
 				if (EcObject.isObject(props[prop])) {
 					let nested = props[prop];
@@ -1692,7 +1689,7 @@ module.exports = class CSVImport {
 							idx == typeIdx
 						) {
 							continue;
-						} else if (name.indexOf(&quot;.&quot;) != -1) {
+						} else if (name.includes(&quot;.&quot;)) {
 							let split = name.split(&quot;.&quot;);
 							if (split.length &gt; 1) {
 								let key = split[0];
@@ -1731,14 +1728,9 @@ module.exports = class CSVImport {
 							serverUrl,
 							repo
 						);
-					} else {
-						if (
-							repo == null ||
-							repo.selectedServer.indexOf(serverUrl) != -1
-						)
-							data.generateId(serverUrl);
-						else data.generateShortId(serverUrl);
-					}
+					} else if (repo?.selectedServer.includes(serverUrl) ?? true)
+						data.generateId(serverUrl);
+					else data.generateShortId(serverUrl);
 					let shortId;
 					if (
 						idIndex != null &amp;&amp;

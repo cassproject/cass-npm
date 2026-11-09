@@ -1195,14 +1195,14 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 		if (EcRemoteLinkedData.caching &amp;&amp; EcRemoteLinkedData.tvfuCache[id] != null)
 			return EcRemoteLinkedData.tvfuCache[id];
 		if (
-			id.indexOf(&quot;/api/data/&quot;) == -1 &amp;&amp;
-			id.indexOf(&quot;/api/custom/data/&quot;) == -1
+			!id.includes(&quot;/api/data/&quot;) &amp;&amp;
+			!id.includes(&quot;/api/custom/data/&quot;)
 		) {
 			if (EcRemoteLinkedData.caching)
 				EcRemoteLinkedData.tvfuCache[id] = id;
 			return id;
 		}
-		if (!id.substring(id.lastIndexOf(&quot;/&quot;)).match(&quot;^\\/[0-9]+$&quot;)) {
+		if (!id.substring(id.lastIndexOf(&quot;/&quot;)).match(String.raw&#x60;^\/[0-9]+$&#x60;)) {
 			if (EcRemoteLinkedData.caching)
 				EcRemoteLinkedData.tvfuCache[id] = id;
 			return id;
@@ -1228,7 +1228,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 		this.id += &quot;/&quot;;
 		this.id += EcCrypto.generateUUID();
 		this.id += &quot;/&quot;;
-		this.id += new Date().getTime();
+		this.id += Date.now();
 	}
 	/**
 	 *  Will generate an short (non-versioned) identifier using the server URL provided (usually from
@@ -1246,7 +1246,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 		return this.getFullType()
 			.replace(&quot;http://&quot;, &quot;&quot;)
 			.replace(&quot;https://&quot;, &quot;&quot;)
-			.replace(/\//g, &quot;.&quot;);
+			.replaceAll(&quot;/&quot;, &quot;.&quot;);
 	}
 	/**
 	 *  Will generate an identifier using the server URL provided (usually from
@@ -1264,7 +1264,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 		this.id += &quot;/&quot;;
 		this.id += uniqueIdentifier;
 		this.id += &quot;/&quot;;
-		this.id += new Date().getTime();
+		this.id += Date.now();
 	}
 	/**
 	 *  Will generate an identifier using the server URL provided (usually from
@@ -1406,8 +1406,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 				works = false;
 				let sig = this.signature[i];
 				if (this.owner != null) {
-					for (let j = 0; j &lt; this.owner.length; j++) {
-						let own = this.owner[j];
+					for (let own of this.owner) {
 						let pk = EcPk.fromPem(own);
 						let verify = false;
 						try {
@@ -1417,10 +1416,10 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 								sig
 							);
 							global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, &quot;EcRemoteLDVerify&quot;, verify);
-						} catch (ex) {
+						} catch (ex) { // NOSONAR - A signature that cannot be checked counts as unverified; the next owner is tried.
 							verify = false;
 						}
-						if (verify == true) {
+						if (verify == true) { // NOSONAR - The worker result is not guaranteed to be a boolean; == true also accepts 1.
 							works = true;
 							break;
 						}
@@ -1436,8 +1435,7 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 				works256 = false;
 				let sig = this.signatureSha256[i];
 				if (this.owner != null) {
-					for (let j = 0; j &lt; this.owner.length; j++) {
-						let own = this.owner[j];
+					for (let own of this.owner) {
 						let pk = EcPk.fromPem(own);
 						let verify = false;
 						try {
@@ -1447,10 +1445,10 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 								sig
 							);
 							global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.INFO, &quot;EcRemoteLDVer256&quot;, verify);
-						} catch (ex) {
+						} catch (ex) { // NOSONAR - A signature that cannot be checked counts as unverified; the next owner is tried.
 							verify = false;
 						}
-						if (verify == true) {
+						if (verify == true) { // NOSONAR - The worker result is not guaranteed to be a boolean; == true also accepts 1.
 							works256 = true;
 							break;
 						}
@@ -1475,8 +1473,8 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 	addOwner(newOwner) {
 		let pem = newOwner.toPem();
 		if (this.owner == null) this.owner = [];
-		for (let i = 0; i &lt; this.owner.length; i++)
-			if (this.owner[i] == pem) return;
+		for (let owner of this.owner)
+			if (owner == pem) return;
 		this.owner.push(pem);
 		this.signature = null;
 	}
@@ -1531,8 +1529,8 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 		if (this.context == null) return true;
 		if (this.getFullType() == null) return true;
 		if (
-			this.getFullType().indexOf(&quot;http://&quot;) == -1 &amp;&amp;
-			this.getFullType().indexOf(&quot;https://&quot;) == -1
+			!this.getFullType().includes(&quot;http://&quot;) &amp;&amp;
+			!this.getFullType().includes(&quot;https://&quot;)
 		)
 			return true;
 		return false;
@@ -1545,8 +1543,8 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 	updateTimestamp() {
 		if (this.getTimestamp() == null) return;
 		let rawId = this.id.substring(0, this.id.lastIndexOf(&quot;/&quot;));
-		if (rawId.endsWith(&quot;/&quot;) == false) rawId += &quot;/&quot;;
-		rawId += new Date().getTime();
+		if (!rawId.endsWith(&quot;/&quot;)) rawId += &quot;/&quot;;
+		rawId += Date.now();
 		this.id = rawId;
 	}
 	/**
@@ -1638,28 +1636,28 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 				types[i].substring(lastSlash + 1) +
 				&#x27;&quot;)&#x27;;
 		}
-		for (let i = 0; i &lt; types.length; i++) {
+		for (let type of types) {
 			if (result != &quot;&quot;) result += &quot; OR &quot;;
-			result += &#x27;\\*encryptedType:&quot;&#x27; + types[i] + &#x27;&quot;&#x27;;
-			let lastSlash = types[i].lastIndexOf(&quot;/&quot;);
+			result += String.raw&#x60;\*encryptedType:&quot;&#x60; + type + &#x27;&quot;&#x27;;
+			let lastSlash = type.lastIndexOf(&quot;/&quot;);
 			result +=
 				&#x27; OR (@context:&quot;&#x27; +
 				Ebac.context +
-				&#x27;&quot; AND \\*encryptedType:&quot;&#x27; +
-				types[i].substring(lastSlash + 1) +
+				String.raw&#x60;&quot; AND \*encryptedType:&quot;&#x60; +
+				type.substring(lastSlash + 1) +
 				&#x27;&quot;)&#x27;;
 		}
 		//Replace http with https in schema or visa versa and then do it again
-		for (let i = 0; i &lt; types.length; i++) {
+		for (let type of types) {
 			if (result != &quot;&quot;) result += &quot; OR &quot;;
-			let lastSlash = types[i].lastIndexOf(&quot;/&quot;);
-			let context = types[i].substring(0, lastSlash + 1);
+			let lastSlash = type.lastIndexOf(&quot;/&quot;);
+			let context = type.substring(0, lastSlash + 1);
 			if (context.startsWith(&quot;http://&quot;)) {
 				let httpsContext = context.replace(&quot;http://&quot;, &quot;https://&quot;);
-				result += &#x27;(@context:&quot;&#x27; + httpsContext + &#x27;&quot; AND @type:&quot;&#x27; + types[i].substring(lastSlash + 1) + &#x27;&quot;)&#x27;;
+				result += &#x27;(@context:&quot;&#x27; + httpsContext + &#x27;&quot; AND @type:&quot;&#x27; + type.substring(lastSlash + 1) + &#x27;&quot;)&#x27;;
 			} else if (context.startsWith(&quot;https://&quot;)) {
 				let httpContext = context.replace(&quot;https://&quot;, &quot;http://&quot;);
-				result += &#x27;(@context:&quot;&#x27; + httpContext + &#x27;&quot; AND @type:&quot;&#x27; + types[i].substring(lastSlash + 1) + &#x27;&quot;)&#x27;;
+				result += &#x27;(@context:&quot;&#x27; + httpContext + &#x27;&quot; AND @type:&quot;&#x27; + type.substring(lastSlash + 1) + &#x27;&quot;)&#x27;;
 			}
 		}
 		return &quot;(&quot; + result + &quot;)&quot;;
@@ -1718,24 +1716,23 @@ module.exports = class EcRemoteLinkedData extends EcLinkedData {
 	 *  @method upgrade
 	 */
 	upgrade() {
-		let me = this;
-		if (me[&quot;@owner&quot;] != null) {
-			me[&quot;owner&quot;] = me[&quot;@owner&quot;];
+		if (this[&quot;@owner&quot;] != null) {
+			this[&quot;owner&quot;] = this[&quot;@owner&quot;];
 		}
-		if (me[&quot;@reader&quot;] != null) {
-			me[&quot;reader&quot;] = me[&quot;@reader&quot;];
+		if (this[&quot;@reader&quot;] != null) {
+			this[&quot;reader&quot;] = this[&quot;@reader&quot;];
 		}
-		if (me[&quot;@signature&quot;] != null) {
-			me[&quot;signature&quot;] = me[&quot;@signature&quot;];
+		if (this[&quot;@signature&quot;] != null) {
+			this[&quot;signature&quot;] = this[&quot;@signature&quot;];
 		}
-		if (me[&quot;@signatureSha256&quot;] != null) {
-			me[&quot;signatureSha256&quot;] = me[&quot;@signatureSha256&quot;];
+		if (this[&quot;@signatureSha256&quot;] != null) {
+			this[&quot;signatureSha256&quot;] = this[&quot;@signatureSha256&quot;];
 		}
-		if (me[&quot;@encryptedType&quot;] != null) {
-			me[&quot;encryptedType&quot;] = me[&quot;@encryptedType&quot;];
+		if (this[&quot;@encryptedType&quot;] != null) {
+			this[&quot;encryptedType&quot;] = this[&quot;@encryptedType&quot;];
 		}
-		if (me[&quot;@encryptedContext&quot;] != null) {
-			me[&quot;encryptedContext&quot;] = me[&quot;@encryptedContext&quot;];
+		if (this[&quot;@encryptedContext&quot;] != null) {
+			this[&quot;encryptedContext&quot;] = this[&quot;@encryptedContext&quot;];
 		}
 		this.handleForwarding();
 	}

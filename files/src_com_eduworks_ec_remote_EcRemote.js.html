@@ -1113,7 +1113,7 @@ let DEBUG = false;
 let isNode = false;    
 if (typeof process === &#x27;object&#x27;) {
   if (typeof process.versions === &#x27;object&#x27;) {
-    if (typeof process.versions.node !== &#x27;undefined&#x27;) {
+    if (process.versions.node !== undefined) {
       isNode = true;
     }
   }
@@ -1299,7 +1299,7 @@ module.exports = class EcRemote {
 			
  			const contentType = response.headers.get(&quot;content-type&quot;);
 			let result = null;
-			if (contentType &amp;&amp; contentType.indexOf(&quot;application/json&quot;) !== -1) {
+			if (contentType?.includes(&quot;application/json&quot;)) {
 				result = await response.json();
 			} else {
 				result = await response.text();
@@ -1318,7 +1318,7 @@ module.exports = class EcRemote {
 			}
 			return result;
 		}).catch((err) =&gt; {
-			if (isNode &amp;&amp; typeof dns !== &#x27;undefined&#x27;) {
+			if (isNode &amp;&amp; dns !== undefined) {
 				dns.lookup(new URL(url).hostname, ((error, address) =&gt; {
 					if (error) {
 						global.auditLogger.report(global.auditLogger.LogCategory.NETWORK, global.auditLogger.Severity.ERROR, &quot;DNSLookup&quot;, url, error);
@@ -1374,7 +1374,7 @@ module.exports = class EcRemote {
 			
 			const contentType = response.headers.get(&quot;content-type&quot;);
 			let result = null;
-			if (contentType &amp;&amp; contentType.indexOf(&quot;application/json&quot;) !== -1) {
+			if (contentType?.includes(&quot;application/json&quot;)) {
 				result = await response.json();
 			} else {
 				result = await response.text();
@@ -1391,7 +1391,7 @@ module.exports = class EcRemote {
 				else
 					throw new Error(response.statusText);
 			}
-			if (isNode &amp;&amp; typeof dns !== &#x27;undefined&#x27;) {
+			if (isNode &amp;&amp; dns !== undefined) {
 				dns.lookup(new URL(url).hostname, ((error, address) =&gt; {
 					if (error) {
 						global.auditLogger.report(global.auditLogger.LogCategory.NETWORK, global.auditLogger.Severity.ERROR, &quot;DNSLookup&quot;, url, error);
@@ -1405,7 +1405,7 @@ module.exports = class EcRemote {
 			}
 			return result;
 	   }).catch((err) =&gt; {
-			if (isNode &amp;&amp; typeof dns !== &#x27;undefined&#x27;) {
+			if (isNode &amp;&amp; dns !== undefined) {
 				dns.lookup(new URL(url).hostname, ((error, address) =&gt; {
 					if (error) {
 						global.auditLogger.report(global.auditLogger.LogCategory.NETWORK, global.auditLogger.Severity.ERROR, &quot;DNSLookup&quot;, url, error);
@@ -1459,7 +1459,7 @@ module.exports = class EcRemote {
 			}
 			const contentType = response.headers.get(&quot;content-type&quot;);
 			let result = null;
-			if (contentType &amp;&amp; contentType.indexOf(&quot;application/json&quot;) !== -1) {
+			if (contentType?.includes(&quot;application/json&quot;)) {
 				result = await response.json();
 			} else {
 				result = await response.text();
@@ -1472,7 +1472,7 @@ module.exports = class EcRemote {
 			}		
 			return result;
 		}).catch((err) =&gt; {
-			if (isNode &amp;&amp; typeof dns !== &#x27;undefined&#x27;) {
+			if (isNode &amp;&amp; dns !== undefined) {
 				dns.lookup(new URL(url).hostname, ((error, address) =&gt; {
 					if (error) {
 						global.auditLogger.report(global.auditLogger.LogCategory.NETWORK, global.auditLogger.Severity.ERROR, &quot;DNSLookup&quot;, url, signatureSheet, error);
@@ -1491,7 +1491,7 @@ module.exports = class EcRemote {
 	static upgradeHttpToHttps(url) {
 		if (typeof window !== &quot;undefined&quot;)
 			if (window?.location != null) {
-				if (url.indexOf(window.location.protocol) == -1) {
+				if (!url.includes(window.location.protocol)) {
 					if (window.location.protocol.startsWith(&quot;https&quot;)) {
 						if (!url.startsWith(&quot;https:&quot;)) {
 							url = url.replace(&quot;http:&quot;, &quot;https:&quot;);

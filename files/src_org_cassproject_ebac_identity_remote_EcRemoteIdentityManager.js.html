@@ -1223,64 +1223,63 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 	 *  @method configureFromServer
 	 */
 	async configureFromServer(success, failure) {
-		let me = this;
 		return cassPromisify(
 			EcRemote.getExpectingObject(
 				this.server,
 				&quot;sky/id/salts&quot;,
-				function (p1) {
-					me.usernameSalt = p1[&quot;usernameSalt&quot;];
-					if (me.usernameSalt.length &lt; 16) {
+				(p1) =&gt; {
+					this.usernameSalt = p1[&quot;usernameSalt&quot;];
+					if (this.usernameSalt.length &lt; 16) {
 						throw new Error(&quot;Insufficient length on Username Salt&quot;);
 					}
-					me.usernameIterations = Math.trunc(
+					this.usernameIterations = Math.trunc(
 						p1[&quot;usernameIterations&quot;]
 					);
-					if (me.usernameIterations &lt; 1000) {
+					if (this.usernameIterations &lt; 1000) {
 						throw new Error(
 							&quot;Insufficient iterations on Username Hash&quot;
 						);
 					}
-					me.usernameWidth = Math.trunc(p1[&quot;usernameLength&quot;]);
-					if (me.usernameWidth != 64) {
+					this.usernameWidth = Math.trunc(p1[&quot;usernameLength&quot;]);
+					if (this.usernameWidth != 64) {
 						throw new Error(
 							&quot;Username Hash required to be length 64.&quot;
 						);
 					}
-					me.passwordSalt = p1[&quot;passwordSalt&quot;];
-					if (me.passwordSalt.length &lt; 16) {
+					this.passwordSalt = p1[&quot;passwordSalt&quot;];
+					if (this.passwordSalt.length &lt; 16) {
 						throw new Error(&quot;Insufficient length on Password Salt&quot;);
 					}
-					me.passwordIterations = Math.trunc(
+					this.passwordIterations = Math.trunc(
 						p1[&quot;passwordIterations&quot;]
 					);
-					if (me.passwordIterations &lt; 1000) {
+					if (this.passwordIterations &lt; 1000) {
 						throw new Error(
 							&quot;Insufficient iterations on Password Hash&quot;
 						);
 					}
-					me.passwordWidth = Math.trunc(p1[&quot;passwordLength&quot;]);
-					if (me.passwordWidth != 64) {
+					this.passwordWidth = Math.trunc(p1[&quot;passwordLength&quot;]);
+					if (this.passwordWidth != 64) {
 						throw new Error(
 							&quot;Password Hash required to be length 64.&quot;
 						);
 					}
-					me.secretSalt = p1[&quot;secretSalt&quot;];
-					if (me.secretSalt.length &lt; 16) {
+					this.secretSalt = p1[&quot;secretSalt&quot;];
+					if (this.secretSalt.length &lt; 16) {
 						throw new Error(&quot;Insufficient length on Secret Salt&quot;);
 					}
-					me.secretIterations = Math.trunc(p1[&quot;secretIterations&quot;]);
-					if (me.secretIterations &lt; 1000) {
+					this.secretIterations = Math.trunc(p1[&quot;secretIterations&quot;]);
+					if (this.secretIterations &lt; 1000) {
 						throw new Error(
 							&quot;Insufficient iterations on Secret Hash&quot;
 						);
 					}
-					me.signatureSheetHashAlgorithm = p1[&quot;signatureSheetHashAlgorithm&quot;];
-					me.configured = true;
+					this.signatureSheetHashAlgorithm = p1[&quot;signatureSheetHashAlgorithm&quot;];
+					this.configured = true;
 					return p1;
 				},
-				function (p1) {
-					me.configured = false;
+				(p1) =&gt; {
+					this.configured = false;
 					throw new Error(p1);
 				}
 			),
@@ -1452,7 +1451,6 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 		r.password = this.passwordWithSalt;
 		let fd = new FormData();
 		fd.append(&quot;credentialRequest&quot;, r.toJson());
-		let me = this;
 		return cassPromisify(
 			EcRemote.postExpectingObject(
 				this.server,
@@ -1461,32 +1459,31 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 				async (arg0) =&gt; {
 					let eim = new EcIdentityManager();
 					let cs = arg0;
-					me.pad = cs.pad;
-					me.token = cs.token;
+					this.pad = cs.pad;
+					this.token = cs.token;
 					let shouldCommit = false;
 					if (cs.credentials != null)
-						for (let i = 0; i &lt; cs.credentials.length; i++) {
-							let c = cs.credentials[i];
+						for (const c of cs.credentials) {
 							let identity = null;
 							try{
 								identity = await EcIdentity.fromCredential(
 									c,
-									me.secretWithSalt,
-									me.server
+									this.secretWithSalt,
+									this.server
 								);
-							} 
+							}
 							catch(ex)
 							{
 								global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, &quot;EcRemoIdenManaFetch&quot;, ex);
 							}
-							if (identity == null || identity.ppk == null)
-							{						
+							if (identity?.ppk == null)
+							{
 								//Try alternate method of getting credential.
-								let newSecretWithSalt = forge.util.encode64(forge.pkcs5.pbkdf2(&#x27;&#x27;,this.secretSalt,this.secretIterations,32));								
+								let newSecretWithSalt = forge.util.encode64(forge.pkcs5.pbkdf2(&#x27;&#x27;,this.secretSalt,this.secretIterations,32));
 								identity = await EcIdentity.fromCredential(
 									c,
 									newSecretWithSalt,
-									me.server
+									this.server
 								);
 								shouldCommit = true;
 							}
@@ -1496,37 +1493,36 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 							eim.addIdentity(identity);
 						}
 					if (cs.contacts != null)
-						for (let i = 0; i &lt; cs.contacts.length; i++) {
-							let c = cs.contacts[i];
+						for (const c of cs.contacts) {
 							let identity = null;
 							try{
-								identity = await EcContact.fromEncryptedContact(
+								identity = EcContact.fromEncryptedContact(
 									c,
-									me.secretWithSalt,
-									me.server
+									this.secretWithSalt,
+									this.server
 								);
-							} 
+							}
 							catch(ex)
 							{
 								global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, &quot;EcRemoIdenManaFetch&quot;, ex);
 							}
-							if (identity == null || identity.pk == null)
-							{					
+							if (identity?.pk == null)
+							{
 								//Try alternate method of getting contact.
-								let newSecretWithSalt = forge.util.encode64(forge.pkcs5.pbkdf2(&#x27;&#x27;,this.secretSalt,this.secretIterations,32));								
-								identity = await EcContact.fromEncryptedContact(
+								let newSecretWithSalt = forge.util.encode64(forge.pkcs5.pbkdf2(&#x27;&#x27;,this.secretSalt,this.secretIterations,32));
+								identity = EcContact.fromEncryptedContact(
 									c,
 									newSecretWithSalt,
-									me.server
+									this.server
 								);
 								shouldCommit = true;
-							}					
+							}
 							if (identity.pk == null)
-								throw new Error(&quot;Could not retreive encrypted pks from credential packet.&quot;)		
+								throw new Error(&quot;Could not retreive encrypted pks from credential packet.&quot;)
 							eim.addContact(identity);
 						}
-						if (shouldCommit)
-							await me.commit(null,null,eim);
+					if (shouldCommit)
+						await this.commit(null,null,eim);
 					return eim;
 				},
 				function (arg0) {
@@ -1598,14 +1594,12 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 		}
 		let credentials = [];
 		let contacts = [];
-		for (let i = 0; i &lt; eim.ids.length; i++) {
-			let id = eim.ids[i];
+		for (const id of eim.ids) {
 			if (id.source != null &amp;&amp; id.source != this.server) continue;
 			id.source = this.server;
 			credentials.push(await id.toCredential(this.secretWithSalt));
 		}
-		for (let i = 0; i &lt; eim.contacts.length; i++) {
-			let id = eim.contacts[i];
+		for (const id of eim.contacts) {
 			if (id.source != null &amp;&amp; id.source != this.server) continue;
 			id.source = this.server;
 			contacts.push(await id.toEncryptedContact(this.secretWithSalt));
@@ -1619,7 +1613,6 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 		commit.credentials.contacts = contacts;
 		let fd = new FormData();
 		fd.append(&quot;credentialCommit&quot;, commit.toJson());
-		let me = this;
 		return cassPromisify(
 			eim.signatureSheet(
 				60000,
@@ -1627,7 +1620,7 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 				async (p1) =&gt; {
 					fd.append(&quot;signatureSheet&quot;, p1);
 					return await EcRemote.postExpectingString(
-						me.server,
+						this.server,
 						service,
 						fd,
 						function (arg0) {
@@ -1661,13 +1654,9 @@ module.exports = class EcRemoteIdentityManager extends RemoteIdentityManagerInte
 		let passwordSplice = &quot;&quot;;
 		for (let charIndex = 0; true; charIndex++) {
 			let foundAny = false;
-			for (
-				let passwordIndex = 0;
-				passwordIndex &lt; passwords.length;
-				passwordIndex++
-			) {
-				if (charIndex &gt;= passwords[passwordIndex].length) continue;
-				passwordSplice += passwords[passwordIndex].charAt(charIndex);
+			for (const password of passwords) {
+				if (charIndex &gt;= password.length) continue;
+				passwordSplice += password.charAt(charIndex);
 				foundAny = true;
 			}
 			if (!foundAny) break;

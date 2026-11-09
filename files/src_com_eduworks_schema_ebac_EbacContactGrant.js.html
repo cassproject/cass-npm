@@ -1163,9 +1163,8 @@ module.exports = class EbacContactGrant extends EcRemoteLinkedData {
 	upgrade() {
 		super.upgrade();
 		if (EbacContactGrant.TYPE_0_1 == (this.type)) {
-			let me = this;
-			if (me[&quot;@context&quot;] == null &amp;&amp; me[&quot;@schema&quot;] != null)
-				me[&quot;@context&quot;] = me[&quot;@schema&quot;];
+			if (this[&quot;@context&quot;] == null &amp;&amp; this[&quot;@schema&quot;] != null)
+				this[&quot;@context&quot;] = this[&quot;@schema&quot;];
 			this.setContextAndType(Ebac.context_0_2, EbacContactGrant.TYPE_0_2);
 		}
 		if (EbacContactGrant.TYPE_0_2 == (this.getFullType())) {
@@ -1176,12 +1175,7 @@ module.exports = class EbacContactGrant extends EcRemoteLinkedData {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(EbacContactGrant.TYPE_0_4);
-		a.push(EbacContactGrant.TYPE_0_3);
-		a.push(EbacContactGrant.TYPE_0_2);
-		a.push(EbacContactGrant.TYPE_0_1);
-		return a;
+		return [EbacContactGrant.TYPE_0_4, EbacContactGrant.TYPE_0_3, EbacContactGrant.TYPE_0_2, EbacContactGrant.TYPE_0_1];
 	}
 };
 

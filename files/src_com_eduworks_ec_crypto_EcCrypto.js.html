@@ -1107,7 +1107,7 @@
 
 <pre class="code prettyprint linenums">
 let forge = require(&quot;node-forge&quot;);
-const realCrypto = require(&#x27;crypto&#x27;);
+const realCrypto = require(&#x27;crypto&#x27;); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill &quot;crypto&quot;, but webpack rejects &quot;node:&quot; URIs.
 /**
  *  @author Fritz
  *  @class EcCrypto
@@ -1180,7 +1180,7 @@ module.exports = class EcCrypto {
 	}
 	static generateUUID()
 	{
-		var d = new Date().getTime(); //Timestamp
+		var d = Date.now(); //Timestamp
 		var d2 = ((typeof performance !== &#x27;undefined&#x27;) &amp;&amp; performance.now &amp;&amp; (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
 		var random = new Uint8Array(32);//One random byte per hex digit
 		(typeof crypto !== &quot;undefined&quot; &amp;&amp; crypto.getRandomValues ? crypto : realCrypto.webcrypto).getRandomValues(random);

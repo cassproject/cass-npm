@@ -1174,8 +1174,7 @@ module.exports = class EcDirectedGraph extends Graph {
 		let results = [];
 		for (let edge2 of this.edges) {
 			if (edge.equals(edge2.edge)) {
-				results.push(edge2.source);
-				results.push(edge2.destination);
+				results.push(edge2.source, edge2.destination);
 			}
 		}
 		EcArray.removeDuplicates(results);

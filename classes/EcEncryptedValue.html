@@ -1162,7 +1162,7 @@
 
         <div id="main" class="yui3-u">
             <div class="content"><div class="title">
-    <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l18"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:18</code></a></span>
+    <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l44"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:44</code></a></span>
     <h1 class="class-name">EcEncryptedValue</h1>
 </div>
 
@@ -1206,7 +1206,7 @@ the data within.</p>
           </td>
           <td>
             <div class="method-name ">
-              <a href="#method_encryptValue">encryptValue</a>(text, id, owners, readers): <a href="../classes/EcEncryptedValue.html" class="crosslink">EcEncryptedValue</a>
+              <a href="#method_encryptValue">encryptValue</a>(text, id, owners, readers): Promise<EcEncryptedValue>
             </div>
             <div class="short-description">
               <p>Encrypts a text value with the owners and readers provided</p>
@@ -1558,7 +1558,7 @@ the data within.</p>
         <h2 id="static-public-methods">Static Public Methods</h2>
 <div class="method item">
     <div id="method_encryptOnSave" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l389"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:389</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l397"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:397</code></a></span>
         <h3 class="">
             public
             static
@@ -1635,12 +1635,12 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_encryptValue" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l237"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:237</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l263"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:263</code></a></span>
         <h3 class="">
             public
             static
             
-            encryptValue(text, id, owners, readers): <a href="../classes/EcEncryptedValue.html" class="crosslink">EcEncryptedValue</a>
+            encryptValue(text, id, owners, readers): Promise<EcEncryptedValue>
         </h3>
     </div>
 
@@ -1724,7 +1724,7 @@ is passed in returns val</p>
       <div class="return">
         <h4>Return:</h4>
         <div>
-          <span class="return-type"><a href="../classes/EcEncryptedValue.html" class="crosslink">EcEncryptedValue</a></span>
+          <span class="return-type">Promise<EcEncryptedValue></span>
           <span class="return-description"><p>Encrypted value</p>
 </span>
         </div>
@@ -1734,7 +1734,7 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_encryptValue" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l265"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:265</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l291"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:291</code></a></span>
         <h3 class="">
             public
             static
@@ -1833,7 +1833,7 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_encryptValueOld" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l210"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:210</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l236"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:236</code></a></span>
         <h3 class="deprecated">
             public
             static
@@ -1921,7 +1921,7 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_encryptValueUsingIvAndSecret" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l362"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:362</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l370"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:370</code></a></span>
         <h3 class="">
             public
             static
@@ -2047,7 +2047,7 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_fromEncryptedValue" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l40"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:40</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l66"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:66</code></a></span>
         <h3 class="">
             public
             static
@@ -2104,7 +2104,7 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_fromEncryptedValue" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l63"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:63</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l89"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:89</code></a></span>
         <h3 class="deprecated">
             public
             static
@@ -2204,7 +2204,7 @@ is passed in returns val</p>
 </div>
 <div class="method item">
     <div id="method_toEncryptedValue" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l145"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:145</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l171"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:171</code></a></span>
         <h3 class="">
             public
             static
@@ -2276,7 +2276,7 @@ when encrypting</p>
 </div>
 <div class="method item">
     <div id="method_toEncryptedValueAsync" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l188"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:188</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l214"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:214</code></a></span>
         <h3 class="">
             public
             static
@@ -2418,7 +2418,7 @@ encryption</p>
     <h2 id="public-methods">Public Methods</h2>
 <div class="method item">
     <div id="method_addReader" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l580"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:580</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l588"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:588</code></a></span>
         <h3 class="">
             public
             
@@ -2467,7 +2467,7 @@ encryption</p>
 </div>
 <div class="method item">
     <div id="method_decryptIntoObject" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l422"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:422</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l430"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:430</code></a></span>
         <h3 class="">
             public
             
@@ -2495,7 +2495,7 @@ encryption</p>
 </div>
 <div class="method item">
     <div id="method_decryptIntoString" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l448"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:448</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l456"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:456</code></a></span>
         <h3 class="">
             public
             
@@ -2560,7 +2560,7 @@ decryption</p>
 </div>
 <div class="method item">
     <div id="method_decryptSecret" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l483"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:483</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l491"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:491</code></a></span>
         <h3 class="">
             public
             
@@ -2647,7 +2647,7 @@ Identity Manager</p>
 </div>
 <div class="method item">
     <div id="method_getEncryptedFullType" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l81"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:81</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l107"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:107</code></a></span>
         <h3 class="">
             public
             
@@ -2676,7 +2676,7 @@ the type to be defined in @context.</p>
 </div>
 <div class="method item">
     <div id="method_isAnEncrypted" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l560"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:560</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l568"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:568</code></a></span>
         <h3 class="">
             public
             
@@ -2735,7 +2735,7 @@ can't tell</p>
 </div>
 <div class="method item">
     <div id="method_removeReader" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l601"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:601</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcEncryptedValue.js.html#l609"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcEncryptedValue.js:609</code></a></span>
         <h3 class="">
             public
             

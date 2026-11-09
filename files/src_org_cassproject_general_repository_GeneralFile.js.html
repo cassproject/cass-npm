@@ -1164,17 +1164,16 @@ module.exports = class GeneralFile extends EcRemoteLinkedData {
 	upgrade() {
 		super.upgrade();
 		if (GeneralFile.TYPE_0_1 == (this.type)) {
-			let me = this;
-			if (me[&quot;@context&quot;] == null &amp;&amp; me[&quot;@schema&quot;] != null)
-				me[&quot;@context&quot;] = me[&quot;@schema&quot;];
+			if (this[&quot;@context&quot;] == null &amp;&amp; this[&quot;@schema&quot;] != null)
+				this[&quot;@context&quot;] = this[&quot;@schema&quot;];
 			this.setContextAndType(General.context_0_2, GeneralFile.TYPE_0_2);
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(GeneralFile.TYPE_0_2);
-		a.push(GeneralFile.TYPE_0_1);
-		return a;
+		return [
+			GeneralFile.TYPE_0_2,
+			GeneralFile.TYPE_0_1,
+		];
 	}
 };
 

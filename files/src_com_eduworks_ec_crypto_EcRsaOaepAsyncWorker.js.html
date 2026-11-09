@@ -1110,8 +1110,8 @@
 if (global.Worker === undefined || global.Worker == null)
 	global.Worker = require(&quot;web-worker&quot;);
 let PromiseWorker = require(&quot;promise-worker&quot;);
-const path = require(&#x27;path&#x27;);
-const url = require(&#x27;url&#x27;);
+const path = require(&#x27;path&#x27;); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill &quot;path&quot;, but webpack rejects &quot;node:&quot; URIs.
+const url = require(&#x27;url&#x27;); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill &quot;url&quot;, but webpack rejects &quot;node:&quot; URIs.
 const EcCrypto = require(&quot;./EcCrypto.js&quot;);
 const forge = require(&quot;node-forge&quot;);
 const cassPromisify = require(&quot;../promises/helpers.js&quot;).cassPromisify;
@@ -1157,11 +1157,8 @@ module.exports = class EcRsaOaepAsyncWorker {
 	}
 	static createWorker(index) {
 		let wkr = null;
-		let me = this;
 		try {
-			//As a module worker, web-worker imports the script by file URL. As a classic worker it
-			//builds a URL from the bare path, which fails on Windows (&quot;C:&quot; reads as a URL scheme).
-			wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, &#x27;forgeAsyncNode.js&#x27;)), { type: &quot;module&quot; });
+			wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, &#x27;forgeAsyncNode.js&#x27;)));
 		} catch (e) {
 			global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, &quot;EcRsaOaepAsyncWorker&quot;, e);
 		}
@@ -1174,13 +1171,13 @@ module.exports = class EcRsaOaepAsyncWorker {
 		if (wkr == null)
 			try {
 				wkr = new Worker(path.resolve(__dirname, &#x27;forgeAsync.js&#x27;));
-				wkr.onerror = function (event) {
+				wkr.onerror = (event) =&gt; {
 					wkr = null;
 					global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, &quot;EcRsaOaepAsyncWorker&quot;, event);
 					wkr = new Worker(path.resolve(__dirname, &#x27;cass-editor/forgeAsync.js&#x27;));
 					if (wkr != null) {
 						// replace errored worker at index
-						me.w[index] = (new PromiseWorker(wkr));
+						this.w[index] = (new PromiseWorker(wkr));
 					}
 				}
 			} catch (e) {
