@@ -1159,7 +1159,9 @@ module.exports = class EcRsaOaepAsyncWorker {
 		let wkr = null;
 		let me = this;
 		try {
-			wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, &#x27;forgeAsyncNode.js&#x27;)));
+			//As a module worker, web-worker imports the script by file URL. As a classic worker it
+			//builds a URL from the bare path, which fails on Windows (&quot;C:&quot; reads as a URL scheme).
+			wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, &#x27;forgeAsyncNode.js&#x27;)), { type: &quot;module&quot; });
 		} catch (e) {
 			global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, &quot;EcRsaOaepAsyncWorker&quot;, e);
 		}
