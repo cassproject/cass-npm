@@ -649,6 +649,10 @@ describe('EcRepository (unit)', () => {
 
     describe('auto-detection', () => {
         let hadWindow, oldWindow;
+        before(function () {
+            // These tests swap in a fake window, which a real browser (Cypress) does not allow.
+            if (typeof document !== 'undefined') this.skip();
+        });
         beforeEach(() => {
             sinon.stub(console, 'trace');
             hadWindow = 'window' in global;
