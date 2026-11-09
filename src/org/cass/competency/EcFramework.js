@@ -15,12 +15,11 @@ const EcRemoteLinkedData = require("../../cassproject/schema/general/EcRemoteLin
 module.exports = class EcFramework extends Framework {
 	constructor() {
 		super();
-		let me = this;
 		if (EcFramework.template != null) {
 			let you = EcFramework.template;
 			for (let key in you) {
 				if (typeof you[key] != "function")
-					me[key.replace("@", "")] = you[key];
+					this[key.replace("@", "")] = you[key];
 			}
 		}
 	}
@@ -188,7 +187,6 @@ module.exports = class EcFramework extends Framework {
 	 */
 	removeRelationshipsThatInclude(id, i, success, failure, repo, eim) {
 		let shortId = EcRemoteLinkedData.trimVersionFromUrl(id);
-		let me = this;
 		if (i >= this.relation.length && success != null) success("");
 		else
 			return EcAlignment.get(
@@ -200,15 +198,15 @@ module.exports = class EcFramework extends Framework {
 						a.source == id ||
 						a.target == id
 					) {
-						me.relation.splice(i, 1);
-						await me.removeRelationshipsThatInclude(
+						this.relation.splice(i, 1);
+						await this.removeRelationshipsThatInclude(
 							id,
 							i,
 							success,
 							failure
 						);
 					} else
-						await me.removeRelationshipsThatInclude(
+						await this.removeRelationshipsThatInclude(
 							id,
 							i + 1,
 							success,
@@ -216,7 +214,7 @@ module.exports = class EcFramework extends Framework {
 						);
 				},
 				async(s) => {
-					await me.removeRelationshipsThatInclude(
+					await this.removeRelationshipsThatInclude(
 						id,
 						i + 1,
 						success,
@@ -242,22 +240,21 @@ module.exports = class EcFramework extends Framework {
 	 */
 	removeLevelsThatInclude(id, i, success, failure, repo, eim) {
 		let shortId = EcRemoteLinkedData.trimVersionFromUrl(id);
-		let me = this;
 		if (i >= this.level.length && success != null) success("");
 		else
 			return EcLevel.get(
 				this.level[i],
 				async(a) => {
 					if (a.competency == shortId || a.competency == id) {
-						me.level.splice(i, 1);
-						await me.removeLevelsThatInclude(
+						this.level.splice(i, 1);
+						await this.removeLevelsThatInclude(
 							id,
 							i,
 							success,
 							failure
 						);
 					} else
-						await me.removeLevelsThatInclude(
+						await this.removeLevelsThatInclude(
 							id,
 							i + 1,
 							success,
@@ -265,7 +262,7 @@ module.exports = class EcFramework extends Framework {
 						);
 				},
 				async(s) => {
-					await me.removeLevelsThatInclude(
+					await this.removeLevelsThatInclude(
 						id,
 						i + 1,
 						success,

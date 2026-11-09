@@ -67,17 +67,13 @@ module.exports = class FrameworkImport {
 			FrameworkImport.compMap = {};
 			FrameworkImport.savedComp = 0;
 			FrameworkImport.savedRel = 0;
-			for (let i = 0; i < source.competency.length; i++) {
-				let id = source.competency[i];
+			for (let sourceCompetencyId of source.competency) {
 				EcCompetency.get(
-					id,
+					sourceCompetencyId,
 					function (comp) {
 						let competency = new EcCompetency();
 						competency.copyFrom(comp);
-						if (
-							repo == null ||
-							repo.selectedServer.indexOf(serverUrl) != -1
-						)
+						if (repo?.selectedServer.includes(serverUrl) ?? true)
 							competency.generateId(serverUrl);
 						else competency.generateShortId(serverUrl);
 						FrameworkImport.compMap[
@@ -100,25 +96,15 @@ module.exports = class FrameworkImport {
 									) {
 										FrameworkImport.targetUsable.save(
 											function (p1) {
-												for (
-													let i = 0;
-													i < source.relation.length;
-													i++
-												) {
-													let id = source.relation[i];
+												for (let sourceRelationId of source.relation) {
 													EcAlignment.get(
-														id,
+														sourceRelationId,
 														function (rel) {
 															let relation = new EcAlignment();
 															relation.copyFrom(
 																rel
 															);
-															if (
-																repo == null ||
-																repo.selectedServer.indexOf(
-																	serverUrl
-																) != -1
-															)
+															if (repo?.selectedServer.includes(serverUrl) ?? true)
 																relation.generateId(
 																	serverUrl
 																);
@@ -223,18 +209,18 @@ module.exports = class FrameworkImport {
 				);
 			}
 		} else {
-			for (let i = 0; i < source.competency.length; i++) {
+			for (let sourceCompetencyId of source.competency) {
 				if (
 					target.competency == null ||
-					target.competency.indexOf(source.competency[i]) == -1 &&
-					target.competency.indexOf(
+					!target.competency.includes(sourceCompetencyId) &&
+					!target.competency.includes(
 						EcRemoteLinkedData.trimVersionFromUrl(
-							source.competency[i]
+							sourceCompetencyId
 						)
-					) == -1
+					)
 				) {
 					EcCompetency.get(
-						source.competency[i],
+						sourceCompetencyId,
 						function (comp) {
 							FrameworkImport.competencies.push(comp);
 							FrameworkImport.targetUsable.addCompetency(comp.id);
@@ -254,14 +240,14 @@ module.exports = class FrameworkImport {
 										) {
 											if (
 												target.relation == null ||
-												target.relation.indexOf(
+												!target.relation.includes(
 													source.relation[i]
-												) == -1 &&
-												target.relation.indexOf(
+												) &&
+												!target.relation.includes(
 													EcRemoteLinkedData.trimVersionFromUrl(
 														source.competency[i]
 													)
-												) == -1
+												)
 											) {
 												EcAlignment.get(
 													source.relation[i],

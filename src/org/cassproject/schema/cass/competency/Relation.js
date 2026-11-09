@@ -130,9 +130,8 @@ module.exports = class Relation extends schema.CreativeWork {
 		if ("isEquivalenTo" == this.relationType)
 			this.relationType = Relation.IS_EQUIVALENT_TO;
 		if (Relation.TYPE_0_1 == this.type) {
-			let me = this;
-			if (me["@context"] == null && me["@schema"] != null)
-				me["@context"] = me["@schema"];
+			if (this["@context"] == null && this["@schema"] != null)
+				this["@context"] = this["@schema"];
 			this.setContextAndType(Cass.context_0_2, Relation.TYPE_0_2);
 		}
 		if (Relation.TYPE_0_2 == this.getFullType()) {
@@ -149,13 +148,13 @@ module.exports = class Relation extends schema.CreativeWork {
 		}
 	}
 	getTypes() {
-		let a = [];
-		a.push(Relation.TYPE_0_6);
-		a.push(Relation.TYPE_0_5);
-		a.push(Relation.TYPE_0_4);
-		a.push(Relation.TYPE_0_3);
-		a.push(Relation.TYPE_0_2);
-		a.push(Relation.TYPE_0_1);
-		return a;
+		return [
+			Relation.TYPE_0_6,
+			Relation.TYPE_0_5,
+			Relation.TYPE_0_4,
+			Relation.TYPE_0_3,
+			Relation.TYPE_0_2,
+			Relation.TYPE_0_1,
+		];
 	}
 };

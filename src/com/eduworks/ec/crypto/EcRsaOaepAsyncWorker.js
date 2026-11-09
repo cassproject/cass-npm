@@ -2,8 +2,8 @@
 if (global.Worker === undefined || global.Worker == null)
 	global.Worker = require("web-worker");
 let PromiseWorker = require("promise-worker");
-const path = require('path');
-const url = require('url');
+const path = require('path'); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "path", but webpack rejects "node:" URIs.
+const url = require('url'); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "url", but webpack rejects "node:" URIs.
 const EcCrypto = require("./EcCrypto.js");
 const forge = require("node-forge");
 const cassPromisify = require("../promises/helpers.js").cassPromisify;
@@ -49,7 +49,6 @@ module.exports = class EcRsaOaepAsyncWorker {
 	}
 	static createWorker(index) {
 		let wkr = null;
-		let me = this;
 		try {
 			wkr = new Worker(url.pathToFileURL(path.resolve(__dirname, 'forgeAsyncNode.js')));
 		} catch (e) {
@@ -64,13 +63,13 @@ module.exports = class EcRsaOaepAsyncWorker {
 		if (wkr == null)
 			try {
 				wkr = new Worker(path.resolve(__dirname, 'forgeAsync.js'));
-				wkr.onerror = function (event) {
+				wkr.onerror = (event) => {
 					wkr = null;
 					global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcRsaOaepAsyncWorker", event);
 					wkr = new Worker(path.resolve(__dirname, 'cass-editor/forgeAsync.js'));
 					if (wkr != null) {
 						// replace errored worker at index
-						me.w[index] = (new PromiseWorker(wkr));
+						this.w[index] = (new PromiseWorker(wkr));
 					}
 				}
 			} catch (e) {

@@ -203,17 +203,15 @@ module.exports = class CSVExport extends Exporter {
 							for (let prop3 in props2[prop2]) {
 								display += props2[prop2][prop3] + "|";
 							}
+						} else if (prop === 'ceterms:versionIdentifier') {
+							if (props2[prop2]['ceterms:identifierValueCode'])
+								display += props2[prop2]['ceterms:identifierValueCode'] + "~";
+							if (props2[prop2]['ceterms:identifierTypeName'])
+								display += Object.values(props2[prop2]['ceterms:identifierTypeName'])[0] + "~";
+							if (props2[prop2]['ceterms:identifierType'])
+								display += props2[prop2]['ceterms:identifierType'] + "|";
 						} else {
-							if (prop === 'ceterms:versionIdentifier') {
-								if (props2[prop2]['ceterms:identifierValueCode'])
-									display += props2[prop2]['ceterms:identifierValueCode'] + "~";
-								if (props2[prop2]['ceterms:identifierTypeName'])
-									display += Object.values(props2[prop2]['ceterms:identifierTypeName'])[0] + "~";
-								if (props2[prop2]['ceterms:identifierType'])
-									display += props2[prop2]['ceterms:identifierType'] + "|";
-							} else {
-								display += props2[prop2] + "|";
-							}
+							display += props2[prop2] + "|";
 						}
 					}
 					display = display.substring(0, display.length - 1);
@@ -243,7 +241,7 @@ module.exports = class CSVExport extends Exporter {
 			}
 		}
 		buildExport(objects, piped) {
-			for (let object of objects.filter(x=>x)) {
+			for (let object of objects.filter(Boolean)) {
 				this.addCSVRow(object, piped);
 			}
 		}

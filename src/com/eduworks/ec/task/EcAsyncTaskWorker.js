@@ -1,9 +1,8 @@
 module.exports = class EcAsyncTaskWorker {
 	constructor() {
 		this.assignedList = [];
-		let that = this;
-		this.intervalHandler = setInterval(function() {
-			that.run();
+		this.intervalHandler = setInterval(() => {
+			this.run();
 		}, this.checkWorkInterval);
 	}
 	checkWorkInterval = 100;
@@ -42,19 +41,18 @@ module.exports = class EcAsyncTaskWorker {
 		}
 	}
 	run() {
-		let that = this;
-		this.taskHandler = Task.immediate(function() {
+		this.taskHandler = Task.immediate(() => {
 			if (
-				that.currentTask != undefined &&
-				that.currentTask != null &&
-				!that.currentTask.getIsStarted()
+				this.currentTask != undefined &&
+				this.currentTask != null &&
+				!this.currentTask.getIsStarted()
 			) {
-				that.invoke();
+				this.invoke();
 			}
 			if (
-				that.currentTask?.getIsComplete()
+				this.currentTask?.getIsComplete()
 			) {
-				that.currentTask = that.assignedList.shift();
+				this.currentTask = this.assignedList.shift();
 			}
 		});
 	}

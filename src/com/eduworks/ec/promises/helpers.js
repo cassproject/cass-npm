@@ -10,9 +10,7 @@ module.exports = {
         return p;
     },
     cassReturnNullAsPromise: function (success, failure, error) {
-        let p = new Promise((resolve, reject) => {
-            resolve(null);
-        });
+        let p = Promise.resolve(null);
         if (success !== undefined && success != null && failure !== undefined && failure != null)
             p = p.then(success, failure);
         else if (success !== undefined && success != null)

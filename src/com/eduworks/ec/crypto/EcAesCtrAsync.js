@@ -6,7 +6,7 @@ if (typeof crypto == 'undefined')
 		if (window.crypto != null)
 			crypto = window.crypto;
 	try {
-		let requireResult = require('crypto').webcrypto;
+		let requireResult = require('crypto').webcrypto; // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "crypto", but webpack rejects "node:" URIs.
 		if (requireResult != null)
 			crypto = requireResult;
 	} catch (err) {
@@ -17,7 +17,7 @@ if (typeof crypto == 'undefined')
 const EcCrypto = require("./EcCrypto.js");
 const cassPromisify = require("../promises/helpers.js").cassPromisify;
 const cassReturnAsPromise = require("../promises/helpers.js").cassReturnAsPromise;
-const realCrypto = require('crypto');
+const realCrypto = require('crypto'); // NOSONAR - Bare specifier on purpose: browser bundlers polyfill "crypto", but webpack rejects "node:" URIs.
 let inWorker = false;
 let fipsForced = false;
 /**
@@ -33,11 +33,11 @@ module.exports = class EcAesCtrAsync {
 			try {
 				realCrypto.setFips(true);
 			} catch (e) {
-				if (e.toString().indexOf("ERR_CRYPTO_FIPS_FORCED") != -1) {
+				if (e.toString().includes("ERR_CRYPTO_FIPS_FORCED")) {
 					fipsForced = true;
 					return;
 				}
-				if (e.toString().indexOf("ERR_WORKER_UNSUPPORTED_OPERATION") != -1) {
+				if (e.toString().includes("ERR_WORKER_UNSUPPORTED_OPERATION")) {
 					inWorker = true;
 					return;
 				}
@@ -52,11 +52,11 @@ module.exports = class EcAesCtrAsync {
 			try {
 				realCrypto.setFips(false);
 			} catch (e) {
-				if (e.toString().indexOf("ERR_CRYPTO_FIPS_FORCED") != -1) {
+				if (e.toString().includes("ERR_CRYPTO_FIPS_FORCED")) {
 					fipsForced = true;
 					return;
 				}
-				if (e.toString().indexOf("ERR_WORKER_UNSUPPORTED_OPERATION") != -1) {
+				if (e.toString().includes("ERR_WORKER_UNSUPPORTED_OPERATION")) {
 					inWorker = true;
 					return;
 				}
@@ -107,12 +107,11 @@ module.exports = class EcAesCtrAsync {
 					keyUsages
 				)
 				.then(function (key) {
-					return crypto.subtle
-						.encrypt(algorithm, key, data)
-						.then(function (p1) {
-							EcAesCtrAsync.fipsOff();
-							return base64.encode(p1);
-						});
+					return crypto.subtle.encrypt(algorithm, key, data);
+				})
+				.then(function (p1) {
+					EcAesCtrAsync.fipsOff();
+					return base64.encode(p1);
 				}),
 			success,
 			failure
@@ -166,16 +165,15 @@ module.exports = class EcAesCtrAsync {
 					keyUsages
 				)
 				.then(function (key) {
-					return crypto.subtle
-						.decrypt(algorithm, key, data)
-						.then(function (p1) {
-							if (EcCrypto.caching)
-								EcCrypto.decryptionCache[
-									secret + iv + ciphertext
-								] = EcCrypto.ab2str(p1);
-							EcAesCtrAsync.fipsOff();
-							return EcCrypto.ab2str(p1);
-						});
+					return crypto.subtle.decrypt(algorithm, key, data);
+				})
+				.then(function (p1) {
+					if (EcCrypto.caching)
+						EcCrypto.decryptionCache[
+							secret + iv + ciphertext
+						] = EcCrypto.ab2str(p1);
+					EcAesCtrAsync.fipsOff();
+					return EcCrypto.ab2str(p1);
 				}),
 			success,
 			failure

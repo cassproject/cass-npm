@@ -69,7 +69,7 @@ module.exports = class CSVImport {
 		if (
 			oldId == null ||
 			oldId == "" ||
-			oldId.toLowerCase().indexOf("http") == -1
+			!oldId.toLowerCase().includes("http")
 		)
 			newObject.assignId(selectedServer, oldId);
 		else {
@@ -182,7 +182,7 @@ module.exports = class CSVImport {
 							serverUrl,
 							repo
 						);
-					} else if (repo == null || repo.selectedServer.indexOf(serverUrl) != -1)
+					} else if (repo?.selectedServer.includes(serverUrl) ?? true)
 						competency.generateId(serverUrl);
 					else 
 						competency.generateShortId(serverUrl);
@@ -226,7 +226,7 @@ module.exports = class CSVImport {
 							name == null ||
 							name.trim() == "" ||
 							name.startsWith("@") ||
-							name.indexOf(".") != -1 ||
+							name.includes(".") ||
 							tabularData[i][idx].trim() == "" ||
 							idx == nameIndex ||
 							idx == descriptionIndex ||
@@ -384,10 +384,7 @@ module.exports = class CSVImport {
 					else alignment.target = CSVImport.importCsvLookup[destKey];
 					alignment.relationType = relationTypeKey;
 					if (owner != null) alignment.addOwner(owner.ppk.toPk());
-					if (
-						repo == null ||
-						repo.selectedServer.indexOf(serverUrl) != -1
-					)
+					if (repo?.selectedServer.includes(serverUrl) ?? true)
 						alignment.generateId(serverUrl);
 					else alignment.generateShortId(serverUrl);
 					relations.push(alignment);
@@ -489,7 +486,7 @@ module.exports = class CSVImport {
 			if (
 				props[prop] == null ||
 				props[prop] == undefined ||
-				Object.toString.call(props[prop]).indexOf("String") == -1
+				!Object.toString.call(props[prop]).includes("String")
 			) {
 				if (EcObject.isObject(props[prop])) {
 					let nested = props[prop];
@@ -584,7 +581,7 @@ module.exports = class CSVImport {
 							idx == typeIdx
 						) {
 							continue;
-						} else if (name.indexOf(".") != -1) {
+						} else if (name.includes(".")) {
 							let split = name.split(".");
 							if (split.length > 1) {
 								let key = split[0];
@@ -623,14 +620,9 @@ module.exports = class CSVImport {
 							serverUrl,
 							repo
 						);
-					} else {
-						if (
-							repo == null ||
-							repo.selectedServer.indexOf(serverUrl) != -1
-						)
-							data.generateId(serverUrl);
-						else data.generateShortId(serverUrl);
-					}
+					} else if (repo?.selectedServer.includes(serverUrl) ?? true)
+						data.generateId(serverUrl);
+					else data.generateShortId(serverUrl);
 					let shortId;
 					if (
 						idIndex != null &&

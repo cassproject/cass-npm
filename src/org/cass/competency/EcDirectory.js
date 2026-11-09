@@ -13,12 +13,11 @@ const Directory = require("../../cassproject/schema/cass/competency/Directory.js
 module.exports = class EcDirectory extends Directory {
 	constructor() {
 		super();
-		let me = this;
 		if (EcDirectory.template != null) {
 			let you = EcDirectory.template;
 			for (let key in you) {
 				if (typeof you[key] != "function")
-					me[key.replace("@", "")] = you[key];
+					this[key.replace("@", "")] = you[key];
 			}
 		}
 	}

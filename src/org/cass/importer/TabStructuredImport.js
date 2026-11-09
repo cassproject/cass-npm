@@ -68,9 +68,9 @@ module.exports = class TabStructuredImport {
 			}
 		}
 		let c = null;
-		for (let i = 0; i < competencies.length; i++) {
-			if (competencies[i].getName().trim() == lines[index].trim()) {
-				c = competencies[i];
+		for (let competency of competencies) {
+			if (competency.getName().trim() == lines[index].trim()) {
+				c = competency;
 				break;
 			}
 		}
@@ -86,9 +86,9 @@ module.exports = class TabStructuredImport {
 		}
 		if (parentI != -1) {
 			let parent = null;
-			for (let i = 0; i < competencies.length; i++) {
-				if (competencies[i].getName().trim() == lines[parentI].trim()) {
-					parent = competencies[i];
+			for (let competency of competencies) {
+				if (competency.getName().trim() == lines[parentI].trim()) {
+					parent = competency;
 					break;
 				}
 			}

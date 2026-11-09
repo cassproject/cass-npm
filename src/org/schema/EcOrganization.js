@@ -71,8 +71,8 @@ module.exports = class EcOrganization extends schema.Organization {
 			throw new Error("Employee is not Array");
 		let ary = this.employee;
 		let psid = person.shortId();
-		for (let i = 0; i < ary.length; i++) {
-			if (ary[i] == psid) return;
+		for (let employee of ary) {
+			if (employee == psid) return;
 		}
 		ary.push(psid);
 	}
@@ -110,7 +110,7 @@ module.exports = class EcOrganization extends schema.Organization {
 		let empAry = this.employee;
 		for (let i = 0; i < membAry.length; i++) {
 			let id = membAry[i];
-			if (id.toLowerCase().indexOf("person") > -1) {
+			if (id.toLowerCase().includes("person")) {
 				if (empAry.indexOf(id) <= -1) {
 					empAry.push(id);
 				}
@@ -132,8 +132,8 @@ module.exports = class EcOrganization extends schema.Organization {
 		if (ppkList == null) return JSON.stringify([]);
 		else {
 			let pemArray = [];
-			for (let i = 0; i < ppkList.length; i++) {
-				pemArray.push(ppkList[i].toPem());
+			for (let ppk of ppkList) {
+				pemArray.push(ppk.toPem());
 			}
 			return JSON.stringify(pemArray);
 		}
@@ -167,7 +167,6 @@ module.exports = class EcOrganization extends schema.Organization {
 			let msg = "Repository cannot be null for a rekey operation";
 			if (failure != null) failure(msg);
 			else global.auditLogger.report(global.auditLogger.LogCategory.SYSTEM, global.auditLogger.Severity.ERROR, "EcOrgRekeyAndSave", msg);
-			return;
 		} else {
 			let oldKey = await this.getCurrentOrgKey();
 			let newKey = EcPpk.generateKey();
@@ -247,8 +246,8 @@ module.exports = class EcOrganization extends schema.Organization {
 			let ev = new EcEncryptedValue();
 			ev.copyFrom(o);
 			let orgKeysPPKPems = JSON.parse(await ev.decryptIntoString(null, null, eim));
-			for (let i = 0; i < orgKeysPPKPems.length; i++) {
-				orgKeys.push(EcPpk.fromPem(orgKeysPPKPems[i]));
+			for (let pem of orgKeysPPKPems) {
+				orgKeys.push(EcPpk.fromPem(pem));
 			}
 		} else if (o) {
 			orgKeys = o;
