@@ -25,3 +25,5 @@ docs/
 .nyc_output/
 
 coverage/lcov-report/
+
+.claude/
