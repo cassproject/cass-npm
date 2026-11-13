@@ -36,6 +36,18 @@ module.exports = (on, config) => {
       experiments: {
         typescript: false,
       },
+      // chai 5+ is an ES module ("type": "module"), so webpack requires fully
+      // specified imports inside it. NodePolyfillPlugin points "buffer" at the
+      // package directory, which is not fully specified, so every spec importing
+      // chai failed to bundle. Resolve ES module requests like CommonJS ones.
+      module: {
+        rules: [
+          {
+            test: /\.m?js$/,
+            resolve: { fullySpecified: false },
+          },
+        ],
+      },
       plugins: [new NodePolyfillPlugin(),
         new webpack.ProvidePlugin({
           process: 'process/browser',
