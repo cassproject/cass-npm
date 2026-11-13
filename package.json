@@ -181,14 +181,14 @@
 	},
 	"homepage": "https://github.com/cassproject/cass-npm#readme",
 	"devDependencies": {
-		"@cypress/webpack-preprocessor": "^7.1.2",
+		"@cypress/webpack-preprocessor": "^8.0.0",
 		"chai": "^6.3.0",
 		"concurrently": "^10.0.7",
-		"cypress": "15.19.0",
+		"cypress": "16.2.1",
 		"cypress-fail-fast": "^8.2.0",
 		"eslint": "^10.14.0",
 		"fake-indexeddb": "^6.2.8",
-		"mocha": "^11.8.0",
+		"mocha": "^12.0.3",
 		"node-polyfill-webpack-plugin": "^4.1.0",
 		"nodemon": "^3.1.14",
 		"nyc": "^18.0.0",
@@ -198,6 +198,6 @@
 	},
 	"packageManager": "npm@11.3.0+sha512.96eb611483f49c55f7fa74df61b588de9e213f80a256728e6798ddc67176c7b07e4a1cfc7de8922422cbce02543714367037536955221fa451b0c4fefaf20c66",
 	"allowScripts": {
-		"cypress@15.19.0": true
+		"cypress@16.2.1": true
 	}
 }

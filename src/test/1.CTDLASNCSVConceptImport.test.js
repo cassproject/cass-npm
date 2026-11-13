@@ -324,9 +324,9 @@ describe('CTDLASNCSVConceptImport', () => {
         it('loads each remote context once and reuses it', async () => {
             // Serves stand-in contexts through jsonld's node document loader. The importer caches them
             // for the rest of the process, so no other test may rely on the real contexts.
-            // Loaded through require.main so webpack does not bundle this Node-only client (and its node:
-            // imports) into the Cypress build, where this test is skipped anyway.
-            const { httpClient } = require.main.require('@digitalbazaar/http-client');
+            // Node's own createRequire keeps this Node-only client (and its node: imports) out of the Cypress
+            // build, where this test is skipped anyway.
+            const { httpClient } = module.constructor.createRequire(__filename)('@digitalbazaar/http-client');
             const calls = [];
             sinon.stub(httpClient, 'get').callsFake(async (url) => {
                 calls.push(url);
