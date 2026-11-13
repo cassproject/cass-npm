@@ -1,3 +1,4 @@
+const cypressValue = require('./cypressValue.js');
 const EcPk = require("../com/eduworks/ec/crypto/EcPk.js");
 const EcPpk = require("../com/eduworks/ec/crypto/EcPpk.js");
 const EcAes = require("../com/eduworks/ec/crypto/EcAes.js");
@@ -134,8 +135,8 @@ describe("EcFrameworkGraph", () => {
     it('init', async () => {
         let newId1, newId2;
         EcIdentityManager.default.clearIdentities();
-        if ((typeof Cypress !== 'undefined') && Cypress?.env != null)
-            process.env.CASS_LOOPBACK = Cypress.env('CASS_LOOPBACK');
+        if ((typeof Cypress !== 'undefined') && Cypress != null)
+            process.env.CASS_LOOPBACK = cypressValue('CASS_LOOPBACK');
         console.log(process.env.CASS_LOOPBACK);
         await repo.init(process.env.CASS_LOOPBACK || "http://localhost/api/", null, null, console.log);
         newId1 = null;

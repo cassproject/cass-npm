@@ -1,3 +1,4 @@
+const cypressValue = require('./cypressValue.js');
 let chai = require('chai');
 const EcAes = require('../com/eduworks/ec/crypto/EcAes');
 const EcPpk = require('../com/eduworks/ec/crypto/EcPpk');
@@ -14,8 +15,8 @@ describe('SkyID Adapter', function() {
     let newPassword = EcAes.newSecret(6);
     let name = 'Test User';
     let ident = null;
-    if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
-        process.env.CASS_LOOPBACK = Cypress.env('CASS_LOOPBACK');
+    if ((typeof Cypress !== 'undefined') && Cypress != null)
+        process.env.CASS_LOOPBACK = cypressValue('CASS_LOOPBACK');
     console.log(process.env.CASS_LOOPBACK);
 
     it('create user', async () => {

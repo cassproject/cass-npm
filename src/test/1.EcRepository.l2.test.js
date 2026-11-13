@@ -1,3 +1,4 @@
+const cypressValue = require('./cypressValue.js');
 const fs = require('fs');
 const https = require('https');
 require('fake-indexeddb/auto');
@@ -91,14 +92,14 @@ describe("EcRepository (L2 Cache)", () => {
         EcRepository.caching = true;
         EcRepository.cachingL2 = true;
         EcIdentityManager.default.clearIdentities();
-        if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
-            process.env.CASS_LOOPBACK = Cypress.env('CASS_LOOPBACK');
+        if ((typeof Cypress !== 'undefined') && Cypress != null)
+            process.env.CASS_LOOPBACK = cypressValue('CASS_LOOPBACK');
         console.log(process.env.CASS_LOOPBACK);
-        if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
-            process.env.ELASTICSEARCH_ENDPOINT = Cypress.env('ELASTICSEARCH_ENDPOINT');
+        if ((typeof Cypress !== 'undefined') && Cypress != null)
+            process.env.ELASTICSEARCH_ENDPOINT = cypressValue('ELASTICSEARCH_ENDPOINT');
         console.log(process.env.ELASTICSEARCH_ENDPOINT);
-        if ((typeof Cypress !== 'undefined') && Cypress != null && Cypress.env != null)
-            process.env.TESTLEVEL = Cypress.env('TESTLEVEL');
+        if ((typeof Cypress !== 'undefined') && Cypress != null)
+            process.env.TESTLEVEL = cypressValue('TESTLEVEL');
         await repo.init(process.env.CASS_LOOPBACK || "http://localhost/api/", null, null, console.log);
         if (EcIdentityManager.default.ids.length > 0)
             newId1 = EcIdentityManager.default.ids[0];
