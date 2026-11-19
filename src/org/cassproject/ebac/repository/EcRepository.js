@@ -1058,10 +1058,12 @@ module.exports = class EcRepository {
 	 *  @param {String[]}  urls List of Data ID Urls that should be precached
 	 *  @param {Callback0} success Callback triggered once all of the data has
 	 *                     been retrieved
+	 *  @param {Map<String, EcRemoteLinkedData>} [found] If given, each object this call
+	 *                     retrieves is also put here, under the same keys as in the cache.
 	 *  @memberOf EcRepository
 	 *  @method precache
 	 */
-	precache = async function (urls, success, failure, eim, skipIds, versionedUrls) {
+	precache = async function (urls, success, failure, eim, skipIds, versionedUrls, found) {
 		if (eim === undefined || eim == null)
 			eim = EcIdentityManager.default;
 		if (urls == null) {
@@ -1142,7 +1144,7 @@ module.exports = class EcRepository {
 							EcRepository.cacheBacking[cached.id] = cached;
 						}
 					}
-					let objResults = await this.precache(results, null, null, eim, true, versionedUrls);
+					let objResults = await this.precache(results, null, null, eim, true, versionedUrls, found);
 					if (objResults.length == results.length)
 						return objResults;
 					//Second attempt, in case the indexed object URL doesn't match the permanent URL.
@@ -1151,7 +1153,7 @@ module.exports = class EcRepository {
 						.filter(r => !objResults.some(rr => r.includes(rr.shortId()))) //Filter out URLs that were found in the first pass.
 						.map(u => EcRemoteLinkedData.trimVersionFromUrl(u)); //NOSONAR - Nesting functions to perform filters is normal.
 					if (missingUris.length > 0)
-						objResults.push(...await this.precache(missingUris, null, null, eim, true));
+						objResults.push(...await this.precache(missingUris, null, null, eim, true, undefined, found));
 					return cassPromisify(objResults, success, failure);
 				}
 				for (let i = 0; i < results.length; i++) {
@@ -1169,13 +1171,17 @@ module.exports = class EcRepository {
 						d.getGuid()
 					);
 					// Do not cache requested versioned urls as anything other than the versioned url
+					const keys = [];
 					if (!versionedUrls[`${md5Id}/${timestamp}`] && !versionedUrls[d.id] && !versionedUrls[`${veryShortId}/${timestamp}`]) {
 						if (!d.shortId().startsWith(this.selectedServer))
-							EcRepository.cache[md5Id] = d;
-						EcRepository.cache[shortId] = d;
-						EcRepository.cache[veryShortId] = d;
+							keys.push(md5Id);
+						keys.push(shortId, veryShortId);
 					}
-					EcRepository.cache[d.id] = d;
+					keys.push(d.id);
+					for (const key of keys) {
+						EcRepository.cache[key] = d;
+						found?.set(key, d);
+					}
 				}
 				return cassPromisify(cachedValues(originals), success, failure);
 			});
@@ -1257,8 +1263,12 @@ module.exports = class EcRepository {
 	 *  @method multiget
 	 */
 	multiget = function (urls, success, failure, eim) {
-		let p = this.precache(urls, null, null, eim)
-			.then(() => Promise.all(urls.map((url) => EcRepository.get(url, null, null, this, eim))))
+		// Without caching, EcRepository.get does not read the cache, so each object would be fetched
+		// again. Use the objects this request returned instead (not the shared cache, which other
+		// requests also write to), and get only the rest.
+		const found = EcRepository.caching ? null : new Map();
+		let p = this.precache(urls, null, null, eim, undefined, undefined, found)
+			.then(() => Promise.all(urls.map((url) => found?.get(url) ?? EcRepository.get(url, null, null, this, eim))))
 			.then((things) => things.filter(Boolean));
 		return cassPromisify(p, success, failure);
 	};
