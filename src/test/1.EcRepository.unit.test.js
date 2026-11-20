@@ -561,6 +561,58 @@ describe('EcRepository (unit)', () => {
             assert.isTrue(success.calledOnceWith([a]));
             assert.deepEqual(EcRepository.get.getCalls().map((c) => [c.args[0], c.args[3]]), [[SERVER + 'a', r], [SERVER + 'b', r]]);
         });
+
+        describe('with the multiGet request', () => {
+            let r, post, get;
+            const obj = (id) => ({ '@id': id, '@type': 'Thing', '@context': 'https://schema.org/' });
+            const local = SERVER + 'data/schema.org.Thing/abc';
+            const foreign = 'https://other.example/things/one';
+            const versioned = SERVER + 'data/schema.org.Thing/ver/123';
+            const missing = SERVER + 'data/schema.org.Thing/missing';
+            beforeEach(() => {
+                r = new EcRepository();
+                r.selectedServer = SERVER;
+                post = sinon.stub(EcRemote, 'postExpectingObject');
+                get = sinon.stub(EcRepository, 'get').resolves(null);
+            });
+
+            it('without caching, uses what the request returned and gets only the rest', async () => {
+                post.resolves([obj(local), obj(foreign), obj(versioned)]);
+                const out = await r.multiget([local, SERVER + 'data/abc', foreign, versioned, missing], null, null, eim);
+                assert.deepEqual(out.map((x) => x.id), [local, local, foreign, versioned]);
+                assert.isTrue(post.calledOnce);
+                assert.deepEqual(get.getCalls().map((c) => c.args[0]), [missing]);
+            });
+
+            it('without caching, does not use objects another request put in the cache', async () => {
+                const other = SERVER + 'data/schema.org.Thing/other';
+                EcRepository.cache[other] = thing(other, 'cached earlier');
+                // Another request finishes while this one waits for the server.
+                post.callsFake(async () => {
+                    EcRepository.cache[missing] = thing(missing, 'theirs');
+                    return [obj(local)];
+                });
+                const out = await r.multiget([local, other, missing], null, null, eim);
+                assert.deepEqual(out.map((x) => x.id), [local]);
+                assert.deepEqual(get.getCalls().map((c) => c.args[0]), [other, missing]);
+            });
+
+            it('with caching, gets each URL as before', async () => {
+                EcRepository.caching = true;
+                post.resolves([obj(local)]);
+                await r.multiget([local, missing], null, null, eim);
+                assert.deepEqual(get.getCalls().map((c) => c.args[0]), [local, missing]);
+            });
+
+            it('without caching, uses objects returned for ids under L2 caching', async () => {
+                EcRepository.cachingL2 = true;
+                post.onFirstCall().resolves([local]);
+                post.onSecondCall().resolves([obj(local)]);
+                const out = await r.multiget([local, missing], null, null, eim);
+                assert.deepEqual(out.map((x) => x.id), [local]);
+                assert.deepEqual(get.getCalls().map((c) => c.args[0]), [missing]);
+            });
+        });
     });
 
     describe('searchWithParams', () => {
