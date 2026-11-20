@@ -1482,7 +1482,7 @@ Should be used for all CRUD and search operations</p>
           </td>
           <td>
             <div class="method-name ">
-              <a href="#method_precache">precache</a>(urls, success)
+              <a href="#method_precache">precache</a>(urls, success, [found])
             </div>
             <div class="short-description">
               <p>Retrieves data from the server and caches it for use later during the application. This should be called before the data is needed if possible, so loading displays can be faster.</p>
@@ -2416,7 +2416,7 @@ save</p>
     <h2 id="public-methods">Public Methods</h2>
 <div class="method item">
     <div id="method_autoDetectRepository" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1453"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1453</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1463"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1463</code></a></span>
         <h3 class="">
             public
             
@@ -2437,7 +2437,7 @@ this repositories instance</p>
 </div>
 <div class="method item">
     <div id="method_autoDetectRepository" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1562"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1562</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1572"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1572</code></a></span>
         <h3 class="">
             public
             
@@ -2458,7 +2458,7 @@ this repositories instance</p>
 </div>
 <div class="method item">
     <div id="method_backup" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1794"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1794</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1804"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1804</code></a></span>
         <h3 class="">
             public
             
@@ -2535,7 +2535,7 @@ this repositories instance</p>
 </div>
 <div class="method item">
     <div id="method_fetchServerAdminKeys" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1845"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1845</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1855"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1855</code></a></span>
         <h3 class="">
             public
             
@@ -2600,7 +2600,7 @@ returns an array of the admin public keys</p>
 </div>
 <div class="method item">
     <div id="method_listTypes" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1760"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1760</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1770"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1770</code></a></span>
         <h3 class="">
             public
             
@@ -2664,7 +2664,7 @@ Uses a signature sheet gathered from {@link EcIdentityManager}.</div>
 </div>
 <div class="method item">
     <div id="method_multidelete" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1184"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1184</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1190"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1190</code></a></span>
         <h3 class="">
             public
             
@@ -2727,7 +2727,7 @@ Uses a signature sheet gathered from {@link EcIdentityManager}.</div>
 </div>
 <div class="method item">
     <div id="method_multiget" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1244"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1244</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1250"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1250</code></a></span>
         <h3 class="">
             public
             
@@ -2827,7 +2827,7 @@ successful retrieval from cache.</p>
             public
             
             
-            precache(urls, success)
+            precache(urls, success, [found])
         </h3>
     </div>
 
@@ -2879,6 +2879,21 @@ been retrieved</p>
 </td>
             </tr>
 
+            <tr>
+              <td>found</td>
+              <td>Map<String, EcRemoteLinkedData></td>
+              <td>
+                <ul>
+                  <li>optional</li>
+                  
+                  
+                </ul>
+              </td>
+              <td><p>If given, each object this call
+retrieves is also put here, under the same keys as in the cache.</p>
+</td>
+            </tr>
+
           </tbody>
         </table>
       </div>
@@ -2888,7 +2903,7 @@ been retrieved</p>
 </div>
 <div class="method item">
     <div id="method_restoreBackup" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1811"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1811</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1821"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1821</code></a></span>
         <h3 class="">
             public
             
@@ -2965,7 +2980,7 @@ been retrieved</p>
 </div>
 <div class="method item">
     <div id="method_search" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1265"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1265</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1275"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1275</code></a></span>
         <h3 class="">
             public
             
@@ -3060,7 +3075,7 @@ after eachSuccess.</p>
 </div>
 <div class="method item">
     <div id="method_searchWithParams" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1290"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1290</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1300"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1300</code></a></span>
         <h3 class="">
             public
             
@@ -3170,7 +3185,7 @@ after eachSuccess.</p>
 </div>
 <div class="method item">
     <div id="method_wipe" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1828"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1828</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1838"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1838</code></a></span>
         <h3 class="">
             public
             
@@ -3252,7 +3267,7 @@ after eachSuccess.</p>
         <h2 id="private-methods">Private Methods</h2>
 <div class="method item private">
     <div id="method_autoDetectRepositoryActual" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1709"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1709</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1719"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1719</code></a></span>
         <h3 class="">
             private
             
@@ -3309,7 +3324,7 @@ after eachSuccess.</p>
 </div>
 <div class="method item private">
     <div id="method_autoDetectRepositoryAsync" class="title">
-        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1655"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1655</code></a></span>
+        <span class="source-link"><a href="../files/src_org_cassproject_ebac_repository_EcRepository.js.html#l1665"><code>src&#x2F;org&#x2F;cassproject&#x2F;ebac&#x2F;repository&#x2F;EcRepository.js:1665</code></a></span>
         <h3 class="">
             private
             

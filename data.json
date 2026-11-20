@@ -37645,6 +37645,12 @@
                     "name": "success",
                     "description": "Callback triggered once all of the data has\n                   been retrieved",
                     "type": "Callback0"
+                },
+                {
+                    "name": "found",
+                    "description": "If given, each object this call\n                   retrieves is also put here, under the same keys as in the cache.",
+                    "type": "Map<String, EcRemoteLinkedData>",
+                    "optional": true
                 }
             ],
             "memberof": "EcRepository",
@@ -37655,7 +37661,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1184,
+            "line": 1190,
             "description": "Deletes multiple records from the server.",
             "params": [
                 {
@@ -37677,7 +37683,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1244,
+            "line": 1250,
             "description": "Returns an array of JSON-LD objects from the places designated by the given URIs.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37709,7 +37715,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1265,
+            "line": 1275,
             "description": "Search a repository for JSON-LD compatible data.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37741,7 +37747,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1290,
+            "line": 1300,
             "description": "Search a repository for JSON-LD compatible data.\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37778,7 +37784,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1453,
+            "line": 1463,
             "description": "Searches known repository endpoints to set the server configuration for\nthis repositories instance",
             "memberof": "EcRepository",
             "itemtype": "method",
@@ -37788,7 +37794,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1562,
+            "line": 1572,
             "description": "Searches known repository endpoints to set the server configuration for\nthis repositories instance",
             "memberof": "EcRepository",
             "itemtype": "method",
@@ -37798,7 +37804,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1655,
+            "line": 1665,
             "description": "Handles the actual detection of repository endpoint /ping service",
             "params": [
                 {
@@ -37821,7 +37827,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1709,
+            "line": 1719,
             "description": "Handles the actual detection of repository endpoint /ping service",
             "params": [
                 {
@@ -37844,7 +37850,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1760,
+            "line": 1770,
             "description": "Lists all types visible to the current user in the repository\n<p>\nUses a signature sheet gathered from {@link EcIdentityManager}.",
             "params": [
                 {
@@ -37866,7 +37872,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1794,
+            "line": 1804,
             "description": "Backs up the skyrepo elasticsearch database to the server backup directory",
             "params": [
                 {
@@ -37893,7 +37899,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1811,
+            "line": 1821,
             "description": "Restores the skyrepo elasticsearch backup from the server backup directory",
             "params": [
                 {
@@ -37920,7 +37926,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1828,
+            "line": 1838,
             "description": "Wipes all data from the the skyrepo elasticsearch, can only be restored by using backup restore",
             "params": [
                 {
@@ -37947,7 +37953,7 @@
         },
         {
             "file": "src/org/cassproject/ebac/repository/EcRepository.js",
-            "line": 1845,
+            "line": 1855,
             "description": "Fetches the admin keys from the server to compare for check if current\nuser is an admin user",
             "params": [
                 {
@@ -99953,55 +99959,55 @@
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1184"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1190"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1244"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1250"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1265"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1275"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1290"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1300"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1453"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1463"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1562"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1572"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1655"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1665"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1709"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1719"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1760"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1770"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1794"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1804"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1811"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1821"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1828"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1838"
         },
         {
             "message": "unknown tag: memberof",
-            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1845"
+            "line": " src/org/cassproject/ebac/repository/EcRepository.js:1855"
         },
         {
             "message": "unknown tag: memberof",
