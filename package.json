@@ -154,7 +154,7 @@
 	"dependencies": {
 		"base64-arraybuffer": "^1.0.2",
 		"jsonld": "^9.0.0",
-		"node-forge": "^1.4.3",
+		"node-forge": "^1.4.4",
 		"papaparse": "^5.7.1",
 		"promise-worker": "^2.0.1",
 		"web-worker": "1.5.0"
@@ -194,7 +194,7 @@
 		"nyc": "^18.0.0",
 		"sinon": "^22.1.0",
 		"wait-on": "^9.5.1",
-		"webpack": "^5.112.2"
+		"webpack": "^5.113.0"
 	},
 	"packageManager": "npm@11.3.0+sha512.96eb611483f49c55f7fa74df61b588de9e213f80a256728e6798ddc67176c7b07e4a1cfc7de8922422cbce02543714367037536955221fa451b0c4fefaf20c66",
 	"allowScripts": {
